@@ -1,0 +1,56 @@
+---
+title: "MTHFR (C677T), Fatty Liver Disease, and Related Biomarkers" 
+author: "Colette Rouiller" 
+format: html
+---
+
+## Introduction 
+
+## Project Rationale/structure 
+
+## PART 1: Mini Meta-Analysis 
+
+### Background 
+
+### Methods (PRISMA) 
+
+#### Search strategy
+#### Inclusion/exclusion criteria 
+#### Flow diagram
+#### Study characteristic table 
+
+### Results 
+
+### Discussion 
+
+## PART 2: 
+
+### Data sources/cohort selection 
+
+### Sql/preprocessing 
+
+### Python/ml 
+#### Supervised 
+- KNN
+- Logistical regression 
+- Decision tree
+#### Unsupervised
+- Cluster 
+#### Discussion of Models' Outputs
+
+### Visualization/Analysis in R
+
+### Overall Results 
+
+### Overall Discussion 
+#### Interpretation 
+#### Limitations 
+#### Integrate parts 1/2 
+#### Conclusions
+#### Future directions 
+
+## References 
+
+  
+
+
