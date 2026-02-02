@@ -20,7 +20,27 @@ format: html
 ### Methods (PRISMA) 
 
 #### Screening and selection process
-#### Inclusion/exclusion criteria 
+- established documents: 
+    * prisma-screening-tracker.csv	
+    * prisma-search-log.md
+#### Inclusion and Exclusion Criteria (Preliminary) 
+
+**Inclusion Criteria:**
+- peer-reviewed material 
+- published >= 2000 
+- stratify MTHFR C677T variants (CC, CT, and TT) separately 
+- measure 1+ of the relevant biomarkers:
+  * Methionine, Homocysteine, Choline, Folate, Betaine, SAM/SAH, or Dimethylglycine
+- measure biomarker(s) biologically (not via dietary intake) and quantitatively
+- comparable assay methodology 
+
+**Exclusion Criteria:**
+- intervention studies where patient comorbidities are expected to impact one-carbon metabolism 
+- studies that meet inclusion criteria but only report post-treatment metrics 
+- no genotype stratification 
+- self reported biomarkers 
+- outcomes irrelevant to one-carbon metabolism or liver biolfy
+
 #### Flow diagram
 #### Study characteristic table 
 
