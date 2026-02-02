@@ -6,7 +6,12 @@ format: html
 
 ## Introduction 
 
+## Project Aims/Research Questions 
+
 ## Project Rationale/structure 
+
+## Why a split design? 
+
 
 ## PART 1: Mini Meta-Analysis 
 
@@ -14,7 +19,7 @@ format: html
 
 ### Methods (PRISMA) 
 
-#### Search strategy
+#### Screening and selection process
 #### Inclusion/exclusion criteria 
 #### Flow diagram
 #### Study characteristic table 
@@ -25,17 +30,19 @@ format: html
 
 ## PART 2: 
 
-### Data sources/cohort selection 
+### Data sources/cohort selection / FLD proxy definitions 
 
-### Sql/preprocessing 
+### SQL / preprocessing 
 
 ### Python/ml 
 #### Supervised 
-- KNN
-- Logistical regression 
-- Decision tree
+- baseline model: Logistic regression 
+- nonlinear comparator: Decision tree
+- sensitivity analysis: KNN
 #### Unsupervised
-- Cluster 
+- independent comparator: Cluster 
+
+
 #### Discussion of Models' Outputs
 
 ### Visualization/Analysis in R
