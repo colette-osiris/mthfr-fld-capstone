@@ -1,0 +1,2 @@
+﻿record_id,citation_short,url_or_doi,source,biomarkers,stage,genotype_strat,biomarker_quant,notes,decision,exclusion_reason
+P001,Fredrikson_2007,https://bevital.no/pmu/Pages/papers%20pdf/2007/fredriksen_07_hm_28_856.pdf,pre-prospectus,tHcy; folate; B12; betaine; DMG; choline,candidate,yes,yes,"""large pop study""",,
