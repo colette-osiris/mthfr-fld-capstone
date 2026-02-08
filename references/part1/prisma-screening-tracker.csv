@@ -1,2 +1,7 @@
 ﻿record_id,citation_short,url_or_doi,source,biomarkers,stage,genotype_strat,biomarker_quant,notes,decision,exclusion_reason
 P001,Fredrikson_2007,https://bevital.no/pmu/Pages/papers%20pdf/2007/fredriksen_07_hm_28_856.pdf,pre-prospectus,tHcy; folate; B12; betaine; DMG; choline,candidate,yes,yes,"""large pop study""",,
+P002,Hustad_2007,https://pmc.ncbi.nlm.nih.gov/articles/PMC1852731/,pre-prospectus,tHcy; folate; riboflavin; colbamin; B6,candidate,yes,yes,"""10,000+ participants, quantifies markers by genotype, examines thc and b vit network"" ",,
+P003,Davis_2005,https://www.sciencedirect.com/science/article/pii/S0022316622101860,pre-prospectus,tHcy; folate; SAM; SAH,candidate,yes,yes,"""controlled sample (n=18), good for mechanistic overview evidence"" ",,
+P004,Ho_2013,https://link.springer.com/article/10.1007/s12263-013-0358-2,pre-prospectus,tHcy; SAM; SAH,candidate,yes,yes,"""n=570"" ",,
+P005,Yang_2011,https://pmc.ncbi.nlm.nih.gov/articles/PMC3021427/,pre-prospectus,tHcy; betaine; DMG,candidate,yes,yes,"""uses controlled folate manipulation, measured quantitatively"" ",,
+P006,Zeisel_2007,10.1016/j.neulet.2007.01.046,pre-prospectus,tHcy; betaine; DMG; choline,candidate ,no,yes,,,
