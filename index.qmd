@@ -19,10 +19,27 @@ format: html
 
 ### Methods (PRISMA) 
 
-#### Screening and selection process
+#### Search strategy:
+- Databases searched:
+- Date range covered:
+- Search terms / query logic:
+- Filters/limits (language, humans, etc.):
+- Last search date:
+- How results were deduplicated:
+
+
+#### Screening Workflow:
+
+Screening procedure following a two-stage process: a title/abstract screening, then followed by a full-text review.
+Records were tracked in 'prisma-screening-tracker.csv', and search decisions were logged in 'prisma-search-log.md', 
+both of which can be found in the 'references/part1' folder of this project. 
+
+
 - established documents: 
     * prisma-screening-tracker.csv	
     * prisma-search-log.md
+
+
 #### Inclusion and Exclusion Criteria (Preliminary) 
 
 **Inclusion Criteria:**
@@ -31,17 +48,24 @@ format: html
 - stratify MTHFR C677T variants (CC, CT, and TT) separately 
 - measure 1+ of the relevant biomarkers:
   * Methionine, Homocysteine, Choline, Folate, Betaine, SAM/SAH, or Dimethylglycine
-- measure biomarker(s) biologically (not via dietary intake) and quantitatively
+- measure biomarker(s) biologically (not via dietary intake) and quantitatively and extractable form.
+   * extractable forms include: mean±SD, median+spread, effect estimate, or figure extractable. 
 - comparable assay methodology 
+- if intervention study: include baseline/control genotype-stratified biomarker data only. Exclude post-intervention biomarker outcomes.
 
 **Exclusion Criteria:**
 - intervention studies where patient comorbidities are expected to impact one-carbon metabolism 
 - studies that meet inclusion criteria but only report post-treatment metrics 
 - no genotype stratification 
-- self reported biomarkers 
-- outcomes irrelevant to one-carbon metabolism or liver biolfy
+- self reported biomarker intake or other proxy measures  
+- outcomes irrelevant to one-carbon metabolism or liver biology
+
+Homozygote-only studies (CC vs TT without CT) may be retained for supporting evidence for directional trends, but will not be used for gradient CT inference. 
 
 #### Flow diagram
+
+A PRISMA-styled flow diagram will be added after full-text source screenings are finalized. 
+
 #### Study characteristic table 
 
 ### Results 
