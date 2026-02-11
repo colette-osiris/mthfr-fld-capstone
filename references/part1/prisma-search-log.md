@@ -15,7 +15,7 @@ For each source searched, record:
 - Records retained for title/abstract screening: 
 - Notes:
 
------ Source 1
+----- Search 1
 - Date: 02/11/2026
 - Database/Source Searched: PubMed
 - Search Strategy/Query: "(MTHFR) AND (C677T) AND ("homocysteine" OR "folate" OR "methionine" OR "betaine" OR "SAM" OR "SAH" OR "dimethylglycine" OR "choline")"
@@ -28,3 +28,17 @@ For each source searched, record:
 - Duplicates removed: 0
 - Records retained for title/abstract screening: 253
 - Notes:
+
+----- Search 2
+- Date: 02/11/2026
+- Database/Source Searched: PubMed
+- Search Strategy/Query: "(MTHFR C677T) AND ("S-adenosylmethionine" OR "SAM" OR "SAH")"
+- Filters/Limits:
+  * Publication date: 01, 01, 2000 - present day
+  * Article type(s): Adaptive Clinical Trial, Clinical Conference, Clinical Study, Clinical Trial, Clinical Trial, Phase I, Clinical Trial, Phase II, Clinical Trial, Phase III, Clinical Trial Phase IV, Clinical Conference, Comparative Study, Controlled Clinical Trial, Equivalence Trial, Evaluation Study, Multicenter Study, Observational Study, Pragmatic Clinical Trial, Randomized Controlled Trial, Twin Study, Validation Study
+  * Article Language: English
+  * Species: Human
+- Results Count: 6
+- Duplicates removed: 0
+- Records retained for title/abstract screening: 6
+- Notes: Added this search after realizing disproportionate biomarker representation during initial screening of search 1 results.  
