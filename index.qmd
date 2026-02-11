@@ -60,7 +60,12 @@ both of which can be found in the 'references/part1' folder of this project.
 - self reported biomarker intake or other proxy measures  
 - outcomes irrelevant to one-carbon metabolism or liver biology
 
+Additional Criteria Notes: 
+
 Homozygote-only studies (CC vs TT without CT) may be retained for supporting evidence for directional trends, but will not be used for gradient CT inference. 
+
+Studies using human or well-characterized translational model systems (e.g., Mthfr677C>T murine models) may be eligible if they reported genotype-stratified quantitative measurements of relevant one-carbon biomarkers.
+
 
 #### Flow diagram
 
