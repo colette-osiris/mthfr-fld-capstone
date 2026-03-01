@@ -17,6 +17,8 @@ Note to self: additional README.md files created for project subdirectories sinc
 - figured out which files I needed per cohort
 - fixed PostGres Login and update issues
 - planned and executed database layout/approach: (layer 1 = imported/converted data), (layer 2 = preprocessing/joining based on cohort), (layer 3 = final 3 tables)
+- downloaded raw data and imported into project folder
+- finshed csv converter helper script - converted all files and saved csvs to cleaned data 
 
   
 - notes:
