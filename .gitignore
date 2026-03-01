@@ -18,7 +18,7 @@ __pycache__/
 
 #Raw Data
 data/raw/
-*.xpt
+#*.xpt
 
 # OS junk
 .DS_Store
