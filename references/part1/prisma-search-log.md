@@ -88,3 +88,18 @@ For each source searched, record:
 - Records retained for abstract/full text screening: 26
 - Notes: First database search of new log for updated biomarker list. 
 
+----- Search 6 
+- Date: 03/05/2026
+- Database/Source Searched: PubMed
+- Search Strategy/Query: "("MTHFR" OR "methylenetetrahydrofolate reductase") AND ("C677T" OR "677C>T") AND ("vitamin B6" OR pyridoxal OR "pyridoxal 5'-phosphate" OR PLP) AND (serum OR plasma OR blood) NOT review"
+- Filters/Limits:
+  * Publication date: 01, 01, 2000 - present day
+  * Article type(s): Adaptive Clinical Trial, Clinical Conference, Clinical Study, Clinical Trial, Clinical Trial, Phase I, Clinical Trial, Phase II, Clinical Trial, Phase III, Clinical Trial Phase IV, Clinical Conference, Comparative Study, Controlled Clinical Trial, Equivalence Trial, Evaluation Study, Multicenter Study, Observational Study, Pragmatic Clinical Trial, Randomized Controlled Trial, Twin Study, Validation Study
+  * Article Language: English
+  * Species: Human
+- Results Count: 14
+- Duplicates removed: 0
+- Records retained for abstract/full text screening: 14
+- Notes: Second database search of new log for updated biomarker list. 
+
+
