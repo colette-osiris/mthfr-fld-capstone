@@ -72,3 +72,19 @@ For each source searched, record:
 - Records retained for title/abstract screening: 33
 - Notes: Added this search after realizing disproportionate biomarker representation during initial screening of search 1 results.  
 
+#######NOTES: DELETE BEFORE FINAL DRAFT: original biomarker list needed to be fine-tuned. Keeping original searches and results for clarity and integrity of reproducibility, but will likely not be incoorperating searches 1-3. 
+
+----- Search 5 
+- Date: 03/05/2026
+- Database/Source Searched: PubMed
+- Search Strategy/Query: "(MTHFR OR "methylenetetrahydrofolate reductase") AND (C677T OR rs1801133 OR polymorphism) AND ("vitamin B6" OR pyridoxine OR "pyridoxal phosphate" OR PLP OR "B6 status")"
+- Filters/Limits:
+  * Publication date: 01, 01, 2000 - present day
+  * Article type(s): Adaptive Clinical Trial, Clinical Conference, Clinical Study, Clinical Trial, Clinical Trial, Phase I, Clinical Trial, Phase II, Clinical Trial, Phase III, Clinical Trial Phase IV, Clinical Conference, Comparative Study, Controlled Clinical Trial, Equivalence Trial, Evaluation Study, Multicenter Study, Observational Study, Pragmatic Clinical Trial, Randomized Controlled Trial, Twin Study, Validation Study
+  * Article Language: English
+  * Species: Human
+- Results Count: 26
+- Duplicates removed: 0
+- Records retained for abstract/full text screening: 26
+- Notes: First database search of new log for updated biomarker list. 
+
