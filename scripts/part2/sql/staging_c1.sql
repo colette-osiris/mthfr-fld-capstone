@@ -1,7 +1,7 @@
 -- Capstone database staging schema script: Cohort 1 
 -- Created: 2026-03-08
 -- Owner: coletterouiller
--- Status: in progress (ran 1x - miscast data - need to look again - where to start next time)
+-- Status: complete (draft - still need to clean comments)
 
 
 -- set path 
@@ -18,18 +18,18 @@ DROP TABLE IF EXISTS c1_clean;
 
 CREATE TABLE c1_clean AS
 SELECT 
-	CAST(c1_alt_ast_ggt_glucose.SEQN AS integer) as seqn,
+	CAST(CAST(c1_alt_ast_ggt_glucose.SEQN AS numeric) AS integer) AS seqn,
 
     -- demographics vars to include 
-    CAST(NULLIF(c1_demo.RIDAGEYR, '') AS integer) AS age_year,
-    CAST(NULLIF(c1_demo.RIAGENDR, '') AS integer) AS sex,
-    CAST(NULLIF(c1_demo.RIDRETH1, '') AS integer) AS race_ethnicity,
+    CAST(CAST(NULLIF(c1_demo.RIDAGEYR, '') AS numeric) AS integer) AS age_year,
+    CAST(CAST(NULLIF(c1_demo.RIAGENDR, '') AS numeric) AS integer) AS sex,
+    CAST(CAST(NULLIF(c1_demo.RIDRETH1, '') AS numeric) AS integer) AS race_ethnicity,
     CAST(NULLIF(c1_demo.INDFMPIR, '') AS numeric) AS income_ratio,
 	
 	-- demo weights to include 
     CAST(NULLIF(c1_demo.WTMEC2YR, '') AS numeric) AS exam_weight,
-    CAST(NULLIF(c1_demo.SDMVPSU, '') AS integer) AS survey_psu,
-    CAST(NULLIF(c1_demo.SDMVSTRA, '') AS integer) AS survey_strata, 
+    CAST(CAST(NULLIF(c1_demo.SDMVPSU, '') AS numeric) AS integer) AS survey_psu,
+    CAST(CAST(NULLIF(c1_demo.SDMVSTRA, '') AS numeric) AS integer) AS survey_strata, 
 
 	-- bmi vars to include 
     CAST(NULLIF(c1_bmi.BMXBMI, '') AS numeric) AS bmi,
@@ -38,10 +38,10 @@ SELECT
 	-- diabetes var
 	-- NOTE: scale: 3= borderline, 7= refused, 9 = dont know
 	-- will need to derive a variable in modeling portion - DONT USE RAW 
-    CAST(NULLIF(c1_diabetes.DIQ010, '') AS integer) AS diabetes,
+    CAST(CAST(NULLIF(c1_diabetes.DIQ010, '') AS numeric) AS integer) AS diabetes,
 
 	-- crp (inflammation) var 
-    CAST(NULLIF(c1_crp.LBXCRP, '')AS numeric) AS crp,
+    CAST(NULLIF(c1_crp.LBXCRP, '') AS numeric) AS crp,
 
 	-- liver vars to include 
 	CAST(NULLIF(c1_alt_ast_ggt_glucose.LBXSASSI, '') AS numeric) AS ast,
