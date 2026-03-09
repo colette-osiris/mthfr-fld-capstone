@@ -1,14 +1,17 @@
+-- need to populate empty raw tables for c1
+
+
+-- duplication issue identified: use of COPY command 
+-- COPY=new full importation every run - need to truncate for reproducible reloads
 -- need to populate empty table
 
--- c1 demo table
-COPY raw.c1_demo
-FROM '/Users/coletterouiller/capstone/data/clean_data/c1_demo.csv'
-WITH (FORMAT CSV, HEADER true);
-
--- c1 alt/ast/ggt/glucose table
-COPY raw.c1_alt_ast_ggt_glucose
-FROM '/Users/coletterouiller/capstone/data/clean_data/c1_alt_ast_ggt_glucose.csv'
-WITH (FORMAT CSV, HEADER true);
+TRUNCATE TABLE
+    raw.c1_demo,
+    raw.c1_alt_ast_ggt_glucose,
+    raw.c1_bmi,
+    raw.c1_crp,
+    raw.c1_diabetes,
+    raw.c1_folate_b12_hcy_mma_iron;
 
 -- c1 bmi table
 COPY raw.c1_bmi
@@ -29,3 +32,14 @@ WITH (FORMAT CSV, HEADER true);
 COPY raw.c1_folate_b12_hcy_mma_iron 
 FROM '/Users/coletterouiller/capstone/data/clean_data/c1_folate_b12_hcy_mma_iron.csv'
 WITH (FORMAT CSV, HEADER true);
+
+-- c1 demo table
+COPY raw.c1_demo
+FROM '/Users/coletterouiller/capstone/data/clean_data/c1_demo.csv'
+WITH (FORMAT CSV, HEADER true);
+
+-- c1 alt/ast/ggt/glucose table
+COPY raw.c1_alt_ast_ggt_glucose
+FROM '/Users/coletterouiller/capstone/data/clean_data/c1_alt_ast_ggt_glucose.csv'
+WITH (FORMAT CSV, HEADER true);
+
