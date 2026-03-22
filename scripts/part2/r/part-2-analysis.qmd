@@ -1,0 +1,106 @@
+---
+title: "part2-analysis.qmd"
+author: "coletterouiller"
+format: html
+jupyter: /opt/homebrew/Caskroom/miniconda/base/bin/python
+editor: visual
+---
+
+## Part 2: Fatty Liver Disease Classification
+
+## Background
+
+Fatty Liver Disease (FLD) is a liver condition characterized by the accumulation of lipid droplets in the liver, affecting up to 42.2% of adults in the US (Jones et. al, 2022). FLD causes impaired liver function; though it is ofen asymptomatic, it can include symptoms like abdominal pain/discomfort, weight loss, loss of appetite, and fatigue (Zhu, 2024). The Hepatic Steatosis Index is a screening tool used to diagnose Non-Alcoholic Fatty Liver Disease (NAFLD), which is a subsection of FLD associated with excessive alcohol consumption (Jones et. al, 2022). Since HSI was not included in the initial data sets but is calculated formulaically, I will be using it as the ground truth label for each patient.
+
+HSI is calculated by:
+
+*𝐻𝑆𝐼* = 8 ∗ (*𝐴𝐿𝑇* /*𝐴𝑆𝑇* ) + *𝐵𝑀𝐼* + (2, *𝑐𝑜𝑛𝑑* : *𝑑𝑖𝑎𝑏𝑒𝑡𝑒𝑠*) + (2, *𝑐𝑜𝑛𝑑* : *𝑓𝑒𝑚𝑎𝑙𝑒*)
+
+The following is a discription of each variable/it's importance in the HSI formula:
+
+1\) Alanine Aminotransferase (ALT) = liver enzyme used as a biomarker for liver cell injury/damage (Lee et. al, 2009).
+
+2\) Aspartate Aminotransferase (AST) = tissue enzyme that is used as a biomarker for tissue injury/damage since it is found in muscle, skeletal, neural, cardiac,and hepatic tissue (Lee et. al, 2009).
+
+When hepatocytes are functioning abnormally/exhibiting stress, ALT rises more than AST, so elevated ALT/AST ratio is known to suggest liver damage/oxidative stress consistent with FLD (Lee et. al, 2009).
+
+3)  BMI = body composition metric calculated by body weight (kg)/height\^2 (m\^2) (Lee et. al, 2009).
+
+4\) Sex = Sex is relevent due to the fact that adipose tissue distribution, hormone levels, and enzyme activity di"ers between male and female (Lee et. al, 2009).
+
+5\) Diabetes = Type II diabetes is strongly linked to FLD. Therefor it is included for diagnostic relevency (Lee et. al, 2009).
+
+'''SECTION NEEDS TO RE-TAILORED" Then I included multiple additional features that are associated with FLD: homocysteine, serum folate, red blood cell (RBC) folate, (MMA), (GGT), C-Reactive Protein, (CRP), triglyceride, Ferritin, and Vitamin B12 levels.
+
+1\) Homocysteine = a folate metabolism byproduct that is created when methioinine, an amino acid necessary for all methylation pathways, donates a methyl group (Martinez et al, 2017). Homocysteine is not inherently harmful, but elevated levels have been associated with FLD (Ma!é et. al, 2009). Case-controlled studies have shown that NAFLD patients show significantly higher homocysteine levels than controls (DeCarvalho, 2013).
+
+2)  Serum Folate = folate de\$ciency impares methylation and hepatic lipid metabolism. Therefore, we expect and studies have shown that NAFLD patients have displayed low serum folate levels compared to control groups (Liu et. al, 2023).
+
+3)  Vitamin B12 = is an important cofactor for methylation and carbon metabolism (Jones et. al, 2022). The CDC has noted Vitamin B12 levels differ between NAFLD and controls, as per the National Health and Nutrition Examination Survey (NHANES) 1999-2004 cohort analysis (Li et. al, 2022).
+
+...
+
+The model will use these additional features to determine class assignment, and then compare to the HSI ground truth we established to determine model accuracy. The data used for this model comes from 2001-2002 and 2003-2004 cohorts of the National Health and Nutrition Examination Survey (NHANES) from the CDC.
+
+## Define Task
+
+Task: Build an ML model that uses the features extracted from the NHANES data set labeled to predict whether a patient has Non-Alcoholic Fatty Liver Disease (NAFLD).
+
+This task is an example of supervised learning because it is a classification task, which is a subtype of supervised machine learning. Since we only have 2 classifications for the model (NAFLD or Healthy) this is a binary classification.
+
+## Load Data
+
+```{r}
+Sys.getenv("RETICULATE_PYTHON")
+```
+
+```{python}
+import sys
+print(sys.executable)
+```
+
+```{python}
+
+# Load libraries and dataset
+import graphviz 
+import pandas as pd
+import numpy as np
+import seaborn as sns
+from sklearn.model_selection import KFold
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+from sklearn.model_selection import cross_val_score
+import graphviz
+from sklearn.tree import export_graphviz
+from io import StringIO
+
+#set to 42 to ensure training/test spits are reproducible 
+MY_RANDOM_STATE = 42
+
+# Load NHANES cleaned data set 
+df = pd.read_csv("../../../data/clean_data/nhanes_final.csv")
+
+
+#check data
+print(df.shape)
+print(df.columns)
+
+```
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
