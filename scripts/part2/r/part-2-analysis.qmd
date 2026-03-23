@@ -50,7 +50,7 @@ This task is an example of supervised learning because it is a classification ta
 
 ## Prepare Data
 
-### Load Data 
+### Load Data
 
 The code block below loads my dataset, which contains one row per patient. For each patient, I have multiple measured features including : ALT, ALS, BMI, sex, homocysteine, serum folate, red blood cell (RBC) folate, (MMA), (GGT), C-Reactive Protein, (CRP), triglyceride, Ferritin and B12 levels, as well as BMI, sex and diabetic status.
 
@@ -121,7 +121,7 @@ df[['alt','ast','bmi','homocysteine']].describe()
 
 These results look good to proceed. Datatypes are correct, core variables are loaded correctly, and there are no obvious signs of data corruption. It is important to note that these checks revealed a moderate-high level of missingness in the biomarker variables. This information was first discovered in preprocessing and therfore cohorts were not defined by full overlap. There appears to be some extreme outliers that will need to be addressed downstream. There may also need to be some encoding adjustments across variables sex (int64), race_ethnicity (int64) and cohort (object) downstream as well.
 
-### Adjust Variables 
+### Adjust Variables
 
 ```{python}
 #need to set/extract relevant label values
@@ -157,7 +157,7 @@ df['HSI_category'] = np.where(
 
 In this section, I corrected the encoding for the sex and diabetes values used in the HSI calculations and established a structure that creates three new variables: HSI, NAFLD, and HSI_category. HSI functions as a continuous score, and it's derived variable, NAFLD, acts as the primary binary ML label. HSI_category was created to provide a descriptive severity grouping for downstream analysis in R, which includes the groups: healthy, borderline, and nafld_like.
 
-### Interpret and Check Data 
+### Interpret and Check Data
 
 The following code below displays the first few rows of the data set and views summary statistics for the HSI, NAFLD, and HSI_category labels.
 
@@ -188,7 +188,7 @@ The cross tab check evaluates our binning method for logical inconsistencies. Th
 
 Functionally, this means that while all NAFLD-positive fall into the 'nafld_like' bin, a subset of individuals remain below the diagnostic threshold that still qualify as "high risk." This inconsistancy accurately reflects HSI as a continuous metric and proxy measure for FLD diagnosis, which supports my analysis approach to include a 'borderline' bin.
 
-### Feature Definition 
+### Feature Definition
 
 My input features are have 14 measured features: ALT, ALS, homocysteine, serum folate, red blood cell (RBC) folate, (MMA), (GGT), C-Reactive Protein, (CRP), triglyceride, Ferritin and B12 levels, as well as BMI, sex and diabetic status. My labels are '1' for NAFLD and 0 for 'Healthy', which correspond to the 'NAFLD' column of our dataset.
 
@@ -232,11 +232,11 @@ df_bio = df[bio_feature_columns + ['NAFLD']].dropna()
 #now set feature/label
 #core
 X_core = df_core[core_feature_columns]
-y_core = df_core['NAFLD'] # 0 = healthy, 1 = NAFLD
+Y_core = df_core['NAFLD'] # 0 = healthy, 1 = NAFLD
 
 #biomarker
 X_bio = df_bio[bio_feature_columns]
-y_bio = df_bio['NAFLD'] # 0 = healthy, 1 = NAFLD
+Y_bio = df_bio['NAFLD'] # 0 = healthy, 1 = NAFLD
 
 #now check sample sizes 
 print("Baseline model shape:", df_core.shape)
@@ -244,8 +244,8 @@ print("Biomarker model shape:", df_bio.shape)
 
 
 #now check class balances 
-print(y_core.value_counts())
-print(y_bio.value_counts())
+print(Y_core.value_counts())
+print(Y_bio.value_counts())
 
 
 #quick sanity check of inputs
@@ -254,9 +254,105 @@ X_core.head(), X_bio.head()
 
 This code chunk shows that we retained nearly 13,000 observations for the core feature set and about 2,500 for the biomarker feature set. While not ideal, this feature shows that richer biological detail often comes at the cost of sample size.
 
-The class balances are the same at \~57/43 split, which is a healthy split for classification. It is important to note that this consistency suggests that missingness did not distort class balance, and therefor the complete-case biomarker subset is not obviously biased towards a single outcome class. The biomarker model therefore represents a smaller but biologically richer subset rather than a distorted sample.
+The class balances are the approximately equal at \~57/43 split, which is a healthy split for classification. It is important to note that this consistency indicates that missingness did not distort class balance, and therefor the complete-case biomarker subset is not obviously biased towards a single outcome class. The biomarker model therefore represents a smaller but biologically richer subset rather than a distorted sample.
 
--   stopping point
+### Split Data
+
+This code chunk splits the data into training and testing sets. I used a 70/30 testing split and stratified sampling to split the data set into equal proportions across sets in order to minimize model bias.
+
+```{python}
+
+# core model - Split the data using stratified sampling - same structure as projects
+X_core_train, X_core_test, Y_core_train, Y_core_test = train_test_split(
+    X_core, Y_core,
+    test_size=0.3,
+    random_state=42,
+    stratify=Y_core
+)
+#look at split
+print(X_core_train.shape, X_core_test.shape)
+
+# bio-marker model - Split the data using stratified sampling - same structure as projects
+X_bio_train, X_bio_test, Y_bio_train, Y_bio_test = train_test_split(
+    X_bio, Y_bio,
+    test_size=0.3,
+    random_state=42,
+    stratify=Y_bio
+)
+#look at split
+print(X_bio_train.shape, X_bio_test.shape)
+
+```
+
+Since I used stratified sampling, I expect the proportion of NAFLD-like vs. Healthy patients in the training and test sets to match the overall data set. To test this, the plot below explores the distribution of classes across the training and test sets in order to confirm that both sets are representative of the original data.
+
+```{python}
+
+#BIOMARKER MODEL now test the sets - generate class distribution plot
+
+bio_split_df = pd.concat([
+    pd.DataFrame({"split": "Train", "label": Y_bio_train}),
+    pd.DataFrame({"split": "Test",  "label": Y_bio_test})
+], ignore_index=True)
+
+plt.figure(figsize=(6,4))
+sns.countplot(data=bio_split_df, x="split", hue="label")
+
+plt.title("Biomarker Class Balance across Training and Test sets (NAFLD vs Healthy)")
+plt.ylabel("Number of participants")
+plt.xlabel("")
+plt.legend(title="NAFLD label (0 = healthy, 1 = NAFLD)")
+plt.tight_layout()
+plt.show()
+
+# Generate tables to show class distribution
+
+print("\nOverall Biomarker Class Distribution:")
+display(pd.Series(Y_bio).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
+
+print("\nTrain Biomarker Class Distribution:")
+display(pd.Series(Y_bio_train).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
+
+print("\nTest Biomarker Class Distribution:")
+display(pd.Series(Y_bio_test).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
+
+#CORE MODEL now test the sets - generate class distribution plot
+
+core_split_df = pd.concat([
+    pd.DataFrame({"split": "Train", "label": Y_core_train}),
+    pd.DataFrame({"split": "Test",  "label": Y_core_test})
+], ignore_index=True)
+
+plt.figure(figsize=(6,4))
+sns.countplot(data=core_split_df, x="split", hue="label")
+
+plt.title("Core Class Balance across Training and Test sets (NAFLD vs Healthy)")
+plt.ylabel("Number of participants")
+plt.xlabel("")
+plt.legend(title="NAFLD label (0 = healthy, 1 = NAFLD)")
+plt.tight_layout()
+plt.show()
+
+
+# Generate tables to show class distribution
+
+print("\nOverall Core Class distribution:")
+display(pd.Series(Y_core).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
+
+print("\nTrain Core Class distribution:")
+display(pd.Series(Y_core_train).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
+
+print("\nTest Core Class distribution:")
+display(pd.Series(Y_core_test).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
+
+
+```
+
+The tables and plots above show a \~57/43 ratio across the training, testing, and overall classes. This near-perfect balance confirms the absence of a class imbalance and ensures internal model consistency and future evaluation metrics will be accurate.
+
+## Train and Evaluate Data 
+
+"stopping point"
 
 ```{r}
 1 + 1
