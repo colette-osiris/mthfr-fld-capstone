@@ -87,7 +87,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier, plot_tree
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score
@@ -119,7 +119,7 @@ df[['alt','ast','bmi','homocysteine']].describe()
 
 ```
 
-These results look good to proceed. Datatypes are correct, core variables are loaded correctly, and there are no obvious signs of data corruption. It is important to note that these checks revealed a moderate-high level of missingness in the biomarker variables. This information was first discovered in preprocessing and therfore cohorts were not defined by full overlap. There appears to be some extreme outliers that will need to be addressed downstream. There may also need to be some encoding adjustments across variables sex (int64), race_ethnicity (int64) and cohort (object) downstream as well.
+These results look good to proceed. Datatypes are correct, core variables are loaded correctly, and there are no obvious signs of data corruption. It is important to note that these checks revealed a moderate-high level of missingness in the biomarker variables. This information was first discovered in preprocessing and therefore cohorts were not defined by full overlap. There appears to be some extreme outliers that will need to be addressed downstream. There may also need to be some encoding adjustments across variables sex (int64), race_ethnicity (int64) and cohort (object) downstream as well.
 
 ### Adjust Variables
 
@@ -155,7 +155,7 @@ df['HSI_category'] = np.where(
 
 ```
 
-In this section, I corrected the encoding for the sex and diabetes values used in the HSI calculations and established a structure that creates three new variables: HSI, NAFLD, and HSI_category. HSI functions as a continuous score, and it's derived variable, NAFLD, acts as the primary binary ML label. HSI_category was created to provide a descriptive severity grouping for downstream analysis in R, which includes the groups: healthy, borderline, and nafld_like.
+In this section, I corrected the encoding for the sex and diabetes values used in the HSI calculations and established a structure that creates three new variables: 'HSI', 'NAFLD', and 'HSI_category'. HSI functions as a continuous score, and it's derived variable, 'NAFLD', acts as the primary binary ML label. 'HSI_category' was created to provide a descriptive severity grouping for downstream analysis in R, which includes the groups: 'healthy', 'borderline', and 'nafld_like'.
 
 ### Interpret and Check Data
 
@@ -182,17 +182,19 @@ print(df['NAFLD'].value_counts())
 print(pd.crosstab(df['HSI_category'], df['NAFLD']))
 ```
 
-Through these checks, we can see the HSI distribution mean is 35.47 and the median is 34.53, which is aligned with our expectations given the 36.0 value cut off, confirming an absense of scaling issues or computation errors. The categorical distribution for downstream analysis is also promising, with 'nafld-like', 'borderline', and 'healthy' showing 6,977, 4022, and 3,416 counts, respectively. These counts are promising because it showed all three bins present without being dominated by one class.
+Through these checks, we can see the HSI distribution mean is 35.47 and the median is 34.53, which is aligned with our expectations given the 36.0 value cut off, confirming an absence of scaling issues or computation errors. The categorical distribution for downstream analysis is also promising, with 'nafld-like', 'borderline', and 'healthy' showing 6,977, 4022, and 3,416 counts, respectively. These counts are promising because it showed all three bins present without being dominated by one class.
 
-The cross tab check evaluates our binning method for logical inconsistencies. The 'borderline' and 'healthy' bins behave as expected, with 0 individuals being labeled as 'NAFLD' = 0. However, the 'nafld_like' bin results show that not all individuals in the high HSI range are classified as NAFLD-positive under the strict established threshold.
+The cross tab check evaluates the binning method for logical inconsistencies. The 'borderline' and 'healthy' bins behave as expected, with 0 individuals being labeled as 'NAFLD' = 0. However, the 'nafld_like' bin results show that not all individuals in the high HSI range are classified as NAFLD-positive under the strict established threshold.
 
-Functionally, this means that while all NAFLD-positive fall into the 'nafld_like' bin, a subset of individuals remain below the diagnostic threshold that still qualify as "high risk." This inconsistancy accurately reflects HSI as a continuous metric and proxy measure for FLD diagnosis, which supports my analysis approach to include a 'borderline' bin.
+Functionally, this means that while all NAFLD-positive fall into the 'nafld_like' bin, a subset of individuals remain below the diagnostic threshold that still qualify as "high risk." This inconsistency accurately reflects HSI as a continuous metric and proxy measure for FLD diagnosis, which supports my analysis approach to include a 'borderline' bin for edge case inclusion.
 
 ### Feature Definition
 
 My input features are have 14 measured features: ALT, ALS, homocysteine, serum folate, red blood cell (RBC) folate, (MMA), (GGT), C-Reactive Protein, (CRP), triglyceride, Ferritin and B12 levels, as well as BMI, sex and diabetic status. My labels are '1' for NAFLD and 0 for 'Healthy', which correspond to the 'NAFLD' column of our dataset.
 
 Because the variables containing biomarker data is limited in comparison to the HSI variables, I will need to create mutliple models. Each model will have their own features, datasets, and set x and y values.
+
+The core model functions as a reconstruction and evaluation of the HSI proxy measure for FLD diagnosis when applied to this dataset specifically. The biomarker model includes variables not traditionally used in HSI calculations, but are systemically relevant, potentially related, and have overlap with MTHFR C677T biomarker profile. This model is created with the goal of recovering FLD signal independently from the proxy model.
 
 ```{python}
 
@@ -352,19 +354,105 @@ The tables and plots above show a \~57/43 ratio across the training, testing, an
 
 ## Train and Evaluate Data 
 
-"stopping point"
+For this section, I will be training and evaluating the models using logistical regression, KNN, and decision tree classifiers.
 
-```{r}
-1 + 1
+### Logistical Regression 
 
+#### Model Training
+
+The code chunk below uses logistical regression to solve the binary classification task by predicting the outcome of the model.
+
+```{python}
+# Train core logistic model - using different solver for larger dataset 
+core_logreg = LogisticRegression(solver='lbfgs', random_state=42)
+core_logreg.fit(X_core_train, Y_core_train)
+
+# Train biomarker logistic model
+bio_logreg = LogisticRegression(solver='liblinear', random_state=42)
+bio_logreg.fit(X_bio_train, Y_bio_train)
+```
+
+#### Model Testing 
+
+Once I'd trained the logistical model for each feature set, I wanted to test it on the established test set and output the accuracy to evaluate it. Accuracy is measured here by dividing the number of correct predictions by the total number of predictions made.
+
+```{python}
+#Core model Accuracy
+core_acc = accuracy_score(Y_core_test, core_logreg.predict(X_core_test))
+print(f"Logistic Regression Accuracy on Core test set: {core_acc:.3f}")
+
+#Biomarker model Accuracy
+bio_acc = accuracy_score(Y_bio_test, bio_logreg.predict(X_bio_test))
+print(f"Logistic Regression Accuracy on Biomarker test set: {bio_acc:.3f}")
+
+#classification reports for both 
+print(classification_report(Y_core_test, core_logreg.predict(X_core_test)))
+print(classification_report(Y_bio_test, bio_logreg.predict(X_bio_test)))
 
 ```
 
-You can add options to executable code like this
+This evaluation indicates that the logistic regression model achieved a sightly higher predictive preformace using the core FLD-related feature set than the biomarker feature set (96.8% vs. 95.3% ). In the classification report, the core model achieved precision, recall, and F1-scores within 0.96-0.97 range across both classes. Again, the biomarker model preformed strongly, but slightly weaker than the core model, with precision, recall, and F1-scores falling within 0.93-0.97 across both classes.
 
-```{r}
-#| echo: false
-2 * 2
+\*need to look up and cite definitions and uses for precision, recall, and f1 scores.
+
+Because the biomarker model was restricted to participants with complete biomarker measurements, it was trained on a substantially smaller subset of the cohorts (n= 762 vs 3900). This data availibility constraint resulted in a substantial size difference which can increase risk of representation bias. As a result, differences in core and biomarker feature models' preformances cannot be attributed to set composition alone, and any downstream analysis must address this explicitly.
+
+Higher performance is expected from the core model given its alignment with the established HSI proxy measurement. However, the biomarker model still achieves high performance despite a substantially reduced subset and use of features not traditionally included in the proxy. This suggests that the biomarker features included capture meaningful predictive signaling related to FLD risk and warrants further investigation.
+
+#### Model Intrepretation
+
+```{python}
+# Print biomarker model regression equation
+bio_intercept = bio_logreg.intercept_[0]
+bio_coefs = bio_logreg.coef_[0]
+bio_features = X_bio_train.columns
+
+print("Biomarker logistic regression equation (logit scale):")
+print(f"logit(P(NAFLD)) = {bio_intercept:.6f}")
+
+for i in range(len(bio_features)):
+    feature = bio_features[i]
+    coef = bio_coefs[i]
+    print(f" + ({coef:.6f} × {feature})")
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+log-odds equation, not probability equation
+
+The biomarker logistic regression model estimates the log-odds of NAFLD as a linear combination of clinically tested and suspected biochemical predictors. As expected, the examination of the fitted coefficients reveals that diabetic status and BMI have the strongest positive associations with predicted NAFLD probability within this model, which is consistent with established metabolic risk factors. Liver enzymes also contribute significantly, with ALT showing a positive association and AST a negative coefficient, which likely reflects their established joint role in liver function and related metrics.
+
+Among the biomarkers of interest, serum folate and RBC folate both show negative associations with predicted NAFLD probability. This is unsurprising, given that we would expect a decrease in serum folate levels to be associated with an increased risk of FLD since folate deficiency is associated with impaired methylation and increased hepatic lipid accumulation. This also aligns with my underlying hypothesis that links folate deficiency (in the form of MTHFR mutations) to hepatic dysfunction.
+
+Vitamin B12 and Ferritin show a near-zero coefficient, which suggests that neither are likely to be statistically significant predictive indicators of FLD. Inflammatory and metabolic markers such as CRP and GGT show positive associations, though factor scaling may be impacting model accuracy and may warrant further investigation into these biomarkers.
+
+In contrast, homocysteine and methylmalonic acid display strong negative association, which is counter to expected biological mechanisms. Elevated homocysteine and methylmalonic acid levels are known risk factor and indicatiors for active metabolic dysfunction disordrs, like FLD. Further investigation into the cause of these mechanistic discrepancies is advised.
+
+Another important result was the negative correlation with female sex status, which is unexpected given it is positively associated with FLD proxy measures and is accounted for in the HSI formula. While this could be an accurate reflection of decreased sex weight on the condition as a result of increasing feature count, it is important that we investigate this discrepancy to ensure it is not the result of modeling errors.
+
+```{python}
+#testing sex distribution across models 
+print("Core dataset sex distribution:")
+print(X_core_train['female'].value_counts(normalize=True))
+
+print("\nBiomarker dataset sex distribution:")
+print(X_bio_train['female'].value_counts(normalize=True))
+
+#testing sex distribution against NAFLD class within the biomarker model
+bio_df = X_bio_train.copy()
+bio_df['NAFLD'] = Y_bio_train
+
+print("\nNAFLD prevalence by sex (biomarker dataset):")
+print(bio_df.groupby('female')['NAFLD'].mean())
+
+#testing against missingness bias across models 
+print("Proportion female in full dataset:")
+print(X_core_train['female'].mean())
+
+print("Proportion female in biomarker subset:")
+print(X_bio_train['female'].mean())
+```
+
+The investigation revealed that the distribution of sex differs substantially between datasets. While the core dataset is approximately balanced (\~51% female), the biomarker subset is heavily skewed (\~89% female). Additionally, despite the imbalance in biomarker subset, NAFLD prevalence is higher among males (48.1%) compared to females (42.3%).
+
+This skew likely influenced the fitted logistic regression coefficients. In the biomarker model, the coefficient for female is negative, indicating a lower predicted probability of NAFLD for females. However, given the strong sex imbalance and differential outcome prevalence, this association should be interpreted cautiously. It likely a consequence of the subset structure and model conditioning rather than a direct biological effect.
+
+This highlights a key limitation of the biomarker analysis: the subset with complete biomarker data is not representative of the full cohort, and model-derived associations may therefore be sensitive to selection bias. Further investigation should address this limitation for better population approximation in analysis.
