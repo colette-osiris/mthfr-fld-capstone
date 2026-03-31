@@ -34,7 +34,7 @@ When hepatocytes are functioning abnormally/exhibiting stress, ALT rises more th
 
 1\) Homocysteine = a folate metabolism byproduct that is created when methioinine, an amino acid necessary for all methylation pathways, donates a methyl group (Martinez et al, 2017). Homocysteine is not inherently harmful, but elevated levels have been associated with FLD (Ma!é et. al, 2009). Case-controlled studies have shown that NAFLD patients show significantly higher homocysteine levels than controls (DeCarvalho, 2013).
 
-2)  Serum Folate = folate de\$ciency impares methylation and hepatic lipid metabolism. Therefore, we expect and studies have shown that NAFLD patients have displayed low serum folate levels compared to control groups (Liu et. al, 2023).
+2)  Serum Folate = folate deficiency impares methylation and hepatic lipid metabolism. Therefore, we expect and studies have shown that NAFLD patients have displayed low serum folate levels compared to control groups (Liu et. al, 2023).
 
 3)  Vitamin B12 = is an important cofactor for methylation and carbon metabolism (Jones et. al, 2022). The CDC has noted Vitamin B12 levels differ between NAFLD and controls, as per the National Health and Nutrition Examination Survey (NHANES) 1999-2004 cohort analysis (Li et. al, 2022).
 
@@ -82,12 +82,12 @@ import graphviz
 import pandas as pd
 import numpy as np
 import seaborn as sns
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, StratifiedKFold, cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier, plot_tree
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score
@@ -119,7 +119,7 @@ df[['alt','ast','bmi','homocysteine']].describe()
 
 ```
 
-These results look good to proceed. Datatypes are correct, core variables are loaded correctly, and there are no obvious signs of data corruption. It is important to note that these checks revealed a moderate-high level of missingness in the biomarker variables. This information was first discovered in preprocessing and therefore cohorts were not defined by full overlap. There appears to be some extreme outliers that will need to be addressed downstream. There may also need to be some encoding adjustments across variables sex (int64), race_ethnicity (int64) and cohort (object) downstream as well.
+These results look good to proceed. Datatypes are correct, core variables are loaded correctly, and there are no obvious signs of data corruption. It is important to note that these checks revealed a moderate-high level of missingness in the biomarker variables. This information was first discovered in pre-processing and therefore cohorts were not defined by full overlap. There appears to be some extreme outliers that will need to be addressed downstream. There may also need to be some encoding adjustments across variables sex (int64), race_ethnicity (int64) and cohort (object) downstream as well.
 
 ### Adjust Variables
 
@@ -456,3 +456,534 @@ The investigation revealed that the distribution of sex differs substantially be
 This skew likely influenced the fitted logistic regression coefficients. In the biomarker model, the coefficient for female is negative, indicating a lower predicted probability of NAFLD for females. However, given the strong sex imbalance and differential outcome prevalence, this association should be interpreted cautiously. It likely a consequence of the subset structure and model conditioning rather than a direct biological effect.
 
 This highlights a key limitation of the biomarker analysis: the subset with complete biomarker data is not representative of the full cohort, and model-derived associations may therefore be sensitive to selection bias. Further investigation should address this limitation for better population approximation in analysis.
+
+### Visualizing Feature Impact 
+
+Since this model here uses fourteen input features instead of just one, I created a multiplot of all the feature 2D plots to see each biomarker feature's individual effect. Each plot holds one feature constant while varying the other. For each point along the x-axis, the plot shows the model’s predicted probability of the patient having NAFLD. Because we are looking at biomarker profiles, I did not repeat these plots for the core feature set.
+
+```{python}
+# BIOMARKER-ONLY MULTIPLOT
+# purpose: show the isolated effect of biomarker predictors on P(NAFLD)
+# while holding all other predictors constant at their mean values
+
+#NEED TO BUILD A FUNCTION FOR THIS - lots of repeat code chunks 
+
+# index of NAFLD = 1 class
+class_idx = list(bio_logreg.classes_).index(1)
+
+# use overall means as fixed values for other predictors
+mean_vals = X_bio.mean()
+
+# setting up multiplot
+fig, axes = plt.subplots(4, 2, figsize=(12, 20))
+axes = axes.ravel()
+
+# 1) Effect of homocysteine
+hc = np.linspace(X_bio['homocysteine'].min(), X_bio['homocysteine'].max(), 200)
+
+df_hc = pd.DataFrame({
+    'homocysteine': hc,
+    'serum_folate': mean_vals['serum_folate'],
+    'rbc_folate': mean_vals['rbc_folate'],
+    'crp': mean_vals['crp'],
+    'mm_acid': mean_vals['mm_acid'],
+    'ggt': mean_vals['ggt'],
+    'vit_b12': mean_vals['vit_b12'],
+    'ferritin': mean_vals['ferritin'],
+    'alt': mean_vals['alt'],
+    'ast': mean_vals['ast'],
+    'bmi': mean_vals['bmi'],
+    'female': mean_vals['female'],
+    'diabetic': mean_vals['diabetic']
+})
+
+probs_hc = bio_logreg.predict_proba(df_hc)[:, class_idx]
+
+ax = axes[0]
+ax.plot(hc, probs_hc, label='P(NAFLD)');
+ax.axhline(0.5, linestyle='--', label='Decision Boundary (0.5)');
+#ax.set_xlabel('homocysteine');
+ax.set_ylabel(' ');
+ax.set_title('Effect of homocysteine', fontsize=8);
+#ax.legend();
+#now adjust all tick label sizes
+ax.tick_params(axis='both', labelsize=8)
+
+# 2) Effect of serum_folate
+sf = np.linspace(X_bio['serum_folate'].min(), X_bio['serum_folate'].max(), 200)
+
+df_sf = pd.DataFrame({
+    'homocysteine': mean_vals['homocysteine'],
+    'serum_folate': sf,
+    'rbc_folate': mean_vals['rbc_folate'],
+    'crp': mean_vals['crp'],
+    'mm_acid': mean_vals['mm_acid'],
+    'ggt': mean_vals['ggt'],
+    'vit_b12': mean_vals['vit_b12'],
+    'ferritin': mean_vals['ferritin'],
+    'alt': mean_vals['alt'],
+    'ast': mean_vals['ast'],
+    'bmi': mean_vals['bmi'],
+    'female': mean_vals['female'],
+    'diabetic': mean_vals['diabetic']
+})
+
+probs_sf = bio_logreg.predict_proba(df_sf)[:, class_idx]
+
+ax = axes[1]
+ax.plot(sf, probs_sf);
+ax.axhline(0.5, linestyle='--');
+#ax.set_xlabel('serum_folate');
+ax.set_ylabel(' ');
+ax.set_title('Effect of serum_folate', fontsize=8);
+#now adjust all tick label sizes
+ax.tick_params(axis='both', labelsize=8)
+
+# 3) Effect of rbc_folate
+rf = np.linspace(X_bio['rbc_folate'].min(), X_bio['rbc_folate'].max(), 200)
+
+df_rf = pd.DataFrame({
+    'homocysteine': mean_vals['homocysteine'],
+    'serum_folate': mean_vals['serum_folate'],
+    'rbc_folate': rf,
+    'crp': mean_vals['crp'],
+    'mm_acid': mean_vals['mm_acid'],
+    'ggt': mean_vals['ggt'],
+    'vit_b12': mean_vals['vit_b12'],
+    'ferritin': mean_vals['ferritin'],
+    'alt': mean_vals['alt'],
+    'ast': mean_vals['ast'],
+    'bmi': mean_vals['bmi'],
+    'female': mean_vals['female'],
+    'diabetic': mean_vals['diabetic']
+})
+
+probs_rf = bio_logreg.predict_proba(df_rf)[:, class_idx]
+
+ax = axes[2]
+ax.plot(rf, probs_rf);
+ax.axhline(0.5, linestyle='--');
+#ax.set_xlabel('rbc_folate');
+ax.set_ylabel(' ');
+ax.set_title('Effect of rbc_folate', fontsize=8);
+#now adjust all tick label sizes
+ax.tick_params(axis='both', labelsize=8)
+
+# 4) Effect of crp
+crp_vals = np.linspace(X_bio['crp'].min(), X_bio['crp'].max(), 200)
+
+df_crp = pd.DataFrame({
+    'homocysteine': mean_vals['homocysteine'],
+    'serum_folate': mean_vals['serum_folate'],
+    'rbc_folate': mean_vals['rbc_folate'],
+    'crp': crp_vals,
+    'mm_acid': mean_vals['mm_acid'],
+    'ggt': mean_vals['ggt'],
+    'vit_b12': mean_vals['vit_b12'],
+    'ferritin': mean_vals['ferritin'],
+    'alt': mean_vals['alt'],
+    'ast': mean_vals['ast'],
+    'bmi': mean_vals['bmi'],
+    'female': mean_vals['female'],
+    'diabetic': mean_vals['diabetic']
+})
+
+probs_crp = bio_logreg.predict_proba(df_crp)[:, class_idx]
+
+ax = axes[3]
+ax.plot(crp_vals, probs_crp);
+ax.axhline(0.5, linestyle='--');
+#ax.set_xlabel('crp');
+ax.set_ylabel(' ');
+ax.set_title('Effect of crp', fontsize=8);
+#now adjust all tick label sizes
+ax.tick_params(axis='both', labelsize=8)
+
+# 5) Effect of mm_acid
+mma = np.linspace(X_bio['mm_acid'].min(), X_bio['mm_acid'].max(), 200)
+
+df_mma = pd.DataFrame({
+    'homocysteine': mean_vals['homocysteine'],
+    'serum_folate': mean_vals['serum_folate'],
+    'rbc_folate': mean_vals['rbc_folate'],
+    'crp': mean_vals['crp'],
+    'mm_acid': mma,
+    'ggt': mean_vals['ggt'],
+    'vit_b12': mean_vals['vit_b12'],
+    'ferritin': mean_vals['ferritin'],
+    'alt': mean_vals['alt'],
+    'ast': mean_vals['ast'],
+    'bmi': mean_vals['bmi'],
+    'female': mean_vals['female'],
+    'diabetic': mean_vals['diabetic']
+})
+
+probs_mma = bio_logreg.predict_proba(df_mma)[:, class_idx]
+
+ax = axes[4]
+ax.plot(mma, probs_mma);
+ax.axhline(0.5, linestyle='--');
+#ax.set_xlabel('mm_acid');
+ax.set_ylabel(' ');
+ax.set_title('Effect of mm_acid', fontsize=8);
+#now adjust all tick label sizes
+ax.tick_params(axis='both', labelsize=8)
+
+# 6) Effect of ggt
+ggt_vals = np.linspace(X_bio['ggt'].min(), X_bio['ggt'].max(), 200)
+
+df_ggt = pd.DataFrame({
+    'homocysteine': mean_vals['homocysteine'],
+    'serum_folate': mean_vals['serum_folate'],
+    'rbc_folate': mean_vals['rbc_folate'],
+    'crp': mean_vals['crp'],
+    'mm_acid': mean_vals['mm_acid'],
+    'ggt': ggt_vals,
+    'vit_b12': mean_vals['vit_b12'],
+    'ferritin': mean_vals['ferritin'],
+    'alt': mean_vals['alt'],
+    'ast': mean_vals['ast'],
+    'bmi': mean_vals['bmi'],
+    'female': mean_vals['female'],
+    'diabetic': mean_vals['diabetic']
+})
+
+probs_ggt = bio_logreg.predict_proba(df_ggt)[:, class_idx]
+
+ax = axes[5]
+ax.plot(ggt_vals, probs_ggt);
+ax.axhline(0.5, linestyle='--');
+#ax.set_xlabel('ggt');
+ax.set_ylabel(' ');
+ax.set_title('Effect of ggt', fontsize=8);
+#now adjust all tick label sizes
+ax.tick_params(axis='both', labelsize=8)
+
+# 7) Effect of vit_b12
+b12 = np.linspace(X_bio['vit_b12'].min(), X_bio['vit_b12'].max(), 200)
+
+df_b12 = pd.DataFrame({
+    'homocysteine': mean_vals['homocysteine'],
+    'serum_folate': mean_vals['serum_folate'],
+    'rbc_folate': mean_vals['rbc_folate'],
+    'crp': mean_vals['crp'],
+    'mm_acid': mean_vals['mm_acid'],
+    'ggt': mean_vals['ggt'],
+    'vit_b12': b12,
+    'ferritin': mean_vals['ferritin'],
+    'alt': mean_vals['alt'],
+    'ast': mean_vals['ast'],
+    'bmi': mean_vals['bmi'],
+    'female': mean_vals['female'],
+    'diabetic': mean_vals['diabetic']
+})
+
+probs_b12 = bio_logreg.predict_proba(df_b12)[:, class_idx]
+
+ax = axes[6]
+ax.plot(b12, probs_b12);
+ax.axhline(0.5, linestyle='--');
+#ax.set_xlabel('vit_b12');
+ax.set_ylabel(' ');
+ax.set_title('Effect of vit_b12', fontsize=8);
+#now adjust all tick label sizes
+ax.tick_params(axis='both', labelsize=8)
+
+# 8) Effect of ferritin
+ferr = np.linspace(X_bio['ferritin'].min(), X_bio['ferritin'].max(), 200)
+
+df_ferr = pd.DataFrame({
+    'homocysteine': mean_vals['homocysteine'],
+    'serum_folate': mean_vals['serum_folate'],
+    'rbc_folate': mean_vals['rbc_folate'],
+    'crp': mean_vals['crp'],
+    'mm_acid': mean_vals['mm_acid'],
+    'ggt': mean_vals['ggt'],
+    'vit_b12': mean_vals['vit_b12'],
+    'ferritin': ferr,
+    'alt': mean_vals['alt'],
+    'ast': mean_vals['ast'],
+    'bmi': mean_vals['bmi'],
+    'female': mean_vals['female'],
+    'diabetic': mean_vals['diabetic']
+})
+
+probs_ferr = bio_logreg.predict_proba(df_ferr)[:, class_idx]
+
+ax = axes[7]
+ax.plot(ferr, probs_ferr);
+ax.axhline(0.5, linestyle='--');
+#ax.set_xlabel('ferritin');
+#going to create overall 1 y label, not repeats 
+ax.set_ylabel('');
+ax.set_title('Effect of ferritin', fontsize=8);
+#now adjust all tick label sizes
+ax.tick_params(axis='both', labelsize=8)
+
+#cant do a tight layout - need to adjust 
+plt.subplots_adjust(hspace=1.15, wspace=0.4, top=0.86, left=0.12)
+#add overall y label for whole figure 
+fig.text(0.003, 0.5, 'P(NAFLD)', va='center', rotation='vertical', fontsize=10)
+
+#now add global legend 
+fig.legend(loc='upper center', bbox_to_anchor=(0.5, 1.02), ncol=2, fontsize=9)
+
+
+#now show
+plt.show()
+```
+
+Based on this graphs, we can see the CRP and GGT are the strongest positive predictors for FLD status from the novel biomarker feature set, which are significant results considering they are not usually used in proxy indicator metrics.
+
+Both folate measures (serum and RBC), Vitamin B12, and homocysteine all consistently show an inverse relationship, which contradicts established biological mechanisms and trends. We would particularly expect folate and homocysteine to increase with NAFLD risk, so this evidence of an inverse relationship warrants further investigation.
+
+It is important to keep in mind that all displayed effects are model-conditional and have established influence due to dataset structure, so interpretation is not indicative of a independently causal relationship.
+
+## K-Nearest-Neighbors 
+
+### K Value Selection 
+
+The next technique I will use is K-Nearest Neighbors (KNN). KNN classifies a new sample by looking at the labels of its K closest neighbors to determine how many neighbors are meaningful given local data density. KNN's only **hyperparameter** is K, which determines the number of neighbors we look at when classifying a point. This is an important metric because a too small of a kmer value can lead to overfitting and too large of a kmer value can lead to underfitting.
+
+The following code block tests the impact of various K values on model accuracy.
+
+```{python}
+
+#biomarker model 
+candidate_ks = [1, 3, 5, 7, 9, 11, 15, 21, 31]
+
+print("K   | Accuracy")
+print("-"*30)
+
+for k in candidate_ks:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    _ = knn.fit(X_bio_train, Y_bio_train)
+    test_acc  = accuracy_score(Y_bio_test,  knn.predict(X_bio_test))
+    print(f"{k:<3} | {test_acc:8.3f}")
+
+
+# KNN  scaling: split first, then scale X_bio_train/X_bio_test
+# scale - need to do after splitting to avoid data leakage
+scaler = StandardScaler()
+X_bio_train_scaled = scaler.fit_transform(X_bio_train)
+X_bio_test_scaled  = scaler.transform(X_bio_test)
+
+
+print("K   | Accuracy")
+print("-"*30)
+
+for k in candidate_ks:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    #need to set = to placeholder to eliminite print line 
+    _ = knn.fit(X_bio_train_scaled, Y_bio_train)
+    test_acc  = accuracy_score(Y_bio_test,  knn.predict(X_bio_test_scaled))
+    print(f"{k:<3} | {test_acc:8.3f}")
+    
+  
+```
+
+Based on these results, we can see that the biomarker K value peaks at 11 (0.696) before declining. However, when scaled, the peak K value is 7, with accuracy peaking at 0.916. This drastic increase in accuracy (+0.22) when scaled indicates that unscaled distance calculations were disproportionately influenced by the individual variable scales. After standardization, the biomarker model more accurately reflects relative biological variation across the biomarkers. This also suggests that smoothing measures may improve signal extraction.
+
+```{python}
+#core model 
+candidate_ks = [1, 3, 5, 7, 9, 11, 15, 21, 31]
+
+print("K   | Accuracy")
+print("-"*30)
+
+for k in candidate_ks:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    _ = knn.fit(X_core_train, Y_core_train)
+    test_acc  = accuracy_score(Y_core_test,  knn.predict(X_core_test))
+    print(f"{k:<3} | {test_acc:8.3f}")
+    
+
+# KNN  scaling: split first, then scale X_bio_train/X_bio_test
+# scale - need to do after splitting to avoid data leakage
+scaler = StandardScaler()
+X_core_train_scaled = scaler.fit_transform(X_core_train)
+X_core_test_scaled  = scaler.transform(X_core_test)
+
+
+print("K   | Accuracy")
+print("-"*30)
+
+for k in candidate_ks:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    _ = knn.fit(X_core_train_scaled, Y_core_train)
+    test_acc  = accuracy_score(Y_core_test,  knn.predict(X_core_test_scaled))
+    print(f"{k:<3} | {test_acc:8.3f}")
+```
+
+In contrast to the biomarker model, the core feature model demonstrates consistently high accuracy across both unscaled and scaled tests. In both cases, accuracy peaks at K=3, (0.968 and 0.981 respectively). This behavior aligns with expectations since the feature set is reflective of established HSI-predictive-based outcomes. As seen in these results, the class separation is strong and insensitive to scaling.
+
+When both model results are compared together, the biomarker model exhibits weaker and more parameter-sensitive performance, while the core model remains relatively stable across K values. This contrast suggests that although biomarker-based signal is present, it is less directly predictive of FLD status and more dependent on appropriate pre-processing and model configuration. This supports the broader objective of Part 2, indicating that biomarker patterns identified in Part 1 may translate to population-level FLD risk, but have reduced strength and increased sensitivity due to modeling choices and dataset restrictions. More research is necessary to establish a stronger link.
+
+### Elbow Plots
+
+It appears that K=7 has the highest accuracy for the scaled biomarker model and K=3 for the scaled core feature model, but we are going to create two elbow plots in order to cross-validate those assertions.
+
+To do this, I will measures the accuracy with every value of K and then plot this accuracy against the coresponding K values. Typically, the accuracy starts low for K=1, increases rapidly as K increases, reaches a peak, and then gradually declines or plateaus.
+
+To pick the best K value, I will look for the highest point on the curve before it begins to plateau. This is called the elbow point, and it critical because it represents the best balance between over-fitting and under-fitting.
+
+```{python}
+
+# BIOMARKER MODEL: choose k using cross-validation on scaled training data
+
+# pick a range of k values to test
+k_values = list(range(1, 31))
+cv_scores = []
+
+# stratified 5-fold cross-validation - using stratified instead of standard bc of class imbalance 
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=MY_RANDOM_STATE)
+
+for k in k_values:
+    knn_cv = KNeighborsClassifier(n_neighbors=k)
+    #need to scale
+    scores = cross_val_score(
+        knn_cv,
+        X_bio_train_scaled,
+        Y_bio_train,
+        cv=skf,
+        scoring='accuracy'
+    )
+    
+    cv_scores.append(scores.mean())
+
+# identify best k
+best_k_bio = k_values[cv_scores.index(max(cv_scores))]
+best_score_bio = max(cv_scores)
+
+print("Best biomarker k:", best_k_bio)
+print("Best biomarker CV accuracy:", round(best_score_bio, 3))
+
+# plot results
+plt.figure(figsize=(8, 4))
+plt.plot(k_values, cv_scores, marker='o')
+plt.xlabel('Number of Neighbors (k)')
+plt.ylabel('Mean CV Accuracy')
+plt.title('Biomarker Model: k Selection for kNN')
+plt.xticks(k_values[::2], rotation=45)
+plt.grid(True)
+plt.tight_layout()
+#now show 
+plt.show()
+```
+
+This plot confirms our biomarker model accuracy peaks at k = 9 with a cross-value score of 0.902.
+
+```{python}
+# CORE MODEL: choose k using cross-validation on scaled training data
+
+# pick a range of k values to test
+k_values = list(range(1, 31))
+cv_scores = []
+
+# stratified 5-fold cross-validation - using stratified instead of standard bc of class imbalance 
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=MY_RANDOM_STATE)
+
+for k in k_values:
+    knn_cv = KNeighborsClassifier(n_neighbors=k)
+    #need to scale
+    scores = cross_val_score(
+        knn_cv,
+        X_core_train_scaled,
+        Y_core_train,
+        cv=skf,
+        scoring='accuracy'
+    )
+    
+    cv_scores.append(scores.mean())
+
+# identify best k
+best_k_core = k_values[cv_scores.index(max(cv_scores))]
+best_score_core = max(cv_scores)
+
+print("Best Core Marker k:", best_k_core)
+print("Best Core Marker CV accuracy:", round(best_score_core, 3))
+
+# plot results
+plt.figure(figsize=(8, 4))
+plt.plot(k_values, cv_scores, marker='o')
+plt.xlabel('Number of Neighbors (k)')
+plt.ylabel('Mean CV Accuracy')
+plt.title('Core Featyre Model: k Selection for kNN')
+plt.xticks(k_values[::2], rotation=45)
+plt.grid(True)
+plt.tight_layout()
+#now show 
+plt.show()
+```
+
+This plot confirms our core model accuracy peaks at k = 7 with a cross-value score of 0.981.
+
+Now that I've identified an optimal K using cross-validation on both sets of training data, I can proceed with training our final KNN models using this k = 9 and k = 7 on the entire training dataset per model, respectively.
+
+### Biomarker Model Training + Testing
+
+```{python}
+
+# BIOMARKER MODEL: train final kNN using cross-validated optimal k
+knn_bio_final = KNeighborsClassifier(n_neighbors=best_k_bio)
+knn_bio_final.fit(X_bio_train_scaled, Y_bio_train)
+
+# BIOMARKER MODEL: test final model on held-out test set
+Y_bio_pred = knn_bio_final.predict(X_bio_test_scaled)
+
+bio_test_acc = accuracy_score(Y_bio_test, Y_bio_pred)
+print(f"Biomarker Model Test Accuracy (k={best_k_bio}): {bio_test_acc:.3f}")
+
+```
+
+### Core Model Training + Testing 
+
+```{python}
+
+# CORE MODEL: train final kNN using cross-validated optimal k
+knn_core_final = KNeighborsClassifier(n_neighbors=best_k_core)
+knn_core_final.fit(X_core_train_scaled, Y_core_train)
+
+# CORE MODEL: test final model on held-out test set
+Y_core_pred = knn_core_final.predict(X_core_test_scaled)
+
+core_test_acc = accuracy_score(Y_core_test, Y_core_pred)
+print(f"Core Model Test Accuracy (k={best_k_core}): {core_test_acc:.3f}")
+```
+
+Because of established class imbalance and model differences, I wanted to investigate error structures, so I included a classification report and confusion matrix for each model.
+
+```{python}
+#biomarker model 
+print("Biomarker Model Classification Report")
+print(classification_report(Y_bio_test, Y_bio_pred))
+
+ConfusionMatrixDisplay.from_predictions(Y_bio_test, Y_bio_pred)
+plt.title("Biomarker Model Confusion Matrix")
+plt.show()
+
+```
+
+```{python}
+
+#core model 
+print("Core Feature Model Classification Report")
+print(classification_report(Y_core_test, Y_core_pred))
+
+ConfusionMatrixDisplay.from_predictions(Y_core_test, Y_core_pred)
+plt.title("Core Feature Model Confusion Matrix")
+plt.show()
+
+```
+
+### Model Comparison 
+
+```{python}
+#now compare both directly 
+print("Final kNN Test Set Comparison")
+print("-" * 40)
+print(f"Biomarker model: k = {best_k_bio}, test accuracy = {bio_test_acc:.3f}")
+print(f"Core model:      k = {best_k_core}, test accuracy = {core_test_acc:.3f}")
+```
+
+### Interpretation
