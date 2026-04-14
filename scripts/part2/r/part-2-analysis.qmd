@@ -10,54 +10,64 @@ editor: visual
 
 ## Background
 
-Fatty Liver Disease (FLD) is a liver condition characterized by the accumulation of lipid droplets in the liver, affecting up to 42.2% of adults in the US (Jones et. al, 2022). FLD causes impaired liver function; though it is often asymptomatic, it can include symptoms like abdominal pain/discomfort, weight loss, loss of appetite, and fatigue (Zhu, 2024). The Hepatic Steatosis Index is a screening tool used to diagnose Non-Alcoholic Fatty Liver Disease (NAFLD), which is a subsection of FLD associated with excessive alcohol consumption (Jones et. al, 2022). Since HSI was not included in the initial data sets but is calculated formulaically, I will be using it as the ground truth label for each patient.
+Fatty Liver Disease (FLD) is a broad clinical term used to describe the accumulation of lipid droplets in hepatocytes (source). The most prevalent sub-type of FLD is Non-Alcoholic Fatty Liver Disease (NAFLD), which was renamed Metabolic dysfynction-Associated Steatotic Liver Disease (MASLD) in 2023 via international consensus (source). MASLD is now defined by hepatic steatosis occuring in the presence of cardiometabolic risk factors but in the absence of significant/harmful levels of alcohol consumption (source). It is the most common cause of liver disease both domestically and globally, affecting up to 42.2% of adults in the US, and continuing to rise as obesity and type 2 diabetic reports also increase (Jones et. al, 2022). FLD causes impaired liver function; though it is often asymptomatic in early stages, it can include symptoms like abdominal pain/discomfort, weight loss, loss of appetite, and fatigue before progressing to more serious effects like fibrosis, cirrhosis, and cancer (Zhu, 2024).
+
+The Hepatic Steatosis Index (HSI) is a validated and non-invasive screening tool used to detect NAFLD (source). It was derived from a logistic regression model that was applied to a cross study of 10,724 subjects, and demonstrated an AOC of 0.182, demonstrating to ability to rule out NAFLD with a 93.1% sensitivity at scores below 30, and detect NAFLD with 92.4% specificity at scores of 36 or above (Lee et al., 2010). Because HSI was not included in the NHANES datasets but is can be computed from available variables, it is used here as the ground truth label for NAFLD classification for each patient.
 
 HSI is calculated by:
 
 *𝐻𝑆𝐼* = 8 ∗ (*𝐴𝐿𝑇* /*𝐴𝑆𝑇* ) + *𝐵𝑀𝐼* + (2, *𝑐𝑜𝑛𝑑* : *𝑑𝑖𝑎𝑏𝑒𝑡𝑒𝑠*) + (2, *𝑐𝑜𝑛𝑑* : *𝑓𝑒𝑚𝑎𝑙𝑒*)
 
-The following is a description of each variable/it's importance in the HSI formula:
+The following variables are included in HSI calculation:
 
-1\) Alanine Aminotransferase (ALT) = liver enzyme used as a biomarker for liver cell injury/damage (Lee et. al, 2009).
+1\) Alanine Aminotransferase (ALT) = liver-specific enzyme that increases with hepatocyte injury/damage; Elevated ALT is clinically used as a primary indicator of hepatic stress (Lee et. al, 2009).
 
-2\) Aspartate Aminotransferase (AST) = tissue enzyme that is used as a biomarker for tissue injury/damage since it is found in muscle, skeletal, neural, cardiac,and hepatic tissue (Lee et. al, 2009).
+2\) Aspartate Aminotransferase (AST) = a tissue enzyme that is used as a biomarker for tissue injury/damage since it is found in muscle, skeletal, neural, cardiac,and hepatic tissue (Lee et. al, 2009). Clinically, AST is used in combination with ALT as an elevated ALT/AST ratio is associated with liver-specific injury consistent with FLD (Lee et al., 2009). Specifically, when hepatocytes are functioning abnormally/exhibiting stress, ALT rises faster than AST, so elevated ALT/AST ratio is known to suggest liver damage/oxidative stress consistent with FLD (Lee et. al., 2009).
 
-When hepatocytes are functioning abnormally/exhibiting stress, ALT rises more than AST, so elevated ALT/AST ratio is known to suggest liver damage/oxidative stress consistent with FLD (Lee et. al, 2009).
+3\) BMI = a proxy measure of body composition metric that calculated by body weight (kg)/height\^2 (m\^2) (Lee et al., 2009). While BMI is not always an accurate measure of health, in this context it is useful because visceral adiposity is a primary driver of hepatic lipid accumulation, and therefore FLD risk (Lee et. al, 2009).
 
-3\) BMI = body composition metric calculated by body weight (kg)/height\^2 (m\^2) (Lee et. al, 2009).
+4\) Sex = Sex is relevant due to the fact that adipose tissue distribution, hormone levels, and enzyme activity differs between male and female; female status is a known risk factor for FLD via HSI proxy determination (Lee et. al, 2009).
 
-4\) Sex = Sex is relavent due to the fact that adipose tissue distribution, hormone levels, and enzyme activity di"ers between male and female (Lee et. al, 2009).
+5\) Diabetes = Type II diabetes is strongly linked to insulin resistance, which drives hepatic lipogenesis and is a central mechanism in the development of FLD (Lee et. al, 2009). Therefor it is included for diagnostic relevancy (Lee et. al, 2009).
 
-5\) Diabetes = Type II diabetes is strongly linked to FLD. Therefor it is included for diagnostic relevency (Lee et. al, 2009).
+In addition to the core variables included in HSI, this model incorperates supplementary biomarkers that have either established or hypothesized association with NAFLD, with particular relevance to the MTHFR C677T biomarker profile examined in part 1: homocysteine, serum folate, red blood cell (RBC) folate, Methylmalonic Acid (MMA), Gamma-Glutamyl Transferase (GGT), C-Reactive Protein (CRP), Ferritin, and Vitamin B12.
 
-'''SECTION NEEDS TO RE-TAILORED" Then I included multiple additional features that are associated with FLD: homocysteine, serum folate, red blood cell (RBC) folate, (MMA), (GGT), C-Reactive Protein (CRP), triglyceride, Ferritin, and Vitamin B12 levels.
+More details on each biomarker are provided below:
 
-1\) Homocysteine = a folate metabolism byproduct that is created when methioinine, an amino acid necessary for all methylation pathways, donates a methyl group (Martinez et al, 2017). Homocysteine is not inherently harmful, but elevated levels have been associated with FLD (Ma!é et. al, 2009). Case-controlled studies have shown that NAFLD patients show significantly higher homocysteine levels than controls (DeCarvalho, 2013).
+1\) Homocysteine = a folate metabolism byproduct that accumulates when methylation pathway function is impaired (source) is created when methioinine, an amino acid necessary for all methylation pathways, donates a methyl group (Martinez et al, 2017). Homocysteine is not inherently harmful, but elevated levels have been independently associated with FLD (Maté et. al, 2009). Case-controlled studies have shown that NAFLD patients show significantly higher homocysteine levels than controls (DeCarvalho, 2013).
 
-2)  Serum Folate = folate deficiency impares methylation and hepatic lipid metabolism. Therefore, we expect and studies have shown that NAFLD patients have displayed low serum folate levels compared to control groups (Liu et. al, 2023).
+2\) Serum Folate = folate deficiency impaires hepatic methylation and lipid metabolism. Serum folate is a circulating biomarker, and therefor more prone to short-term dietary fluctuations (source needed). Studies show that NAFLD patients have displayed low serum folate levels compared to control groups (Liu et. al, 2023).
 
-3)  Vitamin B12 = is an important cofactor for methylation and carbon metabolism (Jones et. al, 2022). The CDC has noted Vitamin B12 levels differ between NAFLD and controls, as per the National Health and Nutrition Examination Survey (NHANES) 1999-2004 cohort analysis (Li et. al, 2022).
+3\) RBC Folate = folate metric that reflects longer-term intracellular folate status. In the NHANES 1999–2004 cohort, RBC folate was independently associated with elevated NAFLD risk (Liu et. al, 2023).
 
-...
+4\) Methylmalonic Acid (MMA) = a functional biomarker of vitamin V12 status and downstream metabolic activity (source needed). Elevated MMA has been independently associated with advanced fibrosis risk in NAFLD populations (Li et al., 2023).
 
-The model will use these additional features to determine class assignment, and then compare to the HSI ground truth we established to determine model accuracy. The data used for this model comes from 2001-2002 and 2003-2004 cohorts of the National Health and Nutrition Examination Survey (NHANES) from the CDC.
+5\) Gamma-Glutamyl Transferase (GGT) = a hepatic enzyme involved in glutathione metabolism and oxidative stress pathways. GGT is a more sensitive FLD marker than ALT in many contexts, and elevated levels are consistently associated with NAFLD and metabolic syndrome (Dillon & Miller, 2016).
 
-### Define Task
+6\) C-Reactive Protein (CRP) = an acute-phase inflammatory marker that is used for detection across several disease states. CRP is significantly elevated in NAFLD when compared to controls, and it is a strong indicator of FLD, which reflects its' central role in in low-grade inflammation detection in disease pathogenesis (Aller et al., 2014).
 
-Task: Build an ML model that uses the features extracted from the NHANES data set labeled to predict whether a patient has Non-Alcoholic Fatty Liver Disease (NAFLD).
+7\) Vitamin B12 = is an important cofactor for methylation and carbon metabolism (Jones et. al, 2022). The CDC has noted Vitamin B12 levels differ between NAFLD and controls, as per the National Health and Nutrition Examination Survey (NHANES) 1999-2004 cohort analysis (Li et. al, 2022).
 
-This task is an example of supervised learning because it is a classification task, which is a sub-type of supervised machine learning. Since I only have 2 classifications for the model (NAFLD or Healthy) this is a binary classification.
+8\) Ferritin = the iron storage protein that is often used as a market of systemic inflammation (source needed). Serum ferritin has been shown to be significantly elevated in NAFLD patients when compared to controls, and has been correlated with FLD severity, fibrosis score, and insulin resistance (Salem et al., 2024).
+
+9\) Triglycerides = the primary lipid substrate that accumulates in hepatocytes during steatosis, and elevated triglyceride levels are an established metabolic risk factor for NAFLD (Younossi et al., 2023).
+
+The biomarker model uses these additional features to predict NAFLD classification assignment, using the computed HSI label as a ground truth. The data used for these models comes from 2001-2002 and 2003-2004 cohorts of the National Health and Nutrition Examination Survey (NHANES) from the CDC.
+
+### Task Definition 
+
+This analysis approaches NAFLD classification as a supervised binary classification problem. For each observation, a NAFLD label is assigned as either NAFLD-positive (1) or healthy (0). This label is derived from the computed HSI score, with a threshold of 36 for NAFLD-positive.
+
+To analyze the role of non-HSI variables as indicators for FLD status, two parallel models are trained and evaluated. The core feature model only uses traditional HSI variables (ALT, AST, BMI, sex, diabetic status), while the biomarker model incorporates the additional metabolic features outlined above that are hypothesized to independently signal FLD risk.
+
+The core model functions as performance benchmark and re-construction of the validated HSI proxy measure; the biomarker model is designed to test where features outside the HSI standard framework — particularly those relevant to the MTHFR C677T biomarker investigated in Part 1 – can recover meaningful classification signal independently.
 
 ## Prepare Data
 
-### Load Data
-
-The code block below loads my dataset, which contains one row per patient. For each patient, I have multiple measured features including : ALT, ALS, BMI, sex, homocysteine, serum folate, red blood cell (RBC) folate, (MMA), (GGT), C-Reactive Protein, (CRP), triglyceride, Ferritin and B12 levels, as well as BMI, sex and diabetic status.
-
-Each cell also has a label for HSI score that represents the true class of the cell, with HSI scores greater or equal to 36 being the determinate threshold score.
+### Environment
 
 ```{r}
-##python was acting unstable and automatically using the reticulate cache - created .Renviron file to fix this issue so the same python and interpretere are used everytime RStudio or Quarto runs. 
+##python was acting unstable and automatically using the reticulate cache - created .Renviron file to fix this issue so the same python and interpreter are used everytime RStudio or Quarto runs. 
 
 ##for reproducibility purposes, the export package list can be found in the requirements.txt file. 
 
@@ -73,6 +83,8 @@ py_config()
 import sys
 print(sys.executable)
 ```
+
+### Load Data
 
 ```{python}
 
@@ -96,7 +108,7 @@ from sklearn.tree import export_graphviz
 from io import StringIO
 from IPython.display import display
 
-#set to 42 to ensure training/test spits are reproducible 
+#fixed at 42 to ensure training/test spits are reproducible 
 MY_RANDOM_STATE = 42
 
 # Load NHANES cleaned data set 
@@ -104,7 +116,11 @@ df = pd.read_csv("../../../data/clean_data/nhanes_final.csv")
 
 ```
 
+### Structural Validation
+
 ```{python}
+
+#Structural Validation: shape, column names, data types, and missingness 
 
 #check data
 print(df.shape)
@@ -114,14 +130,20 @@ print(df.dtypes)
 #check missingness 
 print(df.isna().sum())
 
-#binary check 
+#distribution check for core features
 df[['alt','ast','bmi','homocysteine']].describe()
 
 ```
 
-These results look good to proceed. Datatypes are correct, core variables are loaded correctly, and there are no obvious signs of data corruption. It is important to note that these checks revealed a moderate-high level of missingness in the biomarker variables. This information was first discovered in pre-processing and therefore cohorts were not defined by full overlap. There appears to be some extreme outliers that will need to be addressed downstream. There may also need to be some encoding adjustments across variables sex (int64), race_ethnicity (int64) and cohort (object) downstream as well.
+The dataset loads with expected dimensions and correct column types and core variables, with no signs of data corruption. It's important to note that this validation brought two patterns to attention that will need to be addressed downstream.
 
-### Adjust Variables
+The first revealed pattern is a moderate-high level of missingness in the biomarker variables, though this was first identified in pre-processing. Rather than imputing missing values, complete-case subsetting was applied at the model level in order to preserve data integrity, though this came at the cost of a reduced sample size in the biomarker model (n = 515?).
+
+The second pattern is the appearance of extreme outliers across several continuous features that will need to be addressed downstream. There may also need to be some encoding adjustments across variables sex (int64), race_ethnicity (int64) and cohort (object) downstream as well.
+
+### Construct Labels 
+
+HSI is calculated from available NHANES data and used as the ground truth label for NAFLD classification. The code below creates three new variables : 'HSI', 'NAFLD', and 'HSI_category'. 'HSI' functions as a continuous score while 'NAFLD', acts as the primary binary classification label. 'HSI_category' was created to provide a descriptive severity grouping for downstream analysis in R, which includes the groups: 'healthy', 'borderline', and 'nafld_like'.
 
 ```{python}
 #need to set/extract relevant label values
@@ -155,9 +177,7 @@ df['HSI_category'] = np.where(
 
 ```
 
-In this section, I corrected the encoding for the sex and diabetes values used in the HSI calculations and established a structure that creates three new variables: 'HSI', 'NAFLD', and 'HSI_category'. HSI functions as a continuous score, and it's derived variable, 'NAFLD', acts as the primary binary ML label. 'HSI_category' was created to provide a descriptive severity grouping for downstream analysis in R, which includes the groups: 'healthy', 'borderline', and 'nafld_like'.
-
-### Interpret and Check Data
+### Validate Labels 
 
 The following code below displays the first few rows of the data set and views summary statistics for the HSI, NAFLD, and HSI_category labels.
 
@@ -182,19 +202,17 @@ print(df['NAFLD'].value_counts())
 print(pd.crosstab(df['HSI_category'], df['NAFLD']))
 ```
 
-Through these checks, we can see the HSI distribution mean is 35.47 and the median is 34.53, which is aligned with our expectations given the 36.0 value cut off, confirming an absence of scaling issues or computation errors. The categorical distribution for downstream analysis is also promising, with 'nafld-like', 'borderline', and 'healthy' showing 6,977, 4022, and 3,416 counts, respectively. These counts are promising because it showed all three bins present without being dominated by one class.
+The HSI distribution has a mean of 35.47 and median of 34.53, which is aligned with expectations given the 36.0 value classification threshold. This is consistent with expectations given the population composition and confirms an absence of scaling issues or computation errors. The categorical distribution is also promising, with 'nafld-like', 'borderline', and 'healthy' showing 6,977, 4022, and 3,416 counts, respectively. All three bins are present and populated without being dominated by one class, which supports the use of these groupings for downstream analysis.
 
-The cross tab check evaluates the binning method for logical inconsistencies. The 'borderline' and 'healthy' bins behave as expected, with 0 individuals being labeled as 'NAFLD' = 0. However, the 'nafld_like' bin results show that not all individuals in the high HSI range are classified as NAFLD-positive under the strict established threshold.
+The cross tab check evaluates the binning method for logical inconsistencies and revealed a structural feature worth addressing explicitly. The 'borderline' and 'healthy' bins behave as expected, with 0 individuals being labeled as 'NAFLD' = 0. However, the 'nafld_like' bin results show that not all individuals in the high HSI range are classified as NAFLD-positive under the strict established threshold.
 
-Functionally, this means that while all NAFLD-positive fall into the 'nafld_like' bin, a subset of individuals remain below the diagnostic threshold that still qualify as "high risk." This inconsistency accurately reflects HSI as a continuous metric and proxy measure for FLD diagnosis, which supports my analysis approach to include a 'borderline' bin for edge case inclusion.
+Functionally, this means that while all NAFLD-positive fall into the 'nafld_like' bin, a subset of individuals remain below the diagnostic threshold of 36 that still qualify as "high risk." This is not an inconsistency, but rather an accurate reflection of HSI as a continuous screening metric and proxy measure for FLD status, rather than a hard diagnostic boundary. Not only does this align with clinical uses of HSI, it supports the analysis approach to include a 'borderline' bin for edge case inclusion for interpretative purposes without distorting the binary labels used for model training.
 
-### Feature Definition
+### Feature Set Definition
 
-My input features are have 14 measured features: ALT, ALS, homocysteine, serum folate, red blood cell (RBC) folate, (MMA), (GGT), C-Reactive Protein, (CRP), triglyceride, Ferritin and B12 levels, as well as BMI, sex and diabetic status. My labels are '1' for NAFLD and 0 for 'Healthy', which correspond to the 'NAFLD' column of our dataset.
+Because biomarker data is limited in comparison to the HSI core variables, two model-specific feature sets are defined in place of a single, combined model. Each model will have their own features, datasets, and set x and y values.
 
-Because the variables containing biomarker data is limited in comparison to the HSI variables, I will need to create mutliple models. Each model will have their own features, datasets, and set x and y values.
-
-The core model functions as a reconstruction and evaluation of the HSI proxy measure for FLD diagnosis when applied to this dataset specifically. The biomarker model includes variables not traditionally used in HSI calculations, but are systemically relevant, potentially related, and have overlap with MTHFR C677T biomarker profile. This model is created with the goal of recovering FLD signal independently from the proxy model.
+The core model functions as a reconstruction and evaluation of the HSI proxy measure for FLD diagnosis when applied to this dataset specifically. The biomarker model includes features not traditionally used in HSI calculations, but are systemically relevant, potentially related, and have overlap with MTHFR C677T biomarker profile. This biomarker model is created with the goal of recovering FLD signal independently from the proxy model.
 
 ```{python}
 
@@ -254,13 +272,13 @@ print(Y_bio.value_counts())
 X_core.head(), X_bio.head()
 ```
 
-This code chunk shows that we retained nearly 13,000 observations for the core feature set and about 2,500 for the biomarker feature set. While not ideal, this feature shows that richer biological detail often comes at the cost of sample size.
+Complete-case subsetting retains nearly 13,000 observations for the core feature set and approximately 2,500 for the biomarker feature set. While reductions of this size are not ideal, it reflects the higher missingness limitation of the extended biomarker panel, which is a known limitation when working with richly measured but incompletely observed population survey data.
 
-The class balances are the approximately equal at \~57/43 split, which is a healthy split for classification. It is important to note that this consistency indicates that missingness did not distort class balance, and therefor the complete-case biomarker subset is not obviously biased towards a single outcome class. The biomarker model therefore represents a smaller but biologically richer subset rather than a distorted sample.
+This analysis indicates the class balances are the approximately equal at \~57/43 split (NAFLD-positive/healthy), which is a healthy split for classification. It is important to note that this consistency indicates that missingness did not distort class balance, and therefor the complete-case biomarker subset is not obviously biased towards a single outcome class. The biomarker model therefore represents a smaller but compositionally representative sample rather than a distorted or structurally skewed subset.
 
 ### Split Data
 
-This code chunk splits the data into training and testing sets. I used a 70/30 testing split and stratified sampling to split the data set into equal proportions across sets in order to minimize model bias.
+Both datasets are split into training and testing sets. This approach used a 70/30 testing split and stratified sampling to preserve proportions across sets and minimize model bias.
 
 ```{python}
 
@@ -286,7 +304,7 @@ print(X_bio_train.shape, X_bio_test.shape)
 
 ```
 
-Since I used stratified sampling, I expect the proportion of NAFLD-like vs. Healthy patients in the training and test sets to match the overall data set. To test this, the plot below explores the distribution of classes across the training and test sets in order to confirm that both sets are representative of the original data.
+Since stratified sampling was used, the expected proportion of NAFLD-like vs. Healthy patients in the training and test sets should match the overall data set. To test this, the plot below explores the distribution of classes across the training and test sets in order to confirm that both sets are representative of the original data.
 
 ```{python}
 
@@ -350,17 +368,19 @@ display(pd.Series(Y_core_test).value_counts(normalize=True).mul(100).round(1).as
 
 ```
 
-The tables and plots above show a \~57/43 ratio across the training, testing, and overall classes. This near-perfect balance confirms the absence of a class imbalance and ensures internal model consistency and future evaluation metrics will be accurate.
+The tables and plots above confirm a consistent \~57/43 split across the training, testing, and overall distributions of both models. This near-identical balance across both sets confirms the absence of a class imbalance and ensures internal model consistency and future evaluation metrics will be representative of model performance on the broader data.
+
+-   end of 2nd draft edits.
 
 ## Train and Evaluate Data 
 
-For this section, I will be training and evaluating the models using logistical regression, KNN, and decision tree classifiers.
+For this section, I will be training and evaluating the models using logistical regression and KNN.
 
-### Logistical Regression 
+### Logistic Regression 
 
 #### Model Training
 
-The code chunk below uses logistical regression to solve the binary classification task by predicting the outcome of the model.
+The code chunk below uses logistic regression to solve the binary classification task by predicting the outcome of the model.
 
 ```{python}
 # Train core logistic model - using different solver for larger dataset 
@@ -374,7 +394,7 @@ bio_logreg.fit(X_bio_train, Y_bio_train)
 
 #### Model Testing 
 
-Once I'd trained the logistical model for each feature set, I wanted to test it on the established test set and output the accuracy to evaluate it. Accuracy is measured here by dividing the number of correct predictions by the total number of predictions made.
+Once I'd trained the logistic model for each feature set, I wanted to test it on the established test set and output the accuracy to evaluate it. Accuracy is measured here by dividing the number of correct predictions by the total number of predictions made.
 
 ```{python}
 #Core model Accuracy
@@ -987,3 +1007,29 @@ print(f"Core model:      k = {best_k_core}, test accuracy = {core_test_acc:.3f}"
 ```
 
 ### Interpretation
+
+sources -
+
+(Rinella et al., 2023)
+
+Dillon & Miller, 2016).
+
+(Jones et. al, 2022)
+
+(Zhu, 2024).
+
+(Lee et al., 2010)
+
+(Martinez et al, 2017)
+
+(Maté et. al, 2009).
+
+(DeCarvalho, 2013).
+
+(Liu et. al, 2023).
+
+(Aller et al., 2014).
+
+(Salem et al., 2024).
+
+(Younossi et al., 2023)
