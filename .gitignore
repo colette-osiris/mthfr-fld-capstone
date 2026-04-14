@@ -1,13 +1,13 @@
-#this file helps with rendering conflicts regarding outputs, caches, and raw data. 
-# It will be updated as needed as the project progresses.  
+#this file helps with rendering conflicts regarding outputs, caches, and raw data.
+# It will be updated as needed as the project progresses.
 
 # --- Quarto / render artifacts ---
-#Outputs 
+#Outputs
 outputs/
-*.html
-*.pdf
+#*.html
+#*.pdf
 
-#Python execution noise 
+#Python execution noise
 __pycache__/
 .ipynb_checkpoints/
 
@@ -22,3 +22,5 @@ data/raw/
 
 # OS junk
 .DS_Store
+
+/.quarto/

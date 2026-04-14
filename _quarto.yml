@@ -10,8 +10,16 @@
 project:
   type: website
   output-dir: docs
+  render: 
+      - "*.qmd"
+      - "part1/*.qmd"
+      - "part2/*.qmd"
+      - "!scripts/"
+      - "!references/part1/"
+      - "!references/part2/" 
+ 
   #chose output as docs to keep HTML renderings out of source files 
-  ## need to go to repo settings, pages and set source to docs/ folder once ready to render 
+  #b need to go to repo settings - pages and set source to docs/ folder once ready to render 
 
 website:
   title: "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis"
