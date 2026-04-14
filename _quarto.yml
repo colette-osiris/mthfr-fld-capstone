@@ -4,4 +4,60 @@
 #
 # (File name is mandated by Quarto) 
 
-#configuration behavior will be added as needed
+# Decided to go with website output instead of html due to project structure. 
+
+
+project:
+  type: website
+  output-dir: docs
+  #chose output as docs to keep HTML renderings out of source files 
+  ## need to go to repo settings, pages and set source to docs/ folder once ready to render 
+
+website:
+  title: "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - text: "Part 1: MTHFR Biomarker Profile"
+        menu:
+          - href: part1/methods.qmd
+            text: "1.1 Methods"
+          - href: part1/biomarker-analysis.qmd
+            text: "1.2 Biomarker Analysis"
+      - text: "Part 2: FLD Classification"
+        menu:
+          - href: part2/data-preprocessing.qmd
+            text: "2.1 Data & Preprocessing"
+          - href: part2/machine-learning.qmd
+            text: "2.2 Machine Learning"
+          - href: part2/visualization.qmd
+            text: "2.3 Visualization & Analysis"
+      - href: discussion.qmd
+        text: "Discussion"
+      - href: references.qmd
+        text: "References"
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    number-sections: false
+    smooth-scroll: true
+    code-fold: true
+    code-tools: true
+    #code-fold: true and code-tools: true b/c code chunks are collapsed defaulty
+
+ #professional practice - single bib file created and stored in references 
+   #csl file controls citation formatting - need to download APA .csl from zotero 
+   #repo and place at 'references/apa.csl
+bibliography: references/references.bib
+csl: references/apa.csl
+
+#freeze set to auto so Quarto only re-executes chunks with source changes 
+  ## improves rendering stability for mixed language environments 
+execute:
+  freeze: auto
+  warning: false
+  message: false
