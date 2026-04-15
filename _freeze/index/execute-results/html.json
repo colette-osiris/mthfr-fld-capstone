@@ -1,0 +1,15 @@
+{
+  "hash": "eff2caabf37e7d7c9402ae144f30050b",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis\" \nauthor: \"Colette Rouiller\" \nformat: html\nengine: knitr\n---\n\n::: {.cell}\n<style type=\"text/css\">\n.justify {\n  text-align: justify !important\n}\n</style>\n:::\n\n\n\n\n## Overview \n\n::: {.justify}\n\nThis project investigates whether biomarkers associated with MTHFR C677T genetic\nvariant retain relavance and show correlated patterns in population-level Fatty \nLiver Disease (FLD) analysis. FLD is a liver condition characterized by the \naccumulation of lipidndroplets in the liver, affecting up to 42.2% of adults in \nthe US (Jones et al., 2022). \"The MTHFR C677T mutation is one of the most common\nfunctional genetic variants in the human genome, carried by approximately 25% of \nthe US population (Graydon et al., 2019). Since the liver functions as the central \nhub for both lipid regulation and folate-dependent one-carbon metabolism, it \nprovides a biologically plausible context by which to examine potential downstream\neffects of MTHFR mutations on metabolic dysfunction cases, like FLD. \n\nIf an association can be found between the two, that can be used to develop \nprotocols and recommendations for preventative and reactive care that could impact \na significant portion of the population, making it incredibly important area of \nresearch. Current research confirms the observed phenomenon of the C677T variant \nof the MTHFR gene affects liver-related biomarkers, so this project investigates \nhow the two factors are related (Christianson et al., 2025).\n\nDirectly testing this relationship would require a single dataset that contains \nboth MTHFR genotype data and FLD biomarker data from the same individuals in order \nto avoid data and conclusion conflation. However, this combination is not publically\navailable and access to the sources that exist require extensive applications and \nvetting. This project therefor uses a split analytical approach to focus instead on \noverlapping biomarker trends as potential indications of mechanistic links. \n\nIt is important to note that even if the biomarker profile is consistent across \nboth parts of the analysis, that does not constitute proof of a causal relationship.\nConflation of the two would require further research, specifically using individuals\nwhose biomarkers and genotype is recorded in the same study. However, the analysis \nadds evidence of plausible mechanistic overlap and provides a logical basis for\nfuture research.\n\n:::\n\n## Project Aims/Research Questions \n\n::: {.justify}\n\nTesting \n\n:::\n\n## Project Structure \n\n::: {.justify}\n\nTesting \n\n:::\n\n## Technical Overview \n\n::: {.justify}\n\nTesting \n\n:::\n  \n\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

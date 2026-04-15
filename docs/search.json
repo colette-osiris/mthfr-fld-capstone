@@ -23,9 +23,9 @@
   {
     "objectID": "index.html#project-aimsresearch-questions",
     "href": "index.html#project-aimsresearch-questions",
-    "title": "MTHFR (C677T), Fatty Liver Disease, and Related Biomarkers",
+    "title": "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis",
     "section": "Project Aims/Research Questions",
-    "text": "Project Aims/Research Questions"
+    "text": "Project Aims/Research Questions\n\nTesting"
   },
   {
     "objectID": "index.html#project-rationalestructure",
@@ -89,5 +89,33 @@
     "title": "2.3 Visualization & Analysis",
     "section": "",
     "text": "Content in progress."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis",
+    "section": "",
+    "text": "This project investigates whether biomarkers associated with MTHFR C677T genetic variant retain relavance and show correlated patterns in population-level Fatty Liver Disease (FLD) analysis. FLD is a liver condition characterized by the accumulation of lipidndroplets in the liver, affecting up to 42.2% of adults in the US (Jones et al., 2022). “The MTHFR C677T mutation is one of the most common functional genetic variants in the human genome, carried by approximately 25% of the US population (Graydon et al., 2019). Since the liver functions as the central hub for both lipid regulation and folate-dependent one-carbon metabolism, it provides a biologically plausible context by which to examine potential downstream effects of MTHFR mutations on metabolic dysfunction cases, like FLD.\nIf an association can be found between the two, that can be used to develop protocols and recommendations for preventative and reactive care that could impact a significant portion of the population, making it incredibly important area of research. Current research confirms the observed phenomenon of the C677T variant of the MTHFR gene affects liver-related biomarkers, so this project investigates how the two factors are related (Christianson et al., 2025).\nDirectly testing this relationship would require a single dataset that contains both MTHFR genotype data and FLD biomarker data from the same individuals in order to avoid data and conclusion conflation. However, this combination is not publically available and access to the sources that exist require extensive applications and vetting. This project therefor uses a split analytical approach to focus instead on overlapping biomarker trends as potential indications of mechanistic links.\nIt is important to note that even if the biomarker profile is consistent across both parts of the analysis, that does not constitute proof of a causal relationship. Conflation of the two would require further research, specifically using individuals whose biomarkers and genotype is recorded in the same study. However, the analysis adds evidence of plausible mechanistic overlap and provides a logical basis for future research."
+  },
+  {
+    "objectID": "index.html#overview",
+    "href": "index.html#overview",
+    "title": "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis",
+    "section": "Overview",
+    "text": "Overview\n\nThis project investigates whether biomarkers associated with MTHFR C677T genetic variant retain relavance and show correlated patterns in population-level Fatty Liver Disease (FLD) analysis. FLD is a liver condition characterized by the accumulation of lipidndroplets in the liver, affecting up to 42.2% of adults in the US (Jones et al., 2022). “The MTHFR C677T mutation is one of the most common functional genetic variants in the human genome, carried by approximately 25% of the US population (Graydon et al., 2019). Since the liver functions as the central hub for both lipid regulation and folate-dependent one-carbon metabolism, it provides a biologically plausible context by which to examine potential downstream effects of MTHFR mutations on metabolic dysfunction cases, like FLD.\nIf an association can be found between the two, that can be used to develop protocols and recommendations for preventative and reactive care that could impact a significant portion of the population, making it incredibly important area of research. Current research confirms the observed phenomenon of the C677T variant of the MTHFR gene affects liver-related biomarkers, so this project investigates how the two factors are related (Christianson et al., 2025).\nDirectly testing this relationship would require a single dataset that contains both MTHFR genotype data and FLD biomarker data from the same individuals in order to avoid data and conclusion conflation. However, this combination is not publically available and access to the sources that exist require extensive applications and vetting. This project therefor uses a split analytical approach to focus instead on overlapping biomarker trends as potential indications of mechanistic links.\nIt is important to note that even if the biomarker profile is consistent across both parts of the analysis, that does not constitute proof of a causal relationship. Conflation of the two would require further research, specifically using individuals whose biomarkers and genotype is recorded in the same study. However, the analysis adds evidence of plausible mechanistic overlap and provides a logical basis for future research."
+  },
+  {
+    "objectID": "index.html#project-structure",
+    "href": "index.html#project-structure",
+    "title": "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis",
+    "section": "Project Structure",
+    "text": "Project Structure\n\nTesting"
+  },
+  {
+    "objectID": "index.html#technical-overview",
+    "href": "index.html#technical-overview",
+    "title": "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis",
+    "section": "Technical Overview",
+    "text": "Technical Overview\n\nTesting"
   }
 ]
