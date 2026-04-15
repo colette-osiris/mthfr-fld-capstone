@@ -212,13 +212,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><em>Content in progress.</em></p>
+<div class="cell">
+<style type="text/css">
+.justify {
+  text-align: justify !important
+}
+</style>
+</div>
+<div class="justify">
+<section id="prisma-informed-approach" class="level3">
+<h3 class="anchored" data-anchor-id="prisma-informed-approach"><u>1.2.1 PRISMA-Informed Approach</u></h3>
+<p>Due to the scope and scale of this capstone, part 1 of this project was designed as a targeted, PRISMA-informed synthesis rather than an exhaustive systematic review. PRISMA (Preferred Reporting Items for Systematic Review and Meta-Analyses) is a guideline used in professional settings to improve reporting of systematic reviews against bias (Page et al., 2021). Other PRISMA techniques used in this analysis were a PRISMA-styled explicit search strategy, pre-defined inclusion/exclusion criteria, and a study characteristics table. I chose this approach to ensure any biomarker profile established in the analysis was grounded in systematically reviewed mechanistic literature, and that any conclusions made were based on rigorous criterion and were transparently justified.</p>
+<p>It is important to note that I chose to perform a narrative synthesis instead of a full meta-analysis because my project does not include pooling, which is a critical component of a true meta-analysis. Pooling, which is the numerical merging of results across studies, assumes that variables being pooled are comparable across populations, assays, conditions, and reporting methods (Dagher &amp; Khan, 2025). Since several biomarkers I am evaluating demonstrate variability across these factors, a directional synthesis is a more appropriate approach for this analysis. .</p>
+</section>
+<section id="search-strategy" class="level3">
+<h3 class="anchored" data-anchor-id="search-strategy"><u>1.2.2 Search Strategy</u></h3>
+<p>Per PRISMA guidelines, for every source searched, the following information was recorded: date of search, database/source, search strategy/query, any filters or limits, language, publication type, results count, number of duplicates removed, the number of records retained for screening, and any notes of importance. Records were tracked in ‘prisma-screening-tracker.csv’, which can be found in the ‘references/ part1’ folder of this project’s GitHub repository (https://github.com/colette-osiris/mthfr-fld-capstone).</p>
+<p>An example of a search log entry is provided below:</p>
+<p>-still need to imbed example somehow</p>
+</section>
+<section id="screeening-workflow" class="level3">
+<h3 class="anchored" data-anchor-id="screeening-workflow"><u>1.2.3 Screeening Workflow</u></h3>
+<p>Once records were obtained and recorded for a given search query, screening for that source proceeded. Screening procedure followed a two-stage process: a title/abstract screening, then followed by a full-text review. Records were tracked in ‘prisma-screening-tracker.csv’, and search decisions were logged in ‘prisma-search-log.md’, both of which can be found in the ‘references/part1’ folder of this project’s GitHub repository (https://github.com/colette-osiris/mthfr-fld-capstone). Screening continued for each query until the full resulting dataset was assessed and achieved a minimum of 2 sources per biomarker for directional evaluation.</p>
+</section>
+<section id="eligibility-criteria" class="level3">
+<h3 class="anchored" data-anchor-id="eligibility-criteria"><u>1.2.4 Eligibility Criteria</u></h3>
+<p>Studies were evaluated for inclusion based on pre-defined criteria, as per PRISMA framework. Eligibility was based on if a source met the following criteria:</p>
+<ul>
+<li>Peer-reviewed, 2000 or later publication date</li>
+<li>MTHFR C677T genotypically stratified, either CC/CT/TT or TT vs.&nbsp;non-TT (CC/CT)</li>
+<li>1+ biomarker measured biologically (not via dietary intake or self report) and reported quantitatively<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></li>
+<li>Comparable assay methodology (within biomarker class)</li>
+<li>For intervention studies: include baseline/control genotype-stratified biomarker data only</li>
+</ul>
+<p>Studies were excluded if they met the following criteria:</p>
+<ul>
+<li>Intervention studies where patient comorbidities are expected to impact one-carbon metabolism</li>
+<li>Studies that meet inclusion criteria but only report post-treatment metrics</li>
+<li>Outcomes irrelevant to one-carbon metabolism or liver biology</li>
+<li>Self reported biomarker intake or other proxy measures</li>
+<li>No genotype stratification</li>
+</ul>
+</section>
+<section id="study-characteristics-table" class="level3">
+<h3 class="anchored" data-anchor-id="study-characteristics-table"><u>1.2.5 Study Characteristics Table</u></h3>
+<ul>
+<li>coming back to this section when rest of part 1 is complete</li>
+</ul>
+</section>
+</div>
 
 
 <!-- -->
 
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>In this context, quantitatively is defined as mean ± SD, median with interquartile range or spread, a reportable effect estimate, or figure-extractable values.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -689,9 +743,61 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "1.2 Methods"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>*Content in progress.*</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">engine:</span><span class="co"> knitr</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="in">```{css, echo = FALSE}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="in">.justify {</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="in">  text-align: justify !important</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>::: {.justify}</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">### &lt;u&gt;1.2.1 PRISMA-Informed Approach&lt;/u&gt;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>Due to the scope and scale of this capstone, part 1 of this project was designed as a targeted, PRISMA-informed synthesis rather than an exhaustive systematic review. PRISMA (Preferred Reporting Items for Systematic Review and Meta-Analyses) is a guideline used in professional settings to improve reporting of systematic reviews against bias (Page et al., 2021). Other PRISMA techniques used in this analysis were a PRISMA-styled explicit search strategy, pre-defined inclusion/exclusion criteria, and a study characteristics table. I chose this approach to ensure any biomarker profile established in the analysis was grounded in systematically reviewed mechanistic literature, and that any conclusions made were based on rigorous criterion and were transparently justified.</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>It is important to note that I chose to perform a narrative synthesis instead of a full meta-analysis because my project does not include pooling, which is a critical component of a true meta-analysis. Pooling, which is the numerical merging of results across studies, assumes that variables being pooled are comparable across populations, assays, conditions, and reporting methods (Dagher &amp; Khan, 2025). Since several biomarkers I am evaluating demonstrate variability across these factors, a directional synthesis is a more appropriate approach for this analysis. . </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">### &lt;u&gt;1.2.2 Search Strategy&lt;/u&gt;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>Per PRISMA guidelines, for every source searched, the following information was recorded: date of search, database/source, search strategy/query, any filters or limits, language, publication type, results count, number of duplicates removed, the number of records retained for screening, and any notes of importance. Records were tracked in 'prisma-screening-tracker.csv', which can be found in the 'references/ part1' folder of this project’s GitHub repository (https://github.com/colette-osiris/mthfr-fld-capstone). </span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>An example of a search log entry is provided below: </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>-still need to imbed example somehow</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="fu">### &lt;u&gt;1.2.3 Screeening Workflow&lt;/u&gt;</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>Once records were obtained and recorded for a given search query, screening for that source proceeded. Screening procedure followed a two-stage process: a title/abstract screening, then followed by a full-text review. Records were tracked in 'prisma-screening-tracker.csv', and search decisions were logged in 'prisma-search-log.md', both of which can be found in the 'references/part1' folder of this project’s GitHub repository (https://github.com/colette-osiris/mthfr-fld-capstone). Screening continued for each query until the full resulting dataset was assessed and achieved a minimum of 2 sources per biomarker for directional evaluation.</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">### &lt;u&gt;1.2.4 Eligibility Criteria&lt;/u&gt;</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>Studies were evaluated for inclusion based on pre-defined criteria, as per PRISMA framework. Eligibility was based on if a source met the following criteria: </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Peer-reviewed, 2000 or later publication date </span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>MTHFR C677T genotypically stratified, either CC/CT/TT or TT vs. non-TT (CC/CT) </span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>1+ biomarker measured biologically (not via dietary intake or self report) and reported quantitatively<span class="ot">[^1]</span> </span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Comparable assay methodology (within biomarker class) </span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>For intervention studies: include baseline/control genotype-stratified biomarker data only</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>In this context, quantitatively is defined as mean ± SD, median with interquartile range or spread, a reportable effect estimate, or figure-extractable values.</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>Studies were excluded if they met the following criteria: </span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Intervention studies where patient comorbidities are expected to impact one-carbon metabolism</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Studies that meet inclusion criteria but only report post-treatment metrics </span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Outcomes irrelevant to one-carbon metabolism or liver biology</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Self reported biomarker intake or other proxy measures </span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>No genotype stratification </span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="fu">### &lt;u&gt;1.2.5 Study Characteristics Table&lt;/u&gt;</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>coming back to this section when rest of part 1 is complete</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>::: </span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
