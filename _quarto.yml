@@ -27,12 +27,18 @@ website:
     left:
       - href: index.qmd
         text: Home
+
       - text: "Part 1: MTHFR Biomarker Profile"
         menu:
+          - href: part1/background.qmd
+            text: "1.1 Introduction & Background"
           - href: part1/methods.qmd
-            text: "1.1 Methods"
+            text: "1.2 Methods"
           - href: part1/biomarker-analysis.qmd
-            text: "1.2 Biomarker Analysis"
+            text: "1.3 Biomarker Analysis"
+          - href: part1/conclusions_discussion.qmd
+            text: "1.4 Synthesis & Discussion" 
+
       - text: "Part 2: FLD Classification"
         menu:
           - href: part2/data-preprocessing.qmd
