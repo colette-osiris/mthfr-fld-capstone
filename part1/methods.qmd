@@ -1,5 +1,5 @@
 ---
-title: "1.1 Methods"
+title: "1.2 Methods"
 ---
 
 *Content in progress.*

@@ -16,7 +16,7 @@
   {
     "objectID": "part1/methods.html",
     "href": "part1/methods.html",
-    "title": "1.1 Methods",
+    "title": "1.2 Methods",
     "section": "",
     "text": "Content in progress."
   },
@@ -25,7 +25,7 @@
     "href": "index.html#project-aimsresearch-questions",
     "title": "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis",
     "section": "Project Aims/Research Questions",
-    "text": "Project Aims/Research Questions\n\nTesting"
+    "text": "Project Aims/Research Questions\n\nThis project aims to answer the following questions:\n\nWhat, if any, directional biomarker profile trends are associated with the MTHFR C677T genotype, and how consistent are they across peer-reviewed literature?\nDo any biomarkers associated with MTHFR C677T profile carry independent predictive signalling for FLD classification in the NHANES population cohort?\nIf there are any biomarker signals that are concordant across both profiles, what do they suggest about the plausibility of a mechanistic link between C677T and FLD risk?"
   },
   {
     "objectID": "index.html#project-rationalestructure",
@@ -109,13 +109,27 @@
     "href": "index.html#project-structure",
     "title": "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis",
     "section": "Project Structure",
-    "text": "Project Structure\n\nTesting"
+    "text": "Project Structure\n\nThis project is organized as a Quarto website with the following components:\nPart 1 - MTHFR Biomarker Profile\nThis part establishes a biomarker profile associated with the MTHFR C677T mutation through a PRISMA-informed mini meta-analysis focused on mechanisms and biomarker trend exploration. This part compiles peer-reviewed literature that investigates how specific biomarkers change across C677T genotypes (CC/CT/TT) in order to determine whether mutation type has a directional impact on biomarker levels.\nWhile not a full meta-analysis, PRISMA (Preferred Reporting Items for Systemic Review and Meta-Analyses) techniques including an explicit search strategy, a pre-defined inclusion and exclusion criteria, and a study characteristic table are used to ensure conclusions are grounded in systematically reviewed literature.\nPart 2 - FLD Classification and Biomarker Analysis\nThis part is population-framed data analysis of mechanisms and biomarker trend exploration related to FLD. It evaluates whether the biomarker trends established in Part 1 are present in population-level FLD data, using machine learning concepts and data analysis techniques applied to NHANES 2001–2004 cohort data. The machine learning portion contains two parallel models to be compared: a core feature model that reconstructs the validated Hepatic Steatosis Index (HSI) proxy, and a biomarker model that incorporates additional metrics that are associated with FLD status but are not included in HSI calcuations. Data extraction and preprocessing were performed in SQL, modeling in Python, and interpretive visualization in R, all contained within a single Quarto document.\nDiscussion\nThis portion integreates the findings from both parts. It evaluates concordance between the mechanistic profile constructed for MTHFR C677T and population-level signalling from the models, as well as provides interpretation of compiled evidence. This section also addresses project limitations and directions for future research."
   },
   {
     "objectID": "index.html#technical-overview",
     "href": "index.html#technical-overview",
     "title": "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis",
     "section": "Technical Overview",
-    "text": "Technical Overview\n\nTesting"
+    "text": "Technical Overview\n\nThis project was completed by Colette Rouiller as an IVSP capstone for her B.S. of Bioinformatics and Computational Biology at the University of Maryland, College Park. The two-part structure allows the capstone to demonstrate biological and biochemical mechanism understanding and analysis, programming and statistical analysis skills across multiple languages, and integration of the two elements into a realistic bioinformatic-based inquiry, process, and final deliverable.\nAll source code, data files, data processing scripts, and rendering configuration are version-controlled and publicly available in this repository."
+  },
+  {
+    "objectID": "part1/background.html",
+    "href": "part1/background.html",
+    "title": "1.1 Introduction & Background",
+    "section": "",
+    "text": "Content in progress."
+  },
+  {
+    "objectID": "part1/conclusions_discussion.html",
+    "href": "part1/conclusions_discussion.html",
+    "title": "1.4 Synthesis & Discussion",
+    "section": "",
+    "text": "Content in progress."
   }
 ]
