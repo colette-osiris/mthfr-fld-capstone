@@ -13,7 +13,7 @@ engine: knitr
 
 ### <u>1.1.1 MTHFR and Its Role in One-Carbon Metabolism</u>
 
-The methylenetetrahydrofolate reductase (MTHFR) gene encodes a critical enzyme involved in the one-carbon metabolism pathway, which includes methionine and folate cycles that are integral for cellular metabolic process like protein methylation and DNA synthesis (Raghubeer et al., 2021; Liew & Gupta, 2015). Specifically, the MTHFR enzyme catalyzes the conversion of  5,10-methylenetetrahydrofolate to 5-methyltetrahydrofolate (5-MTHF), which is the biologically active form of folate required for homocysteine re-methylation (Leclerc et al., 2013). 
+The methylenetetrahydrofolate reductase (MTHFR) gene encodes a critical enzyme involved in the one-carbon metabolism pathway, which includes methionine and folate cycles that are integral for cellular metabolic process like protein methylation and DNA synthesis (Raghubeer et al., 2021; Liew & Gupta, 2015). Specifically, the MTHFR enzyme catalyzes the conversion of  5,10-methylenetetrahydrofolate (5,10-CH2-THF) to 5-methyltetrahydrofolate (5-MTHF), which is the biologically active form of folate required for homocysteine re-methylation (Leclerc et al., 2013). 
 
 Roughly 60-70% of the global population is suspected to carry at least one functional allele variant of this gene, many of which alter enzyme activity (Long & Goldblatt, 2016). Despite its prevalence, this complexity has made MTHFR a difficult target for systemic and multi-pathway investigation. 
 
@@ -33,7 +33,11 @@ There are currently 34 rare but deleterious known MTHFR polymorphisms, with vary
 
 Since this investigation explores the impact of the C677T MTHFR mutation, it was important to include measures of modal biochemical expression, like biomarkers, in addition to genotype. As explored further down below, downstream effects of polymorphisms can vary substantially across affected individuals, which indicates that genotype alone cannot fully capture functional metabolic status (Hustad et al., 2007; Tsang et al., 2015). Therefore, in order to attempt to capture the dynamic nature of one-carbon metabolism, circulating biomarkers such as homocysteine, folate, vitamin B6, and vitamin B12, were included in order to provide direct measures of metabolic activity in an approach that accounts for both genetic variation and environmental factors (Hustad et al., 2007; Rooney et al., 2020). 
 
+:::
+
 ### <u>1.1.6 Alternate Relevant Paths: The Betaine/BHMT Pathway</u>
+
+::: {.justify}
 
 While the methionine cycle is the primary mechanism for regulating homocysteine concentrations, there is another independent re-methylation pathway that uses the enzyme betaine-homocysteine methyltransferase (BHMT); in this pathway, betaine, which is a methyl-rich compound derived from choline, donates a methyl group to homocysteine in order to recycle it into methionine (Raghubeer et al., 2021). This pathway is parallel and folate independent, which means it can potentially compensate to some degree in individuals with reduced folate-dependent pathway efficiency, like C677T carriers (Holm et al., 2007). Because the betaine/BHMT represents a mechanistically relevant compensatory system, betaine is included in this analysis as a possible MTHFR C677T biomarker profile component. 
 
