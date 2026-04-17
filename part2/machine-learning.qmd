@@ -1,18 +1,21 @@
 ---
 title: "2.2 Machine Learning Analysis"
 author: "coletterouiller"
-format: html
-  css: styles.css
-jupyter: /opt/homebrew/Caskroom/miniconda/base/bin/python
+format: 
+  html:
+    css: styles.css
+    code-fold: true
+    code-summary: "Show code"
+#jupyter: /opt/homebrew/Caskroom/miniconda/base/bin/python
 editor: visual
 execute:
   echo: true
   output: true
 ---
 
-# Part 2: Fatty Liver Disease Classification
+# 2.2: Machine Learning Classification of FLD 
 
-## Background
+## <u>2.2.1 Background</u>
 
 Fatty Liver Disease (FLD) is a broad clinical term used to describe the accumulation of lipid droplets in hepatocytes (Younossi et al., 2023). The most prevalent sub-type of FLD is Non-Alcoholic Fatty Liver Disease (NAFLD), which was renamed Metabolic dysfunction-Associated Steatotic Liver Disease (MASLD) in 2023 via international consensus; MASLD is now defined by hepatic steatosis occurring in the presence of cardiometabolic risk factors but in the absence of significant/harmful levels of alcohol consumption (Rinella & Sookoian, 2024). It is the most common cause of liver disease both domestically and globally, affecting up to 42.2% of adults in the US, and continuing to rise as obesity and type 2 diabetic reports also increase (Jones et al., 2022). FLD causes impaired liver function; though it is often asymptomatic in early stages, it can include symptoms like abdominal pain/discomfort, weight loss, loss of appetite, and fatigue before progressing to more serious effects like fibrosis, cirrhosis, and cancer (Zhu, 2024).
 
@@ -58,7 +61,7 @@ The biomarker model uses these additional features to predict NAFLD classificati
 
 It is worth noting that several additional biomarkers with established NAFLD and/or MTHFR associations, such as triglycerides and betaine, were considered for inclusion but ultimately excluded due to high missingness rates in the 2001-2004 NHANES cohorts that would have further reduced the already limited biomarker subset sample size.
 
-### Task Definition
+### <u> 2.2.2 Task Definition</u>
 
 This analysis approaches NAFLD classification as a supervised binary classification problem. For each observation, a NAFLD label is assigned as either NAFLD-positive (1) or healthy (0). This label is derived from the computed HSI score, with a threshold of 36 for NAFLD-positive.
 
@@ -66,9 +69,9 @@ To analyze the role of non-HSI variables as indicators for FLD status, two paral
 
 The core model functions as methodological validation and reconstruction of the validated HSI proxy measure. Because the NAFLD label is derived directly from HSI, which is calculated from the core features, this model is effectively reconstructing its own labeling function. Ergo, high accuracy is expected by design and serves as confirmation of correct HSI implementation rather than demonstrating new predictive framework. This validation step establishes a performance benchmark against which the biomarker model can be compared. The biomarker model is designed to test whether features outside the HSI standard framework, particularly those relevant to the MTHFR C677T biomarker investigated in Part 1, can recover meaningful classification signal.
 
-## Prepare Data
+## <u> 2.2.3 Prepare Data</u>
 
-### Environment
+### <u>2.2.3.1 Environment </u>
 
 ```{r}
 ##python was acting unstable and automatically using the reticulate cache - created .Renviron file to fix this issue so the same python and interpreter are used everytime RStudio or Quarto runs. 
@@ -88,7 +91,7 @@ import sys
 print(sys.executable)
 ```
 
-### Load Data
+### <u>Load Data</u>
 
 ```{python}
 
@@ -120,7 +123,7 @@ df = pd.read_csv("../data/clean_data/nhanes_final.csv")
 
 ```
 
-### Structural Validation
+### <u>Structural Validation</u>
 
 ```{python}
 
@@ -145,7 +148,7 @@ The first revealed pattern is a moderate-high level of missingness in the biomar
 
 The second pattern is the appearance of extreme outliers across several continuous features that will need to be addressed downstream. There may also need to be some encoding adjustments across variables sex (int64), race_ethnicity (int64) and cohort (object) downstream as well.
 
-### Construct Labels
+### <u>2.2.3.2 Construct Labels</u>
 
 HSI is calculated from available NHANES data and used as the ground truth label for NAFLD classification. The code below creates three new variables : 'HSI', 'NAFLD', and 'HSI_category'. 'HSI' functions as a continuous score while 'NAFLD', acts as the primary binary classification label. 'HSI_category' was created to provide a descriptive severity grouping for downstream analysis in R, which includes the groups: 'healthy', 'borderline', and 'nafld_like'.
 
@@ -181,7 +184,7 @@ df['HSI_category'] = np.where(
 
 ```
 
-### Validate Labels
+### <u>2.2.3.3. Label Validation </u>
 
 The following code below displays the first few rows of the data set and views summary statistics for the HSI, NAFLD, and HSI_category labels.
 
@@ -212,7 +215,7 @@ The cross tab check evaluates the binning method for logical inconsistencies and
 
 Functionally, this means that while all NAFLD-positive fall into the 'nafld_like' bin, a subset of individuals remain below the diagnostic threshold of 36 that still qualify as "high risk." This is not an inconsistency, but rather an accurate reflection of HSI as a continuous screening metric and proxy measure for FLD status, rather than a hard diagnostic boundary. Not only does this align with clinical uses of HSI, it supports the analysis approach to include a 'borderline' bin for edge case inclusion for interpretative purposes without distorting the binary labels used for model training.
 
-### Feature Set Definition
+### <u> 2.2.3.4. Feature Set Definition </u>
 
 Because biomarker data is limited in comparison to the HSI core variables, two model-specific feature sets are defined in place of a single, combined model. Each model will have their own features, datasets, and set x and y values.
 
@@ -284,7 +287,7 @@ Complete-case subsetting retains nearly 13,000 observations for the core feature
 
 This analysis indicates the class balances are the approximately equal at \~57/43 split (NAFLD-positive/healthy), which is a healthy split for classification. It is important to note that this consistency indicates that missingness did not distort class balance, and therefore the complete-case biomarker subset is not obviously biased towards a single outcome class. The biomarker model therefore represents a smaller but compositionally representative sample rather than a distorted or structurally skewed subset.
 
-### Split Data
+### <u>2.2.3.5 Train-Test Split </u>
 
 Both datasets are split into training and testing sets. This approach used a 70/30 testing split and stratified sampling to preserve proportions across sets and minimize model bias.
 
@@ -378,13 +381,11 @@ display(pd.Series(Y_core_test).value_counts(normalize=True).mul(100).round(1).as
 
 The tables and plots above confirm a consistent \~57/43 split across the training, testing, and overall distributions of both models. While this represents a mild class imbalance and not a severely skewed distribution, stratified sampling will be employed throughout the analysis to ensure proportional representation is maintained across splits. This near-identical balance across both sets ensures internal model consistency and future evaluation metrics will be representative of model performance on the broader data rather than symptoms of uneven sampling.
 
-## Train and Evaluate Data
+This next section focuses on the training and evaluating of both feature sets for logistic regression and KNN analysis.
 
-This section focuses on the training and evaluating of both feature sets for logistic regression and KNN analysis.
+### <u> 2.2.4 Logistic Regression </u>
 
-### Logistic Regression
-
-#### Model Training
+#### <u> 2.2.4.1 Model Training </u>
 
 The code chunk below trains a logistic regression model on each feature set. Logistic regression was chosen to solve this binary classification task because it models the log-odds of positive outcomes as a linear function of the input features. This makes it both interpretable and a functional baseline comparison for evaluating if the biomarker feature carries any meaningful predictive signalling.
 
@@ -398,7 +399,7 @@ bio_logreg = LogisticRegression(solver='liblinear', random_state=42)
 bio_logreg.fit(X_bio_train, Y_bio_train)
 ```
 
-#### Model Testing
+#### <u> 2.2.4.2 Model Evaluation </u>
 
 Once the logistic model is trained on each feature set, it was tested on the established test set and output the accuracy to evaluate it. Accuracy is measured here by dividing the number of correct predictions by the total number of predictions made.
 
@@ -425,7 +426,7 @@ Because the biomarker model was restricted to participants with complete biomark
 
 Higher performance is expected from the core model given its alignment with the established HSI proxy measurement. However, the biomarker model still achieves high performance despite a substantially reduced subset and use of features not traditionally included in the proxy. This suggests that the biomarker features capture some predictive signaling related to FLD risk. However, the extent to which this reflects true biological association versus dataset structure requires further investigation given the subset limitations noted above.
 
-#### Model Interpretation
+#### <u> 2.2.4.3 Coefficient Interpretation </u>
 
 ```{python}
 # Print biomarker model regression equation
@@ -451,6 +452,8 @@ Among the biomarkers of interest, serum folate and RBC folate both show negative
 Vitamin B12 and ferritin show a near-zero coefficient, which suggests that neither are likely to be statistically significant predictive indicators of FLD, though again, this could be a result of unscaled analysis. Inflammatory and metabolic markers such as CRP and GGT show positive associations, though factor scaling may be impacting model accuracy and may warrant further investigation into these biomarkers.
 
 In contrast, homocysteine and methylmalonic acid display strong negative association, which are counter to expected biological mechanisms. Elevated homocysteine and methylmalonic acid levels are known markers of impaired one-carbon metabolism and have been independently associated with active metabolic dysfunction disorders, like FLD (DeCarvalho, 2013). These negative associations could have many causes, but the most likely explanations include functional overlap with other model features, potential suppression effect. For example, BMI and diabetic status both capture metabolic dysfunction signals, and could distort similar feature associations as a result. Alternatively, multicollinearity could be present, which is when 2 or more independent variables in a regression model are highly correlated and therefore difficult to distinguish the individual effect of each variable on the dependent variable. This is possible given homocysteine strongly correlates with multiple other predictors in the model, like folate forms and vitamin B12. Further investigation into the cause of these mechanistic discrepancies is warranted before drawing conclusions about these markers' predictive ability, which is shown below in the biomarker feature heat map.
+
+### <u> 2.2.4.4 Biomarker Multicollinearity Assessment </u>
 
 ```{python}
 
@@ -547,7 +550,7 @@ This skew likely influenced the fitted logistic regression coefficients. In the 
 
 This highlights a key limitation of the biomarker analysis: the subset with complete biomarker data is not representative of the full cohort, and model-derived associations may therefore be sensitive to selection bias. Further investigation should address this limitation by using a more representative subset to improve generalizability for further population approximation analysis.
 
-### Visualizing Feature Impact
+### <u> 2.2.4.5 Feature Effect Visualization </u>
 
 Since this model here uses thirteen input features instead of just one, I created a multiplot of all the feature 2D plots to see each biomarker feature's individual effect. Each plot holds one feature constant while varying the others. For each point along the x-axis, the plot shows the model’s predicted probability of the patient having NAFLD. Because we are looking at biomarker profiles, I did not repeat these plots for the core feature set.
 
@@ -831,9 +834,9 @@ Both folate measures (serum and RBC) show an inverse relationship with predicted
 
 It is important to keep in mind that all displayed effects are model-conditional and have established influence due to dataset structure, so interpretation is not indicative of an independently causal relationship.
 
-## K-Nearest-Neighbors
+## <u> 2.2.5 K-Nearest-Neighbor Analysis </u>
 
-### K Value Selection
+### <u> 2.2.5.1 K Selection </u>
 
 The next technique used for this model analysis is K-Nearest Neighbors (KNN). KNN classifies a new sample by looking at the labels of its K closest neighbors in the feature space. KNN's primary hyperparameter of interest in this analysis is K, which determines the number of neighbors we look at when classifying a point. This is an important metric because a too small of a K value can lead to overfitting and too large of a K value can lead to underfitting.
 
@@ -911,7 +914,7 @@ In contrast to the biomarker model, the core feature model demonstrates consiste
 
 When both model results are compared together, the biomarker model exhibits weaker and more parameter-sensitive performance, while the core model remains relatively stable across K values. This contrast suggests that although biomarker-based signal is present, it is less directly predictive of FLD status and more dependent on appropriate pre-processing and model configuration. This supports the broader objective of this analysis, indicating that biomarker patterns identified in Part 1 may translate to population-level FLD risk, but have reduced strength and increased sensitivity due to modeling choices and dataset restrictions. Future research should consider using a more representative biomarker subset and additional feature engineering to bridge the model performance gap and establish a stronger association.
 
-### Elbow Plots
+### <u> 2.2.5.2 Elbow Plots </u>
 
 The previous section identified K=7 and K=3 as the highest-accuracy values for the scaled biomarker and core feature model, respectively. To select final K values, elbow plots were created using cross-validated mean accuracy across all odd K values from 1 to 29 in order to visually confirm those selections and refine them if needed. The elbow point, which is the highest value on the plot before declining or plateauing, represents the best balance between over-fitting and under-fitting.
 
@@ -1006,7 +1009,7 @@ plt.show()
 
 The core feature elbow plot shows a clearer pattern, with accuracy peaking at K=7 with a mean CV accuracy of 0.981 that consistently declines after the peak. This trend is more consistent with classical elbow curves, which aligns logically since it reflects the stronger, more stable signal of the core feature set. Therefore, K=7 is selected as the final core model K, which replaces the K=3 identified in the initial test set sweep. With optimal K values confirmed via cross-validation, both models can now be finalized for evaluation.
 
-### Biomarker Model Training + Testing
+### <u> 2.2.5.3  Model Training and Evaluation </u>
 
 ```{python}
 
@@ -1024,8 +1027,6 @@ print(f"Biomarker Model Test Accuracy (k={best_k_bio}): {bio_test_acc:.3f}")
 
 The biomarker model was trained on the scaled training set using the cross-validated optimal value of K=9, and then evaluated it on the scaled test set. The final model achieved a test accuracy of 0.911, which is close to but slightly higher than the cross-validated mean accuracy of 0.902 identified in the elbow plot analysis. While sampling variance creates the expectation of slight differences between the two test metrics, test accuracy is usually equal to or slightly lower than CV estimates. The presence of the reversal pattern here likely reflects the natural variance of the relatively small biomarker test set (n=762). This pattern doesn't invalidate the results, but it does suggest the reported test accuracy should be interpreted as an estimate with non-trivial variance. The overall consistency between CV and test accuracy still supports the assertion that the K selection process was applied appropriately for this feature set, and that the model is not significantly overfitting to the training data.
 
-### Core Model Training + Testing
-
 ```{python}
 
 # CORE MODEL: train final kNN using cross-validated optimal k
@@ -1041,13 +1042,13 @@ print(f"Core Model Test Accuracy (k={best_k_core}): {core_test_acc:.3f}")
 
 The core feature model was similarly trained using its cross-validated optimal value of K=7 on the scaled training set, and it achieved a final test accuracy of 0.975. This is slightly lower than the CV accuracy of 0.981, but that aligns with expectations and likely represents a normal degree of variance between cross-validation and evaluation metrics. It is worth re-iterating that this model's near-perfect accuracy reflects its structural relationship to the ground truth label rather than independent predictive power. Again, since HSI is a deterministic function of these features, the result merely confirms correct implementation and provides a benchmark for evaluating whether biomarker features can approach similar classification strength via biologically distinct pathways.
 
-### Model Comparison
+### <u> 2.2.5.4  Model Comparison </u>
 
 When comparing these model results, a performance gap is observable in final test performance, with the core model (0.975) outperforming the biomarker model (0.911) in accuracy by over 6 percentage points. This gap is consistent with the patterns observed during the K selection process, and it reflects the expected strength of the core model as an established and validated proxy measure. The biomarker model accuracy of 0.911, suggests that while biomarker signalling is present, it doesn't match the predictive strength of the of the established clinical proxy metric. In order to derive accurate conclusions. it is important to determine if the 0.911 accuracy reflects genuine classification ability from novel biochemical features or if it is inflated by class imbalance, dataset limitations, and/or error structures.
 
 To investigate this, confusion matrices and classification reports for each model are constructed below.
 
-### Biomarker Model Confusion Matrix + Classification Report
+### <u> 2.2.5.5  Confusion Matrix Analysis </u>
 
 ```{python}
 #biomarker model 
@@ -1064,8 +1065,6 @@ This classification report shows a balanced error structure across both classes,
 
 It is worth noting that the macro-averaged F1 score and weighted average F1 score are both 0.91, which confirms that model performance is distributed well across both classes, rather than being concentrated in the majority class. This balanced distribution is also confirmed directly in the confusion matrix. Out of the 327 true NAFLD cases, 45 were misclassified as false negatives, while only 22 of the 435 true negatives were flagged incorrectly (\~14% vs \~5%). Since our total test samples for this set is only 762, it is important to consider that these error counts carry more variance than those of the core model, and should be interpreted with that instability in mind.
 
-### Core Model Confusion Matrix + Classification Report
-
 ```{python}
 
 #core model 
@@ -1080,7 +1079,7 @@ plt.show()
 
 This core feature model analysis demonstrates strong and balanced performances across both classes. For the NAFLD class (1), precision, recall, and F1 scoring all are 0.98, and the same values are 0.97 for the non-NAFLD class (0). Out of 2232 true positives for class 0, only 53 were misidentified, and only 44 were missed out of 1665 for class 1, meaning only 97/3897 test samples were misclassified. With both error types having similar low and proportional rates, it indicates the core model is genuinely discriminating rather than exploiting the class distribution.
 
-### Model Comparison
+### <u> 2.2.5.6  Model Comparison </u>
 
 ```{python}
 #now compare both directly 
@@ -1096,7 +1095,7 @@ The most practically significant difference is the biomarker model's recall for 
 
 That reinforces the conclusion that biomarker signal exists but requires a more representative dataset, refined feature selection, and potentially a more expressive model architecture before it can approach the performance of established proxy-based classification.
 
-### ML Interpretation + Discussion
+### <u> 2.2.6  Model Comparison and Discussion </u>
 
 Overall, when looking at the KNN results with the logistic regression, they both clearly establish that biomarker-derived features carry real predicative signalling for FLD status. However, they also show that signaling is less stable, more sensitive to modeling choices, and does not yet sufficiently match the classification strength of previously established proxy-based measures, like HSI.
 
