@@ -45,11 +45,11 @@ More details on each biomarker are provided below:
 
 2\) Serum Folate = folate deficiency impairs hepatic methylation and lipid metabolism. Serum folate is a circulating biomarker, and therefore more prone to short-term dietary fluctuations (Liu et al., 2023). Studies show that NAFLD patients have displayed low serum folate levels compared to control groups (Liu et. al, 2023).
 
-3\) RBC Folate = folate metric that reflects longer-term intracellular folate status. In the NHANES 1999–2004 cohort, RBC folate was independently associated with elevated NAFLD risk (Liu et. al, 2023).
+3\) RBC Folate = folate metric that reflects longer-term intracellular folate status; in the NHANES 1999–2004 cohort, RBC folate was independently associated with elevated NAFLD risk (Liu et. al, 2023).
 
 4\) Methylmalonic Acid (MMA) = a functional biomarker of vitamin B12 status and downstream metabolic activity (Molloy et al., 2016). Elevated MMA has been independently associated with advanced fibrosis risk in NAFLD populations (Liu et al., 2023).
 
-5\) Gamma-Glutamyl Transferase (GGT) = a hepatic enzyme involved in glutathione metabolism and oxidative stress pathways. GGT is a more sensitive FLD marker than ALT in many contexts, and elevated levels are consistently associated with NAFLD and metabolic syndrome (Dillon & Miller, 2016).
+5\) Gamma-Glutamyl Transferase (GGT) = a hepatic enzyme involved in glutathione metabolism and oxidative stress pathways; GGT is a more sensitive FLD marker than ALT in many contexts, and elevated levels are consistently associated with NAFLD and metabolic syndrome (Dillon & Miller, 2016).
 
 6\) C-Reactive Protein (CRP) = an acute-phase inflammatory marker that is used for detection across several disease states. CRP is significantly elevated in NAFLD when compared to controls, and it is a strong indicator of FLD, which reflects its central role in low-grade inflammation detection in disease pathogenesis (Yeniova et al., 2014).
 

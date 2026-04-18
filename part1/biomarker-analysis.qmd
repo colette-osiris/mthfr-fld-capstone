@@ -1,5 +1,5 @@
 ---
-title: "1.2 Biomarker Analysis"
+title: "1.3 Biomarker Analysis"
 ---
 
 *Content in progress.*

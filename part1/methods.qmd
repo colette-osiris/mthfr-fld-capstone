@@ -25,7 +25,7 @@ An example of a search log entry is provided below:
 
 -still need to imbed example somehow
 
-### <u>1.2.3 Screeening Workflow</u>
+### <u>1.2.3 Screening Workflow</u>
 
 Once records were obtained and recorded for a given search query, screening for that source proceeded. Screening procedure followed a two-stage process: a title/abstract screening, then followed by a full-text review. Records were tracked in 'prisma-screening-tracker.csv', and search decisions were logged in 'prisma-search-log.md', both of which can be found in the 'references/part1' folder of this project’s GitHub repository (https://github.com/colette-osiris/mthfr-fld-capstone). Screening continued for each query until the full resulting dataset was assessed and achieved a minimum of 2 sources per biomarker for directional evaluation.
 

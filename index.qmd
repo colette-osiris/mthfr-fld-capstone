@@ -19,7 +19,7 @@ This project investigates whether biomarkers associated with MTHFR C677T genetic
 variant retain relavance and show correlated patterns in population-level Fatty 
 Liver Disease (FLD) analysis. FLD is a liver condition characterized by the 
 accumulation of lipidndroplets in the liver, affecting up to 42.2% of adults in 
-the US (Jones et al., 2022). "The MTHFR C677T mutation is one of the most common
+the US (Jones et al., 2022). The MTHFR C677T mutation is one of the most common
 functional genetic variants in the human genome, carried by approximately 25% of 
 the US population (Graydon et al., 2019). Since the liver functions as the central 
 hub for both lipid regulation and folate-dependent one-carbon metabolism, it 
@@ -101,7 +101,7 @@ visualization in R, all contained within a single Quarto document.
 
 **Discussion** 
 
-This portion integreates the findings from both parts. It evaluates concordance 
+This portion integrates the findings from both parts. It evaluates concordance 
 between the mechanistic profile constructed for MTHFR C677T and population-level
 signalling from the models, as well as provides interpretation of compiled evidence.
 This section also addresses project limitations and directions for future research. 
