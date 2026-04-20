@@ -10,15 +10,18 @@ editor: visual
 execute:
   echo: true
   output: true
+knitr:
+  opts_chunk:
+    connection: NULL
 ---
 
 # 2.1: Data Preprocessing
 
 #### <u> 2.1. Database Preprocessing Overview </u>
 
-Preprocessing for Part 2 was conducted using a primarily PostgreSQL staged pipeline prior to downstream modeling in Python and Visualization in R.
+Preprocessing for Part 2 was conducted using a primarily PostgreSQL staged pipeline prior to downstream modeling in Python and visualization in R.
 
-The NHANES data used was obtained as multiple files in SAS transport (.XPT) format, which required an additional CSV conversion step before data importation. After conversion, all data preprocessing, cleaning, organization, and extraction were performed in PostgreSQL that uses a multi-schema approach for reproducibility and transparency.
+The NHANES data used was obtained as multiple files in SAS transport (.XPT) format, which required an additional CSV conversion step before data importation. After conversion, all data preprocessing, cleaning, organization, and extraction were performed in PostgreSQL using a multi-schema approach for reproducibility and transparency.
 
 The overall Part 2 data pipeline follows:
 
@@ -80,6 +83,7 @@ An example of the conversion code is included below:
 
 ```{python}
 #| eval: false
+#| label: xpt-to-csv
 
 #imports 
 import pandas as pd 
@@ -100,7 +104,6 @@ c2_dict = {
 for raw_file in c2_dict: 
 	df = pd.read_sas("../data/raw_data/" + raw_file, format="xport")
 	df.to_csv("../data/clean_data/c2_" + c2_dict[raw_file] + ".csv", index=False) 
-
 ```
 
 #### <u> 2.1.3 Database Architecture </u>
@@ -114,8 +117,8 @@ This project's database infrastructure used a three-schema approach:
 This structure allows for clear distinction between unprocessed data, intermediate adjustments, and analysis-ready outputs.
 
 ```{sql}
-
 #| eval: false
+#| label: initialize-database
 
 
 CREATE schema IF NOT EXISTS raw;
@@ -135,9 +138,10 @@ The unabridged pre-processing pipeline for data structuring found in the project
 
 This created empty tables for each NHANES CSV imported file. All variables were initially read in as raw text in order to avoid importation and/or missingness errors. After the tables were created, each CSV file is loaded into the raw schema's new, empty tables using COPY commands.
 
-```{sql}
 
+```{sql}
 #| eval: false
+#| label: raw-table-create-load
 
 -- c2_crp table set up
 DROP TABLE IF EXISTS raw.c2_crp;
@@ -153,12 +157,11 @@ CREATE TABLE raw.c2_crp (
 COPY raw.c2_crp
 FROM '/Users/coletterouiller/capstone/data/clean_data/c2_crp.csv'
 WITH (FORMAT CSV, HEADER true);
-
 ```
 
 #### <u> 2.1.5 Cleaning & Staging </u>
 
-Cleaning and preprocessing were preformed in the staging schema using the files:
+Cleaning and preprocessing were performed in the staging schema using the files:
 
 -   staging_c1.sql
 
@@ -170,7 +173,13 @@ The initial organization plan was to start with the complete overlap of biomarke
 
 ```{sql}
 #| eval: false
+#| label: staging-anchor-join
 
+-- part 2: FLD, so anchor on liver biomarkers
+CREATE TABLE c1_clean AS
+SELECT
+        CAST(CAST(c1_alt_ast_ggt_glucose.SEQN AS numeric) AS integer) AS seqn,
+        -- [full column list continues — see staging-casting chunk below for additional examples]
 FROM raw.c1_alt_ast_ggt_glucose 
 -- now that vars are retrieved, left join on SEQN
 LEFT JOIN raw.c1_demo 
@@ -187,10 +196,11 @@ LEFT JOIN raw.c1_folate_b12_hcy_mma_iron
 
 **Issue 2: Type Casting**
 
-Despite efforts to use all TEXT formatting in CSV conversion, integer variables were automatically converted to floats during the .XPT to CSV conversion process. A nested recasting approach was used to correct this in which all affected variables were first cast from text to numeric. Then, when appropriate, variables were recast from numeric to integer data type; this ensured correct datatypes for downstream joins and analysis.
+During the .XPT to CSV conversion process, integer variables were automatically converted to floats by pandas regardless of downstream formatting specifications. A nested recasting approach was then used to correct this, in which all affected variables were first cast from text to numeric. Then, based on variable data type, variables were recast from numeric to integer data type when appropriate. This ensured datatype assignment was correct for downstream joins and analysis.
 
 ```{sql}
 #| eval: false
+#| label: staging-casting
 
 -- set path
 SET search_path TO staging;
@@ -218,6 +228,7 @@ During standard data checks and manual observation practices, duplicate SEQN val
 
 ```{sql}
 #| eval: false
+#| label: duplication-check
 
 --looking for duplication after manually catching a potential duplication event at raw layer
 SELECT
@@ -236,8 +247,6 @@ GROUP BY seqn
 HAVING COUNT(*) > 1
 ORDER BY n_rows DESC, seqn
 LIMIT 20;
-
-
 ```
 
 This was resolved by identifying the raw tables, correcting the duplication at the raw layer and then rebuilding and repopulating the affected tables.
@@ -246,9 +255,28 @@ Final verification before cohort merging confirmed an absence of duplicates in r
 
 #### <u> 2.1.6 Cohort Merging </u>
 
-Cohorts were merged using LEFT JOIN operations across all relevant component tables, with the final cohort structure prioritizing maximal participant inclusion, preservation of missingness, and flexibility for downstream filtering in Python and R.
+Cohorts were merged using UNION ALL instead of UNION to stack rows across both cohorts without duplicating participants. These operations were performed across all relevant component tables, with the final cohort structure prioritizing maximal participant inclusion, preservation of missingness, and flexibility for downstream filtering in Python and R.
 
 Missing biomarker values were retained and addressed during analysis rather than being removed during preprocessing, given the uneven biomarker coverage established across cohorts.
+
+```{sql}
+#| eval: false
+#| label: final-union-all
+
+-- use UNION ALL not UNION bc I am stacking, not de-duplicating
+SELECT seqn, 'c1_2001_2002' AS cohort, age_year, sex, race_ethnicity,
+       ast, alt, ggt, glucose, homocysteine, rbc_folate, serum_folate,
+       vit_b12, mm_acid, ferritin, crp, bmi, diabetes
+FROM staging.c1_clean
+
+UNION ALL
+
+SELECT seqn, 'c2_2003_2004' AS cohort, age_year, sex, race_ethnicity,
+       ast, alt, ggt, glucose, homocysteine, rbc_folate, serum_folate,
+       vit_b12, mm_acid, ferritin, crp, bmi, diabetes
+FROM staging.c2_clean;
+
+```
 
 #### <u> 2.1.7 Final Analysis-Ready Export </u>
 
@@ -266,10 +294,31 @@ Key transformations include:
 
     -   ast_alt_ratio that set to NULL if either value is missing
 
+```{sql}
+#| eval: false
+#| label: final-derived-variables
+
+-- derived variables created at final schema stage
+CASE
+    WHEN diabetes = 1 THEN 1
+    WHEN diabetes = 2 THEN 0
+    ELSE NULL
+END AS diabetes_binary,
+
+'c1_2001_2002' AS cohort,
+
+CASE
+    WHEN ast IS NOT NULL AND alt IS NOT NULL
+    THEN ROUND(ast / NULLIF(alt, 0), 4)
+    ELSE NULL
+END AS ast_alt_ratio
+```
+
 Final QC checks confirmed there was only one row per participant, there was consistent and plausible coverage counts with expected variation in biomarker availability across cohorts.
 
 ```{sql}
 #| eval: false
+#| label: coverage-checks
 
 --QC check - c1
 SELECT COUNT(*) AS total_rows,
@@ -300,6 +349,24 @@ SELECT
     COUNT(bmi) AS n_bmi,
     COUNT(diabetes) AS n_diabetes
 FROM staging.c1_clean;
+
+--biomarker coverage check - c2
+SELECT
+    COUNT(*) AS total_rows,
+    COUNT(ast) AS n_ast,
+    COUNT(alt) AS n_alt,
+    COUNT(ggt) AS n_ggt,
+    COUNT(glucose) AS n_glucose,
+    COUNT(rbc_folate) AS n_rbc_folate,
+    COUNT(vit_b12) AS n_vit_b12,
+    COUNT(serum_folate) AS n_serum_folate,
+    COUNT(homocysteine) AS n_homocysteine,
+    COUNT(mm_acid) AS n_mma,
+    COUNT(ferritin) AS n_ferritin,
+    COUNT(crp) AS n_crp,
+    COUNT(bmi) AS n_bmi,
+    COUNT(diabetes) AS n_diabetes
+FROM staging.c2_clean;
 ```
 
-It's worth noting that cohort 2's ferritin displayed lower coverage than other biomarkers. In addition, differences in biomarker availability across cohorts were retained and accounted for in downstream analysis.
+It's worth noting that cohort 2's ferritin displayed lower coverage than other biomarkers, though that may be attributable to ferritin being stored in a separate source file (L06TFR_C.XPT), unlike in cohort 1. In addition, differences in biomarker availability across cohorts were retained and accounted for in downstream analysis.
