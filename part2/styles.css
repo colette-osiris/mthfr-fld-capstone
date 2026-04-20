@@ -1,3 +1,12 @@
-body {
+/*formatting for website - editing as needed during project development */
+
+/* prose justified alignment */
+body .content p,
+body main p {
   text-align: justify;
+}
+
+/* sidebar odd spacing (underline/justified conflict resolution) */
+.sidebar-navigation, #TOC {
+  text-align: left;
 }
