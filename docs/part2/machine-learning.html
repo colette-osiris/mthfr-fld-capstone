@@ -635,7 +635,7 @@ Name: count, dtype: int64</code></pre>
 <pre><code>(1775, 13) (762, 13)</code></pre>
 </div>
 </div>
-<p>Since stratified sampling was used, the expected proportion of NAFLD-like vs.&nbsp;Healthy patients in the training and test sets should match the overall data set.&nbsp;To test this, the plot below explores the distribution of classes across the training and test sets in order to confirm that both sets are representative of the original data.</p>
+<p>Since stratified sampling was used, the expected proportion of NAFLD-like vs.&nbsp;Healthy patients in the training and test sets should match the overall data set.To test this, the plot below explores the distribution of classes across the training and test sets in order to confirm that both sets are representative of the original data.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">#BIOMARKER MODEL now test the sets - generate class distribution plot</span></span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1400,67 +1400,86 @@ Name: NAFLD, dtype: float64</code></pre>
 31  |    0.969</code></pre>
 </div>
 </div>
+<p>-everything past here looks good</p>
 <p>In contrast to the biomarker model, the core feature model demonstrates consistently high test set accuracy across both unscaled and scaled conditions. In both cases, accuracy peaks at K=3, (0.968 and 0.981 respectively). This behavior aligns with expectations since the feature set is reflective of established HSI-predictive-based outcomes. These results show strong class separation with insensitivity to scaling. However, it’s worth noting that accuracy alone may not fully characterize model performance given the class imbalance established in this dataset. The confusion matrix and classification report metrics presented later in this analysis provide some additional insight into this error structure and impact on class-specific performance.</p>
 <p>When both model results are compared together, the biomarker model exhibits weaker and more parameter-sensitive performance, while the core model remains relatively stable across K values. This contrast suggests that although biomarker-based signal is present, it is less directly predictive of FLD status and more dependent on appropriate pre-processing and model configuration. This supports the broader objective of this analysis, indicating that biomarker patterns identified in Part 1 may translate to population-level FLD risk, but have reduced strength and increased sensitivity due to modeling choices and dataset restrictions. Future research should consider using a more representative biomarker subset and additional feature engineering to bridge the model performance gap and establish a stronger association.</p>
 </section>
 <section id="elbow-plots" class="level5">
 <h5 class="anchored" data-anchor-id="elbow-plots"><u> 2.2.5.2: Elbow Plots </u></h5>
-<p>The previous section identified K=7 and K=3 as the highest-accuracy values for the scaled biomarker and core feature model, respectively. To select final K values, elbow plots were created using cross-validated mean accuracy across all odd K values from 1 to 29 in order to visually confirm those selections and refine them if needed. The elbow point, which is the highest value on the plot before declining or plateauing, represents the best balance between over-fitting and under-fitting.</p>
+<p>The previous section identified K=7 and K=3 as candidate values for the scaled biomarker and core feature model, respectively. Elbow plots were created using cross-validated mean accuracy across all odd K values from 1 to 30 in order to visually confirm those selections and refine them if needed. The elbow point, which is the highest value on the plot before declining or plateauing, represents the best balance between over-fitting and under-fitting.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb124"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a><span class="co"># BIOMARKER MODEL: choose k using cross-validation on scaled training data</span></span>
+<div class="sourceCode cell-code" id="cb124"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CORE MODEL: choose k using cross-validation on scaled training data</span></span>
 <span id="cb124-2"><a href="#cb124-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb124-3"><a href="#cb124-3" aria-hidden="true" tabindex="-1"></a><span class="co"># pick a range of k values to test</span></span>
-<span id="cb124-4"><a href="#cb124-4" aria-hidden="true" tabindex="-1"></a>k_values <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">31</span>))</span>
-<span id="cb124-5"><a href="#cb124-5" aria-hidden="true" tabindex="-1"></a>cv_scores <span class="op">=</span> []</span>
-<span id="cb124-6"><a href="#cb124-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb124-7"><a href="#cb124-7" aria-hidden="true" tabindex="-1"></a><span class="co"># stratified 5-fold cross-validation - using stratified instead of standard to maintain consistent class proportions </span></span>
-<span id="cb124-8"><a href="#cb124-8" aria-hidden="true" tabindex="-1"></a>skf <span class="op">=</span> StratifiedKFold(n_splits<span class="op">=</span><span class="dv">5</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span>MY_RANDOM_STATE)</span>
-<span id="cb124-9"><a href="#cb124-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb124-10"><a href="#cb124-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> k_values:</span>
-<span id="cb124-11"><a href="#cb124-11" aria-hidden="true" tabindex="-1"></a>    knn_cv <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>k)</span>
-<span id="cb124-12"><a href="#cb124-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">#need to scale</span></span>
-<span id="cb124-13"><a href="#cb124-13" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> cross_val_score(</span>
-<span id="cb124-14"><a href="#cb124-14" aria-hidden="true" tabindex="-1"></a>        knn_cv,</span>
-<span id="cb124-15"><a href="#cb124-15" aria-hidden="true" tabindex="-1"></a>        X_bio_train_scaled,</span>
-<span id="cb124-16"><a href="#cb124-16" aria-hidden="true" tabindex="-1"></a>        Y_bio_train,</span>
-<span id="cb124-17"><a href="#cb124-17" aria-hidden="true" tabindex="-1"></a>        cv<span class="op">=</span>skf,</span>
-<span id="cb124-18"><a href="#cb124-18" aria-hidden="true" tabindex="-1"></a>        scoring<span class="op">=</span><span class="st">'accuracy'</span></span>
-<span id="cb124-19"><a href="#cb124-19" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb124-20"><a href="#cb124-20" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb124-21"><a href="#cb124-21" aria-hidden="true" tabindex="-1"></a>    cv_scores.append(scores.mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb124-3"><a href="#cb124-3" aria-hidden="true" tabindex="-1"></a>core_k_values <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">31</span>))</span>
+<span id="cb124-4"><a href="#cb124-4" aria-hidden="true" tabindex="-1"></a>core_cv_scores <span class="op">=</span> []</span>
+<span id="cb124-5"><a href="#cb124-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb124-6"><a href="#cb124-6" aria-hidden="true" tabindex="-1"></a>skf <span class="op">=</span> StratifiedKFold(n_splits<span class="op">=</span><span class="dv">5</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span>MY_RANDOM_STATE)</span>
+<span id="cb124-7"><a href="#cb124-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb124-8"><a href="#cb124-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> core_k_values:</span>
+<span id="cb124-9"><a href="#cb124-9" aria-hidden="true" tabindex="-1"></a>    core_knn_cv <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>k)</span>
+<span id="cb124-10"><a href="#cb124-10" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> cross_val_score(</span>
+<span id="cb124-11"><a href="#cb124-11" aria-hidden="true" tabindex="-1"></a>        core_knn_cv,</span>
+<span id="cb124-12"><a href="#cb124-12" aria-hidden="true" tabindex="-1"></a>        X_core_train_scaled,</span>
+<span id="cb124-13"><a href="#cb124-13" aria-hidden="true" tabindex="-1"></a>        Y_core_train,</span>
+<span id="cb124-14"><a href="#cb124-14" aria-hidden="true" tabindex="-1"></a>        cv<span class="op">=</span>skf,</span>
+<span id="cb124-15"><a href="#cb124-15" aria-hidden="true" tabindex="-1"></a>        scoring<span class="op">=</span><span class="st">'accuracy'</span></span>
+<span id="cb124-16"><a href="#cb124-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb124-17"><a href="#cb124-17" aria-hidden="true" tabindex="-1"></a>    core_cv_scores.append(scores.mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<section id="biomarker-model-elbow-plot" class="level6">
-<h6 class="anchored" data-anchor-id="biomarker-model-elbow-plot"><u><strong>Biomarker Model Elbow Plot</strong> </u></h6>
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb125"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a><span class="co"># identify best k</span></span>
-<span id="cb125-2"><a href="#cb125-2" aria-hidden="true" tabindex="-1"></a>best_k_bio <span class="op">=</span> k_values[cv_scores.index(<span class="bu">max</span>(cv_scores))]</span>
-<span id="cb125-3"><a href="#cb125-3" aria-hidden="true" tabindex="-1"></a><span class="co">#best_score_bio = max(cv_scores)</span></span>
-<span id="cb125-4"><a href="#cb125-4" aria-hidden="true" tabindex="-1"></a>best_k_core <span class="op">=</span> k_values[cv_scores.index(<span class="bu">max</span>(cv_scores))]</span>
+<div class="sourceCode cell-code" id="cb125"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a><span class="co"># BIOMARKER MODEL: choose k using cross-validation on scaled training data</span></span>
+<span id="cb125-2"><a href="#cb125-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb125-3"><a href="#cb125-3" aria-hidden="true" tabindex="-1"></a>bio_k_values <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">31</span>))</span>
+<span id="cb125-4"><a href="#cb125-4" aria-hidden="true" tabindex="-1"></a>bio_cv_scores <span class="op">=</span> []</span>
 <span id="cb125-5"><a href="#cb125-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb125-6"><a href="#cb125-6" aria-hidden="true" tabindex="-1"></a>output<span class="op">=</span>(</span>
-<span id="cb125-7"><a href="#cb125-7" aria-hidden="true" tabindex="-1"></a>  <span class="ss">f"Best biomarker K: </span><span class="sc">{</span>best_k_bio<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span> <span class="op">+</span></span>
-<span id="cb125-8"><a href="#cb125-8" aria-hidden="true" tabindex="-1"></a>  <span class="ss">f"Best biomarker CV accuracy: </span><span class="sc">{</span>best_k_bio<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb125-9"><a href="#cb125-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb125-10"><a href="#cb125-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(output)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb125-6"><a href="#cb125-6" aria-hidden="true" tabindex="-1"></a>skf <span class="op">=</span> StratifiedKFold(n_splits<span class="op">=</span><span class="dv">5</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span>MY_RANDOM_STATE)</span>
+<span id="cb125-7"><a href="#cb125-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb125-8"><a href="#cb125-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> bio_k_values:</span>
+<span id="cb125-9"><a href="#cb125-9" aria-hidden="true" tabindex="-1"></a>    bio_knn_cv <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>k)</span>
+<span id="cb125-10"><a href="#cb125-10" aria-hidden="true" tabindex="-1"></a>    bio_scores <span class="op">=</span> cross_val_score(          <span class="co"># &lt;-- fixed typo</span></span>
+<span id="cb125-11"><a href="#cb125-11" aria-hidden="true" tabindex="-1"></a>        bio_knn_cv,</span>
+<span id="cb125-12"><a href="#cb125-12" aria-hidden="true" tabindex="-1"></a>        X_bio_train_scaled,</span>
+<span id="cb125-13"><a href="#cb125-13" aria-hidden="true" tabindex="-1"></a>        Y_bio_train,</span>
+<span id="cb125-14"><a href="#cb125-14" aria-hidden="true" tabindex="-1"></a>        cv<span class="op">=</span>skf,</span>
+<span id="cb125-15"><a href="#cb125-15" aria-hidden="true" tabindex="-1"></a>        scoring<span class="op">=</span><span class="st">'accuracy'</span></span>
+<span id="cb125-16"><a href="#cb125-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb125-17"><a href="#cb125-17" aria-hidden="true" tabindex="-1"></a>    bio_cv_scores.append(bio_scores.mean())</span>
+<span id="cb125-18"><a href="#cb125-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb125-19"><a href="#cb125-19" aria-hidden="true" tabindex="-1"></a>best_k_bio <span class="op">=</span> bio_k_values[bio_cv_scores.index(<span class="bu">max</span>(bio_cv_scores))]</span>
+<span id="cb125-20"><a href="#cb125-20" aria-hidden="true" tabindex="-1"></a>best_k_core <span class="op">=</span> core_k_values[core_cv_scores.index(<span class="bu">max</span>(core_cv_scores))]</span>
+<span id="cb125-21"><a href="#cb125-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb125-22"><a href="#cb125-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb125-23"><a href="#cb125-23" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Best biomarker K: </span><span class="sc">{</span>best_k_bio<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb125-24"><a href="#cb125-24" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Best biomarker CV accuracy: </span><span class="sc">{</span><span class="bu">max</span>(bio_cv_scores)<span class="sc">:.3f}</span><span class="ch">\n</span><span class="ss">"</span>   <span class="co"># &lt;-- fixed print bug</span></span>
+<span id="cb125-25"><a href="#cb125-25" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Best core K: </span><span class="sc">{</span>best_k_core<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb125-26"><a href="#cb125-26" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Best core CV accuracy: </span><span class="sc">{</span><span class="bu">max</span>(core_cv_scores)<span class="sc">:.3f}</span><span class="ss">"</span></span>
+<span id="cb125-27"><a href="#cb125-27" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Best biomarker K: 9
-Best biomarker CV accuracy: 9</code></pre>
+Best biomarker CV accuracy: 0.902
+Best core K: 7
+Best core CV accuracy: 0.981</code></pre>
 </div>
+</div>
+<p>Cross-validation identified K=9 as the optimal biomarker K (mean CV accuracy: 0.902) and K=7 as the optimal core K (mean CV accuracy: 0.981). The elbow plots below visualize these results for each model.</p>
+<section id="core-model-elbow-plot" class="level6">
+<h6 class="anchored" data-anchor-id="core-model-elbow-plot"><u><strong>Core Model Elbow Plot</strong> </u></h6>
+<div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb127"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot results</span></span>
 <span id="cb127-2"><a href="#cb127-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))<span class="op">;</span></span>
-<span id="cb127-3"><a href="#cb127-3" aria-hidden="true" tabindex="-1"></a>plt.plot(k_values, cv_scores, marker<span class="op">=</span><span class="st">'o'</span>)<span class="op">;</span></span>
+<span id="cb127-3"><a href="#cb127-3" aria-hidden="true" tabindex="-1"></a>plt.plot(core_k_values, core_cv_scores, marker<span class="op">=</span><span class="st">'o'</span>)<span class="op">;</span></span>
 <span id="cb127-4"><a href="#cb127-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Number of Neighbors (K)'</span>)<span class="op">;</span></span>
 <span id="cb127-5"><a href="#cb127-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean CV Accuracy'</span>)<span class="op">;</span></span>
 <span id="cb127-6"><a href="#cb127-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Core Feature Model: K Selection for KNN'</span>)<span class="op">;</span></span>
-<span id="cb127-7"><a href="#cb127-7" aria-hidden="true" tabindex="-1"></a>plt.xticks(k_values[::<span class="dv">2</span>], rotation<span class="op">=</span><span class="dv">45</span>)<span class="op">;</span></span>
+<span id="cb127-7"><a href="#cb127-7" aria-hidden="true" tabindex="-1"></a>plt.xticks(core_k_values[::<span class="dv">2</span>], rotation<span class="op">=</span><span class="dv">45</span>)<span class="op">;</span></span>
 <span id="cb127-8"><a href="#cb127-8" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)<span class="op">;</span></span>
 <span id="cb127-9"><a href="#cb127-9" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span></span>
 <span id="cb127-10"><a href="#cb127-10" aria-hidden="true" tabindex="-1"></a><span class="co">#now show </span></span>
@@ -1469,25 +1488,25 @@ Best biomarker CV accuracy: 9</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="machine-learning_files/figure-html/bio-elbow-plot-9.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="machine-learning_files/figure-html/core-elbow-plot-9.png" class="img-fluid figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>This cross-validation elbow plot confirms the biomarker model accuracy peaks at K=9 with a mean CV accuracy of 0.902. It is worth noting that the curve shows considerable variability across K values instead of the commonly observed smooth rise-to-plateau pattern, which could be indicative of significant noise in the biomarker feature set. However, this variability is consistent with the sensitivity to pre-processing that was observed in the training section earlier in the analysis, which showed substantial differences in scaled and unscaled results in the biomarker feature set. For this model, K=9 is selected as the final biomarker K, since it represents the peak CV accuracy and provides slightly more smoothing than the K=7 identified previously.</p>
+<p>The core feature elbow plot shows a clearer pattern, with accuracy peaking at K=7 with a mean CV accuracy of 0.981 that consistently declines after the peak. This trend is more consistent with classical elbow curves, which aligns logically since it reflects the stronger, more stable signal of the core feature set. Therefore, K=7 is selected as the final core model K, which replaces the K=3 identified in the initial test set sweep.</p>
 </section>
-<section id="core-model-elbow-plot" class="level6">
-<h6 class="anchored" data-anchor-id="core-model-elbow-plot"><u><strong>Core Model Elbow Plot</strong> </u></h6>
+<section id="biomarker-model-elbow-plot" class="level6">
+<h6 class="anchored" data-anchor-id="biomarker-model-elbow-plot"><u><strong>Biomarker Model Elbow Plot</strong> </u></h6>
 <div class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb128"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot results</span></span>
 <span id="cb128-2"><a href="#cb128-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))<span class="op">;</span></span>
-<span id="cb128-3"><a href="#cb128-3" aria-hidden="true" tabindex="-1"></a>plt.plot(k_values, cv_scores, marker<span class="op">=</span><span class="st">'o'</span>)<span class="op">;</span></span>
+<span id="cb128-3"><a href="#cb128-3" aria-hidden="true" tabindex="-1"></a>plt.plot(bio_k_values, bio_cv_scores, marker<span class="op">=</span><span class="st">'o'</span>)<span class="op">;</span></span>
 <span id="cb128-4"><a href="#cb128-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Number of Neighbors (K)'</span>)<span class="op">;</span></span>
 <span id="cb128-5"><a href="#cb128-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean CV Accuracy'</span>)<span class="op">;</span></span>
-<span id="cb128-6"><a href="#cb128-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Core Feature Model: K Selection for KNN'</span>)<span class="op">;</span></span>
-<span id="cb128-7"><a href="#cb128-7" aria-hidden="true" tabindex="-1"></a>plt.xticks(k_values[::<span class="dv">2</span>], rotation<span class="op">=</span><span class="dv">45</span>)<span class="op">;</span></span>
+<span id="cb128-6"><a href="#cb128-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Biomarker Feature Model: K Selection for KNN'</span>)<span class="op">;</span></span>
+<span id="cb128-7"><a href="#cb128-7" aria-hidden="true" tabindex="-1"></a>plt.xticks(bio_k_values[::<span class="dv">2</span>], rotation<span class="op">=</span><span class="dv">45</span>)<span class="op">;</span></span>
 <span id="cb128-8"><a href="#cb128-8" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)<span class="op">;</span></span>
 <span id="cb128-9"><a href="#cb128-9" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span></span>
 <span id="cb128-10"><a href="#cb128-10" aria-hidden="true" tabindex="-1"></a><span class="co">#now show </span></span>
@@ -1496,12 +1515,13 @@ Best biomarker CV accuracy: 9</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="machine-learning_files/figure-html/core-elbow-plot-11.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="machine-learning_files/figure-html/bio-elbow-plot-11.png" class="img-fluid figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>The core feature elbow plot shows a clearer pattern, with accuracy peaking at K=7 with a mean CV accuracy of 0.981 that consistently declines after the peak. This trend is more consistent with classical elbow curves, which aligns logically since it reflects the stronger, more stable signal of the core feature set. Therefore, K=7 is selected as the final core model K, which replaces the K=3 identified in the initial test set sweep. With optimal K values confirmed via cross-validation, both models can now be finalized for evaluation.</p>
+<p>This cross-validation elbow plot identifies the biomarker model accuracy peaks at K=9 with a mean CV accuracy of 0.902. It is worth noting that the curve shows considerable variability across K values instead of the commonly observed smooth rise-to-plateau pattern, which could be indicative of significant noise in the biomarker feature set. However, this variability is consistent with the sensitivity to preprocessing that was observed in the training section earlier in the analysis, which showed substantial differences in scaled and unscaled results in the biomarker feature set. The elbow plot identifies K=9 as the peak value for this model, superseding the K=7 that was identified in the initial sweep.</p>
+<p>With optimal K values confirmed via cross-validation, both models can now be finalized for evaluation.</p>
 </section>
 </section>
 <section id="model-training-and-evaluation" class="level5">
@@ -1539,7 +1559,7 @@ Best biomarker CV accuracy: 9</code></pre>
 <span id="cb131-10"><a href="#cb131-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Core Model Test Accuracy (k=</span><span class="sc">{</span>best_k_core<span class="sc">}</span><span class="ss">): </span><span class="sc">{</span>core_test_acc<span class="sc">:.3f}</span><span class="ss">"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Core Model Test Accuracy (k=9): 0.974</code></pre>
+<pre><code>Core Model Test Accuracy (k=7): 0.975</code></pre>
 </div>
 </div>
 <p>The core feature model was similarly trained using its cross-validated optimal value of K=7 on the scaled training set, and it achieved a final test accuracy of 0.975. This is slightly lower than the CV accuracy of 0.981, but that aligns with expectations and likely represents a normal degree of variance between cross-validation and evaluation metrics. It is worth re-iterating that this model’s near-perfect accuracy reflects its structural relationship to the ground truth label rather than independent predictive power. Again, since HSI is a deterministic function of these features, the result merely confirms correct implementation and provides a benchmark for evaluating whether biomarker features can approach similar classification strength via biologically distinct pathways.</p>
@@ -1590,9 +1610,9 @@ weighted avg       0.91      0.91      0.91       762</code></pre>
            0       0.98      0.98      0.98      2232
            1       0.97      0.97      0.97      1665
 
-    accuracy                           0.97      3897
+    accuracy                           0.98      3897
    macro avg       0.97      0.97      0.97      3897
-weighted avg       0.97      0.97      0.97      3897</code></pre>
+weighted avg       0.98      0.98      0.98      3897</code></pre>
 </div>
 <div class="cell-output-display">
 <div>
@@ -1612,7 +1632,7 @@ weighted avg       0.97      0.97      0.97      3897</code></pre>
 <pre><code>Final KNN Test Set Comparison
 --------------------------------------------------------------------------------
 Biomarker model: K = 9, test accuracy = 0.911
-Core model:      K = 9, test accuracy = 0.974
+Core model:      K = 7, test accuracy = 0.975
 --------------------------------------------------------------------------------</code></pre>
 </div>
 </div>
@@ -2444,7 +2464,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb138-360"><a href="#cb138-360" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb138-361"><a href="#cb138-361" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb138-362"><a href="#cb138-362" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-363"><a href="#cb138-363" aria-hidden="true" tabindex="-1"></a>Since stratified sampling was used, the expected proportion of NAFLD-like vs. Healthy patients in the training and test sets should match the overall data set.&nbsp;To test this, the plot below explores the distribution of classes across the training and test sets in order to confirm that both sets are representative of the original data.</span>
+<span id="cb138-363"><a href="#cb138-363" aria-hidden="true" tabindex="-1"></a>Since stratified sampling was used, the expected proportion of NAFLD-like vs. Healthy patients in the training and test sets should match the overall data set.To test this, the plot below explores the distribution of classes across the training and test sets in order to confirm that both sets are representative of the original data.</span>
 <span id="cb138-364"><a href="#cb138-364" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb138-367"><a href="#cb138-367" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb138-368"><a href="#cb138-368" aria-hidden="true" tabindex="-1"></a><span class="co">#BIOMARKER MODEL now test the sets - generate class distribution plot</span></span>
@@ -3041,219 +3061,246 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb138-975"><a href="#cb138-975" aria-hidden="true" tabindex="-1"></a>    test_acc  <span class="op">=</span> accuracy_score(Y_core_test,  knn.predict(X_core_test_scaled))</span>
 <span id="cb138-976"><a href="#cb138-976" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>k<span class="sc">:&lt;3}</span><span class="ss"> | </span><span class="sc">{</span>test_acc<span class="sc">:8.3f}</span><span class="ss">"</span>)</span>
 <span id="cb138-977"><a href="#cb138-977" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb138-978"><a href="#cb138-978" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-979"><a href="#cb138-979" aria-hidden="true" tabindex="-1"></a>In contrast to the biomarker model, the core feature model demonstrates consistently high test set accuracy across both unscaled and scaled conditions. In both cases, accuracy peaks at K=3, (0.968 and 0.981 respectively). This behavior aligns with expectations since the feature set is reflective of established HSI-predictive-based outcomes. These results show strong class separation with insensitivity to scaling. However, it's worth noting that accuracy alone may not fully characterize model performance given the class imbalance established in this dataset. The confusion matrix and classification report metrics presented later in this analysis provide some additional insight into this error structure and impact on class-specific performance.</span>
+<span id="cb138-978"><a href="#cb138-978" aria-hidden="true" tabindex="-1"></a>-everything past here looks good </span>
+<span id="cb138-979"><a href="#cb138-979" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb138-980"><a href="#cb138-980" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-981"><a href="#cb138-981" aria-hidden="true" tabindex="-1"></a>When both model results are compared together, the biomarker model exhibits weaker and more parameter-sensitive performance, while the core model remains relatively stable across K values. This contrast suggests that although biomarker-based signal is present, it is less directly predictive of FLD status and more dependent on appropriate pre-processing and model configuration. This supports the broader objective of this analysis, indicating that biomarker patterns identified in Part 1 may translate to population-level FLD risk, but have reduced strength and increased sensitivity due to modeling choices and dataset restrictions. Future research should consider using a more representative biomarker subset and additional feature engineering to bridge the model performance gap and establish a stronger association.</span>
+<span id="cb138-981"><a href="#cb138-981" aria-hidden="true" tabindex="-1"></a>In contrast to the biomarker model, the core feature model demonstrates consistently high test set accuracy across both unscaled and scaled conditions. In both cases, accuracy peaks at K=3, (0.968 and 0.981 respectively). This behavior aligns with expectations since the feature set is reflective of established HSI-predictive-based outcomes. These results show strong class separation with insensitivity to scaling. However, it's worth noting that accuracy alone may not fully characterize model performance given the class imbalance established in this dataset. The confusion matrix and classification report metrics presented later in this analysis provide some additional insight into this error structure and impact on class-specific performance.</span>
 <span id="cb138-982"><a href="#cb138-982" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-983"><a href="#cb138-983" aria-hidden="true" tabindex="-1"></a><span class="fu">##### &lt;u&gt; 2.2.5.2: Elbow Plots &lt;/u&gt;</span></span>
+<span id="cb138-983"><a href="#cb138-983" aria-hidden="true" tabindex="-1"></a>When both model results are compared together, the biomarker model exhibits weaker and more parameter-sensitive performance, while the core model remains relatively stable across K values. This contrast suggests that although biomarker-based signal is present, it is less directly predictive of FLD status and more dependent on appropriate pre-processing and model configuration. This supports the broader objective of this analysis, indicating that biomarker patterns identified in Part 1 may translate to population-level FLD risk, but have reduced strength and increased sensitivity due to modeling choices and dataset restrictions. Future research should consider using a more representative biomarker subset and additional feature engineering to bridge the model performance gap and establish a stronger association.</span>
 <span id="cb138-984"><a href="#cb138-984" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-985"><a href="#cb138-985" aria-hidden="true" tabindex="-1"></a>The previous section identified K=7 and K=3 as the highest-accuracy values for the scaled biomarker and core feature model, respectively. To select final K values, elbow plots were created using cross-validated mean accuracy across all odd K values from 1 to 29 in order to visually confirm those selections and refine them if needed. The elbow point, which is the highest value on the plot before declining or plateauing, represents the best balance between over-fitting and under-fitting.</span>
+<span id="cb138-985"><a href="#cb138-985" aria-hidden="true" tabindex="-1"></a><span class="fu">##### &lt;u&gt; 2.2.5.2: Elbow Plots &lt;/u&gt;</span></span>
 <span id="cb138-986"><a href="#cb138-986" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-989"><a href="#cb138-989" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb138-990"><a href="#cb138-990" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "bio-opt-k-csv-scaled"</span></span>
-<span id="cb138-991"><a href="#cb138-991" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb138-992"><a href="#cb138-992" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb138-993"><a href="#cb138-993" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
-<span id="cb138-994"><a href="#cb138-994" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-show: hold</span></span>
-<span id="cb138-995"><a href="#cb138-995" aria-hidden="true" tabindex="-1"></a><span class="co"># BIOMARKER MODEL: choose k using cross-validation on scaled training data</span></span>
-<span id="cb138-996"><a href="#cb138-996" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-997"><a href="#cb138-997" aria-hidden="true" tabindex="-1"></a><span class="co"># pick a range of k values to test</span></span>
-<span id="cb138-998"><a href="#cb138-998" aria-hidden="true" tabindex="-1"></a>k_values <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">31</span>))</span>
-<span id="cb138-999"><a href="#cb138-999" aria-hidden="true" tabindex="-1"></a>cv_scores <span class="op">=</span> []</span>
-<span id="cb138-1000"><a href="#cb138-1000" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1001"><a href="#cb138-1001" aria-hidden="true" tabindex="-1"></a><span class="co"># stratified 5-fold cross-validation - using stratified instead of standard to maintain consistent class proportions </span></span>
+<span id="cb138-987"><a href="#cb138-987" aria-hidden="true" tabindex="-1"></a>The previous section identified K=7 and K=3 as candidate values for the scaled biomarker and core feature model, respectively. Elbow plots were created using cross-validated mean accuracy across all odd K values from 1 to 30 in order to visually confirm those selections and refine them if needed. The elbow point, which is the highest value on the plot before declining or plateauing, represents the best balance between over-fitting and under-fitting.</span>
+<span id="cb138-988"><a href="#cb138-988" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-991"><a href="#cb138-991" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb138-992"><a href="#cb138-992" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "core-CV-calc"</span></span>
+<span id="cb138-993"><a href="#cb138-993" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb138-994"><a href="#cb138-994" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb138-995"><a href="#cb138-995" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
+<span id="cb138-996"><a href="#cb138-996" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-show: hold</span></span>
+<span id="cb138-997"><a href="#cb138-997" aria-hidden="true" tabindex="-1"></a><span class="co"># CORE MODEL: choose k using cross-validation on scaled training data</span></span>
+<span id="cb138-998"><a href="#cb138-998" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-999"><a href="#cb138-999" aria-hidden="true" tabindex="-1"></a>core_k_values <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">31</span>))</span>
+<span id="cb138-1000"><a href="#cb138-1000" aria-hidden="true" tabindex="-1"></a>core_cv_scores <span class="op">=</span> []</span>
+<span id="cb138-1001"><a href="#cb138-1001" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb138-1002"><a href="#cb138-1002" aria-hidden="true" tabindex="-1"></a>skf <span class="op">=</span> StratifiedKFold(n_splits<span class="op">=</span><span class="dv">5</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span>MY_RANDOM_STATE)</span>
 <span id="cb138-1003"><a href="#cb138-1003" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1004"><a href="#cb138-1004" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> k_values:</span>
-<span id="cb138-1005"><a href="#cb138-1005" aria-hidden="true" tabindex="-1"></a>    knn_cv <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>k)</span>
-<span id="cb138-1006"><a href="#cb138-1006" aria-hidden="true" tabindex="-1"></a>    <span class="co">#need to scale</span></span>
-<span id="cb138-1007"><a href="#cb138-1007" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> cross_val_score(</span>
-<span id="cb138-1008"><a href="#cb138-1008" aria-hidden="true" tabindex="-1"></a>        knn_cv,</span>
-<span id="cb138-1009"><a href="#cb138-1009" aria-hidden="true" tabindex="-1"></a>        X_bio_train_scaled,</span>
-<span id="cb138-1010"><a href="#cb138-1010" aria-hidden="true" tabindex="-1"></a>        Y_bio_train,</span>
-<span id="cb138-1011"><a href="#cb138-1011" aria-hidden="true" tabindex="-1"></a>        cv<span class="op">=</span>skf,</span>
-<span id="cb138-1012"><a href="#cb138-1012" aria-hidden="true" tabindex="-1"></a>        scoring<span class="op">=</span><span class="st">'accuracy'</span></span>
-<span id="cb138-1013"><a href="#cb138-1013" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb138-1014"><a href="#cb138-1014" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb138-1015"><a href="#cb138-1015" aria-hidden="true" tabindex="-1"></a>    cv_scores.append(scores.mean())</span>
-<span id="cb138-1016"><a href="#cb138-1016" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb138-1017"><a href="#cb138-1017" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1018"><a href="#cb138-1018" aria-hidden="true" tabindex="-1"></a><span class="fu">###### &lt;u&gt;**Biomarker Model Elbow Plot** &lt;/u&gt;</span></span>
-<span id="cb138-1019"><a href="#cb138-1019" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1022"><a href="#cb138-1022" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb138-1023"><a href="#cb138-1023" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "bio-elbow-plot"</span></span>
-<span id="cb138-1024"><a href="#cb138-1024" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb138-1025"><a href="#cb138-1025" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb138-1026"><a href="#cb138-1026" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
-<span id="cb138-1027"><a href="#cb138-1027" aria-hidden="true" tabindex="-1"></a><span class="co"># identify best k</span></span>
-<span id="cb138-1028"><a href="#cb138-1028" aria-hidden="true" tabindex="-1"></a>best_k_bio <span class="op">=</span> k_values[cv_scores.index(<span class="bu">max</span>(cv_scores))]</span>
-<span id="cb138-1029"><a href="#cb138-1029" aria-hidden="true" tabindex="-1"></a><span class="co">#best_score_bio = max(cv_scores)</span></span>
-<span id="cb138-1030"><a href="#cb138-1030" aria-hidden="true" tabindex="-1"></a>best_k_core <span class="op">=</span> k_values[cv_scores.index(<span class="bu">max</span>(cv_scores))]</span>
-<span id="cb138-1031"><a href="#cb138-1031" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1032"><a href="#cb138-1032" aria-hidden="true" tabindex="-1"></a>output<span class="op">=</span>(</span>
-<span id="cb138-1033"><a href="#cb138-1033" aria-hidden="true" tabindex="-1"></a>  <span class="ss">f"Best biomarker K: </span><span class="sc">{</span>best_k_bio<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span> <span class="op">+</span></span>
-<span id="cb138-1034"><a href="#cb138-1034" aria-hidden="true" tabindex="-1"></a>  <span class="ss">f"Best biomarker CV accuracy: </span><span class="sc">{</span>best_k_bio<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb138-1035"><a href="#cb138-1035" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb138-1036"><a href="#cb138-1036" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(output)  </span>
-<span id="cb138-1037"><a href="#cb138-1037" aria-hidden="true" tabindex="-1"></a><span class="co"># plot results</span></span>
-<span id="cb138-1038"><a href="#cb138-1038" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))<span class="op">;</span></span>
-<span id="cb138-1039"><a href="#cb138-1039" aria-hidden="true" tabindex="-1"></a>plt.plot(k_values, cv_scores, marker<span class="op">=</span><span class="st">'o'</span>)<span class="op">;</span></span>
-<span id="cb138-1040"><a href="#cb138-1040" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Number of Neighbors (K)'</span>)<span class="op">;</span></span>
-<span id="cb138-1041"><a href="#cb138-1041" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean CV Accuracy'</span>)<span class="op">;</span></span>
-<span id="cb138-1042"><a href="#cb138-1042" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Core Feature Model: K Selection for KNN'</span>)<span class="op">;</span></span>
-<span id="cb138-1043"><a href="#cb138-1043" aria-hidden="true" tabindex="-1"></a>plt.xticks(k_values[::<span class="dv">2</span>], rotation<span class="op">=</span><span class="dv">45</span>)<span class="op">;</span></span>
-<span id="cb138-1044"><a href="#cb138-1044" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)<span class="op">;</span></span>
-<span id="cb138-1045"><a href="#cb138-1045" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span></span>
-<span id="cb138-1046"><a href="#cb138-1046" aria-hidden="true" tabindex="-1"></a><span class="co">#now show </span></span>
-<span id="cb138-1047"><a href="#cb138-1047" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span>
-<span id="cb138-1048"><a href="#cb138-1048" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb138-1049"><a href="#cb138-1049" aria-hidden="true" tabindex="-1"></a>This cross-validation elbow plot confirms the biomarker model accuracy peaks at K=9 with a mean CV accuracy of 0.902. It is worth noting that the curve shows considerable variability across K values instead of the commonly observed smooth rise-to-plateau pattern, which could be indicative of significant noise in the biomarker feature set. However, this variability is consistent with the sensitivity to pre-processing that was observed in the training section earlier in the analysis, which showed substantial differences in scaled and unscaled results in the biomarker feature set. For this model, K=9 is selected as the final biomarker K, since it represents the peak CV accuracy and provides slightly more smoothing than the K=7 identified previously.</span>
-<span id="cb138-1050"><a href="#cb138-1050" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1051"><a href="#cb138-1051" aria-hidden="true" tabindex="-1"></a><span class="fu">###### &lt;u&gt;**Core Model Elbow Plot** &lt;/u&gt;</span></span>
-<span id="cb138-1052"><a href="#cb138-1052" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1055"><a href="#cb138-1055" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb138-1056"><a href="#cb138-1056" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "core-elbow-plot"</span></span>
-<span id="cb138-1057"><a href="#cb138-1057" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb138-1058"><a href="#cb138-1058" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb138-1059"><a href="#cb138-1059" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
-<span id="cb138-1060"><a href="#cb138-1060" aria-hidden="true" tabindex="-1"></a><span class="co"># plot results</span></span>
-<span id="cb138-1061"><a href="#cb138-1061" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))<span class="op">;</span></span>
-<span id="cb138-1062"><a href="#cb138-1062" aria-hidden="true" tabindex="-1"></a>plt.plot(k_values, cv_scores, marker<span class="op">=</span><span class="st">'o'</span>)<span class="op">;</span></span>
-<span id="cb138-1063"><a href="#cb138-1063" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Number of Neighbors (K)'</span>)<span class="op">;</span></span>
-<span id="cb138-1064"><a href="#cb138-1064" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean CV Accuracy'</span>)<span class="op">;</span></span>
-<span id="cb138-1065"><a href="#cb138-1065" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Core Feature Model: K Selection for KNN'</span>)<span class="op">;</span></span>
-<span id="cb138-1066"><a href="#cb138-1066" aria-hidden="true" tabindex="-1"></a>plt.xticks(k_values[::<span class="dv">2</span>], rotation<span class="op">=</span><span class="dv">45</span>)<span class="op">;</span></span>
-<span id="cb138-1067"><a href="#cb138-1067" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)<span class="op">;</span></span>
-<span id="cb138-1068"><a href="#cb138-1068" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span></span>
-<span id="cb138-1069"><a href="#cb138-1069" aria-hidden="true" tabindex="-1"></a><span class="co">#now show </span></span>
-<span id="cb138-1070"><a href="#cb138-1070" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span>
-<span id="cb138-1071"><a href="#cb138-1071" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb138-1072"><a href="#cb138-1072" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1073"><a href="#cb138-1073" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1074"><a href="#cb138-1074" aria-hidden="true" tabindex="-1"></a>The core feature elbow plot shows a clearer pattern, with accuracy peaking at K=7 with a mean CV accuracy of 0.981 that consistently declines after the peak. This trend is more consistent with classical elbow curves, which aligns logically since it reflects the stronger, more stable signal of the core feature set. Therefore, K=7 is selected as the final core model K, which replaces the K=3 identified in the initial test set sweep. With optimal K values confirmed via cross-validation, both models can now be finalized for evaluation.</span>
-<span id="cb138-1075"><a href="#cb138-1075" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1076"><a href="#cb138-1076" aria-hidden="true" tabindex="-1"></a><span class="fu">##### &lt;u&gt; 2.2.5.3: Model Training and Evaluation &lt;/u&gt;</span></span>
+<span id="cb138-1004"><a href="#cb138-1004" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> core_k_values:</span>
+<span id="cb138-1005"><a href="#cb138-1005" aria-hidden="true" tabindex="-1"></a>    core_knn_cv <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>k)</span>
+<span id="cb138-1006"><a href="#cb138-1006" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> cross_val_score(</span>
+<span id="cb138-1007"><a href="#cb138-1007" aria-hidden="true" tabindex="-1"></a>        core_knn_cv,</span>
+<span id="cb138-1008"><a href="#cb138-1008" aria-hidden="true" tabindex="-1"></a>        X_core_train_scaled,</span>
+<span id="cb138-1009"><a href="#cb138-1009" aria-hidden="true" tabindex="-1"></a>        Y_core_train,</span>
+<span id="cb138-1010"><a href="#cb138-1010" aria-hidden="true" tabindex="-1"></a>        cv<span class="op">=</span>skf,</span>
+<span id="cb138-1011"><a href="#cb138-1011" aria-hidden="true" tabindex="-1"></a>        scoring<span class="op">=</span><span class="st">'accuracy'</span></span>
+<span id="cb138-1012"><a href="#cb138-1012" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb138-1013"><a href="#cb138-1013" aria-hidden="true" tabindex="-1"></a>    core_cv_scores.append(scores.mean())</span>
+<span id="cb138-1014"><a href="#cb138-1014" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb138-1015"><a href="#cb138-1015" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1018"><a href="#cb138-1018" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb138-1019"><a href="#cb138-1019" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "bio-CV-calc"</span></span>
+<span id="cb138-1020"><a href="#cb138-1020" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb138-1021"><a href="#cb138-1021" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb138-1022"><a href="#cb138-1022" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
+<span id="cb138-1023"><a href="#cb138-1023" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-show: hold</span></span>
+<span id="cb138-1024"><a href="#cb138-1024" aria-hidden="true" tabindex="-1"></a><span class="co"># BIOMARKER MODEL: choose k using cross-validation on scaled training data</span></span>
+<span id="cb138-1025"><a href="#cb138-1025" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1026"><a href="#cb138-1026" aria-hidden="true" tabindex="-1"></a>bio_k_values <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">31</span>))</span>
+<span id="cb138-1027"><a href="#cb138-1027" aria-hidden="true" tabindex="-1"></a>bio_cv_scores <span class="op">=</span> []</span>
+<span id="cb138-1028"><a href="#cb138-1028" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1029"><a href="#cb138-1029" aria-hidden="true" tabindex="-1"></a>skf <span class="op">=</span> StratifiedKFold(n_splits<span class="op">=</span><span class="dv">5</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span>MY_RANDOM_STATE)</span>
+<span id="cb138-1030"><a href="#cb138-1030" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1031"><a href="#cb138-1031" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> bio_k_values:</span>
+<span id="cb138-1032"><a href="#cb138-1032" aria-hidden="true" tabindex="-1"></a>    bio_knn_cv <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>k)</span>
+<span id="cb138-1033"><a href="#cb138-1033" aria-hidden="true" tabindex="-1"></a>    bio_scores <span class="op">=</span> cross_val_score(          <span class="co"># &lt;-- fixed typo</span></span>
+<span id="cb138-1034"><a href="#cb138-1034" aria-hidden="true" tabindex="-1"></a>        bio_knn_cv,</span>
+<span id="cb138-1035"><a href="#cb138-1035" aria-hidden="true" tabindex="-1"></a>        X_bio_train_scaled,</span>
+<span id="cb138-1036"><a href="#cb138-1036" aria-hidden="true" tabindex="-1"></a>        Y_bio_train,</span>
+<span id="cb138-1037"><a href="#cb138-1037" aria-hidden="true" tabindex="-1"></a>        cv<span class="op">=</span>skf,</span>
+<span id="cb138-1038"><a href="#cb138-1038" aria-hidden="true" tabindex="-1"></a>        scoring<span class="op">=</span><span class="st">'accuracy'</span></span>
+<span id="cb138-1039"><a href="#cb138-1039" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb138-1040"><a href="#cb138-1040" aria-hidden="true" tabindex="-1"></a>    bio_cv_scores.append(bio_scores.mean())</span>
+<span id="cb138-1041"><a href="#cb138-1041" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1042"><a href="#cb138-1042" aria-hidden="true" tabindex="-1"></a>best_k_bio <span class="op">=</span> bio_k_values[bio_cv_scores.index(<span class="bu">max</span>(bio_cv_scores))]</span>
+<span id="cb138-1043"><a href="#cb138-1043" aria-hidden="true" tabindex="-1"></a>best_k_core <span class="op">=</span> core_k_values[core_cv_scores.index(<span class="bu">max</span>(core_cv_scores))]</span>
+<span id="cb138-1044"><a href="#cb138-1044" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1045"><a href="#cb138-1045" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb138-1046"><a href="#cb138-1046" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Best biomarker K: </span><span class="sc">{</span>best_k_bio<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb138-1047"><a href="#cb138-1047" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Best biomarker CV accuracy: </span><span class="sc">{</span><span class="bu">max</span>(bio_cv_scores)<span class="sc">:.3f}</span><span class="ch">\n</span><span class="ss">"</span>   <span class="co"># &lt;-- fixed print bug</span></span>
+<span id="cb138-1048"><a href="#cb138-1048" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Best core K: </span><span class="sc">{</span>best_k_core<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb138-1049"><a href="#cb138-1049" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Best core CV accuracy: </span><span class="sc">{</span><span class="bu">max</span>(core_cv_scores)<span class="sc">:.3f}</span><span class="ss">"</span></span>
+<span id="cb138-1050"><a href="#cb138-1050" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb138-1051"><a href="#cb138-1051" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1052"><a href="#cb138-1052" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb138-1053"><a href="#cb138-1053" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1054"><a href="#cb138-1054" aria-hidden="true" tabindex="-1"></a>Cross-validation identified K=9 as the optimal biomarker K (mean CV accuracy: 0.902) and K=7 as the optimal core K (mean CV accuracy: 0.981). The elbow plots below visualize these results for each model.</span>
+<span id="cb138-1055"><a href="#cb138-1055" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1056"><a href="#cb138-1056" aria-hidden="true" tabindex="-1"></a><span class="fu">###### &lt;u&gt;**Core Model Elbow Plot** &lt;/u&gt;</span></span>
+<span id="cb138-1057"><a href="#cb138-1057" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1060"><a href="#cb138-1060" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb138-1061"><a href="#cb138-1061" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "core-elbow-plot"</span></span>
+<span id="cb138-1062"><a href="#cb138-1062" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb138-1063"><a href="#cb138-1063" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb138-1064"><a href="#cb138-1064" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
+<span id="cb138-1065"><a href="#cb138-1065" aria-hidden="true" tabindex="-1"></a><span class="co"># plot results</span></span>
+<span id="cb138-1066"><a href="#cb138-1066" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))<span class="op">;</span></span>
+<span id="cb138-1067"><a href="#cb138-1067" aria-hidden="true" tabindex="-1"></a>plt.plot(core_k_values, core_cv_scores, marker<span class="op">=</span><span class="st">'o'</span>)<span class="op">;</span></span>
+<span id="cb138-1068"><a href="#cb138-1068" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Number of Neighbors (K)'</span>)<span class="op">;</span></span>
+<span id="cb138-1069"><a href="#cb138-1069" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean CV Accuracy'</span>)<span class="op">;</span></span>
+<span id="cb138-1070"><a href="#cb138-1070" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Core Feature Model: K Selection for KNN'</span>)<span class="op">;</span></span>
+<span id="cb138-1071"><a href="#cb138-1071" aria-hidden="true" tabindex="-1"></a>plt.xticks(core_k_values[::<span class="dv">2</span>], rotation<span class="op">=</span><span class="dv">45</span>)<span class="op">;</span></span>
+<span id="cb138-1072"><a href="#cb138-1072" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)<span class="op">;</span></span>
+<span id="cb138-1073"><a href="#cb138-1073" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span></span>
+<span id="cb138-1074"><a href="#cb138-1074" aria-hidden="true" tabindex="-1"></a><span class="co">#now show </span></span>
+<span id="cb138-1075"><a href="#cb138-1075" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span>
+<span id="cb138-1076"><a href="#cb138-1076" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb138-1077"><a href="#cb138-1077" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1080"><a href="#cb138-1080" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb138-1081"><a href="#cb138-1081" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "bio-final-KNN-test-train"</span></span>
-<span id="cb138-1082"><a href="#cb138-1082" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb138-1083"><a href="#cb138-1083" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb138-1084"><a href="#cb138-1084" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
-<span id="cb138-1085"><a href="#cb138-1085" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1086"><a href="#cb138-1086" aria-hidden="true" tabindex="-1"></a><span class="co"># BIOMARKER MODEL: train final kNN using cross-validated optimal k</span></span>
-<span id="cb138-1087"><a href="#cb138-1087" aria-hidden="true" tabindex="-1"></a>knn_bio_final <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>best_k_bio)<span class="op">;</span></span>
-<span id="cb138-1088"><a href="#cb138-1088" aria-hidden="true" tabindex="-1"></a>knn_bio_final.fit(X_bio_train_scaled, Y_bio_train)<span class="op">;</span></span>
-<span id="cb138-1089"><a href="#cb138-1089" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1090"><a href="#cb138-1090" aria-hidden="true" tabindex="-1"></a><span class="co"># BIOMARKER MODEL: test final model on held-out test set</span></span>
-<span id="cb138-1091"><a href="#cb138-1091" aria-hidden="true" tabindex="-1"></a>Y_bio_pred <span class="op">=</span> knn_bio_final.predict(X_bio_test_scaled)<span class="op">;</span></span>
-<span id="cb138-1092"><a href="#cb138-1092" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1093"><a href="#cb138-1093" aria-hidden="true" tabindex="-1"></a>bio_test_acc <span class="op">=</span> accuracy_score(Y_bio_test, Y_bio_pred)<span class="op">;</span></span>
-<span id="cb138-1094"><a href="#cb138-1094" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Biomarker Model Test Accuracy (k=</span><span class="sc">{</span>best_k_bio<span class="sc">}</span><span class="ss">): </span><span class="sc">{</span>bio_test_acc<span class="sc">:.3f}</span><span class="ss">"</span>)<span class="op">;</span></span>
-<span id="cb138-1095"><a href="#cb138-1095" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1096"><a href="#cb138-1096" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb138-1097"><a href="#cb138-1097" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1098"><a href="#cb138-1098" aria-hidden="true" tabindex="-1"></a>The biomarker model was trained on the scaled training set using the cross-validated optimal value of K=9, and then evaluated it on the scaled test set. The final model achieved a test accuracy of 0.911, which is close to but slightly higher than the cross-validated mean accuracy of 0.902 identified in the elbow plot analysis. While sampling variance creates the expectation of slight differences between the two test metrics, test accuracy is usually equal to or slightly lower than CV estimates. The presence of the reversal pattern here likely reflects the natural variance of the relatively small biomarker test set (n=762). This pattern doesn't invalidate the results, but it does suggest the reported test accuracy should be interpreted as an estimate with non-trivial variance. The overall consistency between CV and test accuracy still supports the assertion that the K selection process was applied appropriately for this feature set, and that the model is not significantly overfitting to the training data.</span>
-<span id="cb138-1099"><a href="#cb138-1099" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1102"><a href="#cb138-1102" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb138-1103"><a href="#cb138-1103" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "core-final-KNN-test-train"</span></span>
-<span id="cb138-1104"><a href="#cb138-1104" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb138-1105"><a href="#cb138-1105" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb138-1106"><a href="#cb138-1106" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
-<span id="cb138-1107"><a href="#cb138-1107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1108"><a href="#cb138-1108" aria-hidden="true" tabindex="-1"></a><span class="co"># CORE MODEL: train final kNN using cross-validated optimal k</span></span>
-<span id="cb138-1109"><a href="#cb138-1109" aria-hidden="true" tabindex="-1"></a>knn_core_final <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>best_k_core)<span class="op">;</span></span>
-<span id="cb138-1110"><a href="#cb138-1110" aria-hidden="true" tabindex="-1"></a>knn_core_final.fit(X_core_train_scaled, Y_core_train)<span class="op">;</span></span>
-<span id="cb138-1111"><a href="#cb138-1111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1112"><a href="#cb138-1112" aria-hidden="true" tabindex="-1"></a><span class="co"># CORE MODEL: test final model on held-out test set</span></span>
-<span id="cb138-1113"><a href="#cb138-1113" aria-hidden="true" tabindex="-1"></a>Y_core_pred <span class="op">=</span> knn_core_final.predict(X_core_test_scaled)<span class="op">;</span></span>
+<span id="cb138-1078"><a href="#cb138-1078" aria-hidden="true" tabindex="-1"></a>The core feature elbow plot shows a clearer pattern, with accuracy peaking at K=7 with a mean CV accuracy of 0.981 that consistently declines after the peak. This trend is more consistent with classical elbow curves, which aligns logically since it reflects the stronger, more stable signal of the core feature set. Therefore, K=7 is selected as the final core model K, which replaces the K=3 identified in the initial test set sweep. </span>
+<span id="cb138-1079"><a href="#cb138-1079" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1080"><a href="#cb138-1080" aria-hidden="true" tabindex="-1"></a><span class="fu">###### &lt;u&gt;**Biomarker Model Elbow Plot** &lt;/u&gt;</span></span>
+<span id="cb138-1081"><a href="#cb138-1081" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1084"><a href="#cb138-1084" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb138-1085"><a href="#cb138-1085" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "bio-elbow-plot"</span></span>
+<span id="cb138-1086"><a href="#cb138-1086" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb138-1087"><a href="#cb138-1087" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb138-1088"><a href="#cb138-1088" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
+<span id="cb138-1089"><a href="#cb138-1089" aria-hidden="true" tabindex="-1"></a><span class="co"># plot results</span></span>
+<span id="cb138-1090"><a href="#cb138-1090" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))<span class="op">;</span></span>
+<span id="cb138-1091"><a href="#cb138-1091" aria-hidden="true" tabindex="-1"></a>plt.plot(bio_k_values, bio_cv_scores, marker<span class="op">=</span><span class="st">'o'</span>)<span class="op">;</span></span>
+<span id="cb138-1092"><a href="#cb138-1092" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Number of Neighbors (K)'</span>)<span class="op">;</span></span>
+<span id="cb138-1093"><a href="#cb138-1093" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean CV Accuracy'</span>)<span class="op">;</span></span>
+<span id="cb138-1094"><a href="#cb138-1094" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Biomarker Feature Model: K Selection for KNN'</span>)<span class="op">;</span></span>
+<span id="cb138-1095"><a href="#cb138-1095" aria-hidden="true" tabindex="-1"></a>plt.xticks(bio_k_values[::<span class="dv">2</span>], rotation<span class="op">=</span><span class="dv">45</span>)<span class="op">;</span></span>
+<span id="cb138-1096"><a href="#cb138-1096" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)<span class="op">;</span></span>
+<span id="cb138-1097"><a href="#cb138-1097" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span></span>
+<span id="cb138-1098"><a href="#cb138-1098" aria-hidden="true" tabindex="-1"></a><span class="co">#now show </span></span>
+<span id="cb138-1099"><a href="#cb138-1099" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span>
+<span id="cb138-1100"><a href="#cb138-1100" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb138-1101"><a href="#cb138-1101" aria-hidden="true" tabindex="-1"></a>This cross-validation elbow plot identifies the biomarker model accuracy peaks at K=9 with a mean CV accuracy of 0.902. It is worth noting that the curve shows considerable variability across K values instead of the commonly observed smooth rise-to-plateau pattern, which could be indicative of significant noise in the biomarker feature set. However, this variability is consistent with the sensitivity to preprocessing that was observed in the training section earlier in the analysis, which showed substantial differences in scaled and unscaled results in the biomarker feature set. The elbow plot identifies K=9 as the peak value for this model, superseding the K=7 that was identified in the initial sweep. </span>
+<span id="cb138-1102"><a href="#cb138-1102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1103"><a href="#cb138-1103" aria-hidden="true" tabindex="-1"></a>With optimal K values confirmed via cross-validation, both models can now be finalized for evaluation.</span>
+<span id="cb138-1104"><a href="#cb138-1104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1105"><a href="#cb138-1105" aria-hidden="true" tabindex="-1"></a><span class="fu">##### &lt;u&gt; 2.2.5.3: Model Training and Evaluation &lt;/u&gt;</span></span>
+<span id="cb138-1106"><a href="#cb138-1106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1109"><a href="#cb138-1109" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb138-1110"><a href="#cb138-1110" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "bio-final-KNN-test-train"</span></span>
+<span id="cb138-1111"><a href="#cb138-1111" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb138-1112"><a href="#cb138-1112" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb138-1113"><a href="#cb138-1113" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
 <span id="cb138-1114"><a href="#cb138-1114" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1115"><a href="#cb138-1115" aria-hidden="true" tabindex="-1"></a>core_test_acc <span class="op">=</span> accuracy_score(Y_core_test, Y_core_pred)<span class="op">;</span></span>
-<span id="cb138-1116"><a href="#cb138-1116" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1117"><a href="#cb138-1117" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Core Model Test Accuracy (k=</span><span class="sc">{</span>best_k_core<span class="sc">}</span><span class="ss">): </span><span class="sc">{</span>core_test_acc<span class="sc">:.3f}</span><span class="ss">"</span>)<span class="op">;</span></span>
-<span id="cb138-1118"><a href="#cb138-1118" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb138-1119"><a href="#cb138-1119" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1120"><a href="#cb138-1120" aria-hidden="true" tabindex="-1"></a>The core feature model was similarly trained using its cross-validated optimal value of K=7 on the scaled training set, and it achieved a final test accuracy of 0.975. This is slightly lower than the CV accuracy of 0.981, but that aligns with expectations and likely represents a normal degree of variance between cross-validation and evaluation metrics. It is worth re-iterating that this model's near-perfect accuracy reflects its structural relationship to the ground truth label rather than independent predictive power. Again, since HSI is a deterministic function of these features, the result merely confirms correct implementation and provides a benchmark for evaluating whether biomarker features can approach similar classification strength via biologically distinct pathways.</span>
+<span id="cb138-1115"><a href="#cb138-1115" aria-hidden="true" tabindex="-1"></a><span class="co"># BIOMARKER MODEL: train final kNN using cross-validated optimal k</span></span>
+<span id="cb138-1116"><a href="#cb138-1116" aria-hidden="true" tabindex="-1"></a>knn_bio_final <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>best_k_bio)<span class="op">;</span></span>
+<span id="cb138-1117"><a href="#cb138-1117" aria-hidden="true" tabindex="-1"></a>knn_bio_final.fit(X_bio_train_scaled, Y_bio_train)<span class="op">;</span></span>
+<span id="cb138-1118"><a href="#cb138-1118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1119"><a href="#cb138-1119" aria-hidden="true" tabindex="-1"></a><span class="co"># BIOMARKER MODEL: test final model on held-out test set</span></span>
+<span id="cb138-1120"><a href="#cb138-1120" aria-hidden="true" tabindex="-1"></a>Y_bio_pred <span class="op">=</span> knn_bio_final.predict(X_bio_test_scaled)<span class="op">;</span></span>
 <span id="cb138-1121"><a href="#cb138-1121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1122"><a href="#cb138-1122" aria-hidden="true" tabindex="-1"></a><span class="fu">##### &lt;u&gt; 2.2.5.4: Model Comparison &lt;/u&gt;</span></span>
-<span id="cb138-1123"><a href="#cb138-1123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1124"><a href="#cb138-1124" aria-hidden="true" tabindex="-1"></a>When comparing these model results, a performance gap is observable in final test performance, with the core model (0.975) outperforming the biomarker model (0.911) in accuracy by over 6 percentage points. This gap is consistent with the patterns observed during the K selection process, and it reflects the expected strength of the core model as an established and validated proxy measure. The biomarker model accuracy of 0.911, suggests that while biomarker signalling is present, it doesn't match the predictive strength of the of the established clinical proxy metric. In order to derive accurate conclusions. it is important to determine if the 0.911 accuracy reflects genuine classification ability from novel biochemical features or if it is inflated by class imbalance, dataset limitations, and/or error structures.</span>
-<span id="cb138-1125"><a href="#cb138-1125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1126"><a href="#cb138-1126" aria-hidden="true" tabindex="-1"></a>To investigate this, confusion matrices and classification reports for each model are constructed below.</span>
-<span id="cb138-1127"><a href="#cb138-1127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1128"><a href="#cb138-1128" aria-hidden="true" tabindex="-1"></a><span class="fu">##### &lt;u&gt; 2.2.5.5: Model Evaluation - Classification Reports &amp; Confusion Matrices &lt;/u&gt;</span></span>
-<span id="cb138-1129"><a href="#cb138-1129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1130"><a href="#cb138-1130" aria-hidden="true" tabindex="-1"></a><span class="fu">###### &lt;u&gt;**Biomarker Class Report + Confusion Matrix Analysis** &lt;/u&gt;</span></span>
-<span id="cb138-1131"><a href="#cb138-1131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1134"><a href="#cb138-1134" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb138-1135"><a href="#cb138-1135" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "bio-class-report-and-conf-maxtrix"</span></span>
-<span id="cb138-1136"><a href="#cb138-1136" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb138-1137"><a href="#cb138-1137" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb138-1138"><a href="#cb138-1138" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
-<span id="cb138-1139"><a href="#cb138-1139" aria-hidden="true" tabindex="-1"></a><span class="co">#biomarker model </span></span>
-<span id="cb138-1140"><a href="#cb138-1140" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Biomarker Model Classification Report: "</span>)</span>
-<span id="cb138-1141"><a href="#cb138-1141" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(Y_bio_test, Y_bio_pred))<span class="op">;</span></span>
-<span id="cb138-1142"><a href="#cb138-1142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1143"><a href="#cb138-1143" aria-hidden="true" tabindex="-1"></a>ConfusionMatrixDisplay.from_predictions(Y_bio_test, Y_bio_pred)<span class="op">;</span></span>
-<span id="cb138-1144"><a href="#cb138-1144" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Biomarker Model Confusion Matrix"</span>)<span class="op">;</span></span>
-<span id="cb138-1145"><a href="#cb138-1145" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb138-1146"><a href="#cb138-1146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1122"><a href="#cb138-1122" aria-hidden="true" tabindex="-1"></a>bio_test_acc <span class="op">=</span> accuracy_score(Y_bio_test, Y_bio_pred)<span class="op">;</span></span>
+<span id="cb138-1123"><a href="#cb138-1123" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Biomarker Model Test Accuracy (k=</span><span class="sc">{</span>best_k_bio<span class="sc">}</span><span class="ss">): </span><span class="sc">{</span>bio_test_acc<span class="sc">:.3f}</span><span class="ss">"</span>)<span class="op">;</span></span>
+<span id="cb138-1124"><a href="#cb138-1124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1125"><a href="#cb138-1125" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb138-1126"><a href="#cb138-1126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1127"><a href="#cb138-1127" aria-hidden="true" tabindex="-1"></a>The biomarker model was trained on the scaled training set using the cross-validated optimal value of K=9, and then evaluated it on the scaled test set. The final model achieved a test accuracy of 0.911, which is close to but slightly higher than the cross-validated mean accuracy of 0.902 identified in the elbow plot analysis. While sampling variance creates the expectation of slight differences between the two test metrics, test accuracy is usually equal to or slightly lower than CV estimates. The presence of the reversal pattern here likely reflects the natural variance of the relatively small biomarker test set (n=762). This pattern doesn't invalidate the results, but it does suggest the reported test accuracy should be interpreted as an estimate with non-trivial variance. The overall consistency between CV and test accuracy still supports the assertion that the K selection process was applied appropriately for this feature set, and that the model is not significantly overfitting to the training data.</span>
+<span id="cb138-1128"><a href="#cb138-1128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1131"><a href="#cb138-1131" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb138-1132"><a href="#cb138-1132" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "core-final-KNN-test-train"</span></span>
+<span id="cb138-1133"><a href="#cb138-1133" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb138-1134"><a href="#cb138-1134" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb138-1135"><a href="#cb138-1135" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
+<span id="cb138-1136"><a href="#cb138-1136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1137"><a href="#cb138-1137" aria-hidden="true" tabindex="-1"></a><span class="co"># CORE MODEL: train final kNN using cross-validated optimal k</span></span>
+<span id="cb138-1138"><a href="#cb138-1138" aria-hidden="true" tabindex="-1"></a>knn_core_final <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>best_k_core)<span class="op">;</span></span>
+<span id="cb138-1139"><a href="#cb138-1139" aria-hidden="true" tabindex="-1"></a>knn_core_final.fit(X_core_train_scaled, Y_core_train)<span class="op">;</span></span>
+<span id="cb138-1140"><a href="#cb138-1140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1141"><a href="#cb138-1141" aria-hidden="true" tabindex="-1"></a><span class="co"># CORE MODEL: test final model on held-out test set</span></span>
+<span id="cb138-1142"><a href="#cb138-1142" aria-hidden="true" tabindex="-1"></a>Y_core_pred <span class="op">=</span> knn_core_final.predict(X_core_test_scaled)<span class="op">;</span></span>
+<span id="cb138-1143"><a href="#cb138-1143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1144"><a href="#cb138-1144" aria-hidden="true" tabindex="-1"></a>core_test_acc <span class="op">=</span> accuracy_score(Y_core_test, Y_core_pred)<span class="op">;</span></span>
+<span id="cb138-1145"><a href="#cb138-1145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1146"><a href="#cb138-1146" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Core Model Test Accuracy (k=</span><span class="sc">{</span>best_k_core<span class="sc">}</span><span class="ss">): </span><span class="sc">{</span>core_test_acc<span class="sc">:.3f}</span><span class="ss">"</span>)<span class="op">;</span></span>
 <span id="cb138-1147"><a href="#cb138-1147" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb138-1148"><a href="#cb138-1148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1149"><a href="#cb138-1149" aria-hidden="true" tabindex="-1"></a>This classification report shows a balanced error structure across both classes, which addresses the class imbalance concern that was flagged earlier. For the non-NAFLD class (0), precision was 0.9 and recall was 0.95, which indicates the model can identify most true negatives correctly while producing very few false positives. For the NAFLD class (1), precision was higher at 0.93, but recall decreased to 0.86. This suggests the model is more conservative when predicting positive cases, but still misses \~14% of true positive NAFLD cases. This asymmetry may be clinically relevant since in screening contexts, false negatives tend to be more costly than false positives. This relatively lower recall for class one should therefore be noted as a limitation.</span>
+<span id="cb138-1149"><a href="#cb138-1149" aria-hidden="true" tabindex="-1"></a>The core feature model was similarly trained using its cross-validated optimal value of K=7 on the scaled training set, and it achieved a final test accuracy of 0.975. This is slightly lower than the CV accuracy of 0.981, but that aligns with expectations and likely represents a normal degree of variance between cross-validation and evaluation metrics. It is worth re-iterating that this model's near-perfect accuracy reflects its structural relationship to the ground truth label rather than independent predictive power. Again, since HSI is a deterministic function of these features, the result merely confirms correct implementation and provides a benchmark for evaluating whether biomarker features can approach similar classification strength via biologically distinct pathways.</span>
 <span id="cb138-1150"><a href="#cb138-1150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1151"><a href="#cb138-1151" aria-hidden="true" tabindex="-1"></a>It is worth noting that the macro-averaged F1 score and weighted average F1 score are both 0.91, which confirms that model performance is distributed well across both classes, rather than being concentrated in the majority class. This balanced distribution is also confirmed directly in the confusion matrix. Out of the 327 true NAFLD cases, 45 were misclassified as false negatives, while only 22 of the 435 true negatives were flagged incorrectly (\~14% vs \~5%). Since our total test samples for this set is only 762, it is important to consider that these error counts carry more variance than those of the core model, and should be interpreted with that instability in mind.</span>
+<span id="cb138-1151"><a href="#cb138-1151" aria-hidden="true" tabindex="-1"></a><span class="fu">##### &lt;u&gt; 2.2.5.4: Model Comparison &lt;/u&gt;</span></span>
 <span id="cb138-1152"><a href="#cb138-1152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1153"><a href="#cb138-1153" aria-hidden="true" tabindex="-1"></a><span class="fu">###### &lt;u&gt;**Core Class Report + Confusion Matrix Analysis** &lt;/u&gt;</span></span>
+<span id="cb138-1153"><a href="#cb138-1153" aria-hidden="true" tabindex="-1"></a>When comparing these model results, a performance gap is observable in final test performance, with the core model (0.975) outperforming the biomarker model (0.911) in accuracy by over 6 percentage points. This gap is consistent with the patterns observed during the K selection process, and it reflects the expected strength of the core model as an established and validated proxy measure. The biomarker model accuracy of 0.911, suggests that while biomarker signalling is present, it doesn't match the predictive strength of the of the established clinical proxy metric. In order to derive accurate conclusions. it is important to determine if the 0.911 accuracy reflects genuine classification ability from novel biochemical features or if it is inflated by class imbalance, dataset limitations, and/or error structures.</span>
 <span id="cb138-1154"><a href="#cb138-1154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1157"><a href="#cb138-1157" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb138-1158"><a href="#cb138-1158" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "core-class-report-and-conf-maxtrix"</span></span>
-<span id="cb138-1159"><a href="#cb138-1159" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb138-1160"><a href="#cb138-1160" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb138-1161"><a href="#cb138-1161" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
-<span id="cb138-1162"><a href="#cb138-1162" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-show: hold</span></span>
-<span id="cb138-1163"><a href="#cb138-1163" aria-hidden="true" tabindex="-1"></a><span class="co">#core model </span></span>
-<span id="cb138-1164"><a href="#cb138-1164" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Core Feature Model Classification Report: "</span>)</span>
-<span id="cb138-1165"><a href="#cb138-1165" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(Y_core_test, Y_core_pred))<span class="op">;</span></span>
-<span id="cb138-1166"><a href="#cb138-1166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1167"><a href="#cb138-1167" aria-hidden="true" tabindex="-1"></a>ConfusionMatrixDisplay.from_predictions(Y_core_test, Y_core_pred)<span class="op">;</span></span>
-<span id="cb138-1168"><a href="#cb138-1168" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Core Feature Model Confusion Matrix"</span>)<span class="op">;</span></span>
-<span id="cb138-1169"><a href="#cb138-1169" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb138-1170"><a href="#cb138-1170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1171"><a href="#cb138-1171" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb138-1172"><a href="#cb138-1172" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1173"><a href="#cb138-1173" aria-hidden="true" tabindex="-1"></a>This core feature model analysis demonstrates strong and balanced performances across both classes. For the NAFLD class (1), precision, recall, and F1 scoring all are 0.98, and the same values are 0.97 for the non-NAFLD class (0). Out of 2232 true positives for class 0, only 53 were misidentified, and only 44 were missed out of 1665 for class 1, meaning only 97/3897 test samples were misclassified. With both error types having similar low and proportional rates, it indicates the core model is genuinely discriminating rather than exploiting the class distribution.</span>
-<span id="cb138-1174"><a href="#cb138-1174" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1175"><a href="#cb138-1175" aria-hidden="true" tabindex="-1"></a><span class="fu">##### &lt;u&gt; 2.2.5.6: KNN Model Comparison &lt;/u&gt;</span></span>
-<span id="cb138-1176"><a href="#cb138-1176" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1179"><a href="#cb138-1179" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb138-1180"><a href="#cb138-1180" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "final-KNN-test-set-comparison"</span></span>
-<span id="cb138-1181"><a href="#cb138-1181" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb138-1182"><a href="#cb138-1182" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb138-1183"><a href="#cb138-1183" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
-<span id="cb138-1184"><a href="#cb138-1184" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-show: hold</span></span>
-<span id="cb138-1185"><a href="#cb138-1185" aria-hidden="true" tabindex="-1"></a><span class="co">#now compare both directly </span></span>
-<span id="cb138-1186"><a href="#cb138-1186" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> (</span>
-<span id="cb138-1187"><a href="#cb138-1187" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Final KNN Test Set Comparison</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span></span>
-<span id="cb138-1188"><a href="#cb138-1188" aria-hidden="true" tabindex="-1"></a>  <span class="st">"-"</span> <span class="op">*</span> <span class="dv">80</span> <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> </span>
-<span id="cb138-1189"><a href="#cb138-1189" aria-hidden="true" tabindex="-1"></a>  <span class="ss">f"Biomarker model: K = </span><span class="sc">{</span>best_k_bio<span class="sc">}</span><span class="ss">, test accuracy = </span><span class="sc">{</span>bio_test_acc<span class="sc">:.3f}</span><span class="ch">\n</span><span class="ss">"</span> <span class="op">+</span></span>
-<span id="cb138-1190"><a href="#cb138-1190" aria-hidden="true" tabindex="-1"></a>  <span class="ss">f"Core model:      K = </span><span class="sc">{</span>best_k_core<span class="sc">}</span><span class="ss">, test accuracy = </span><span class="sc">{</span>core_test_acc<span class="sc">:.3f}</span><span class="ch">\n</span><span class="ss">"</span> <span class="op">+</span></span>
-<span id="cb138-1191"><a href="#cb138-1191" aria-hidden="true" tabindex="-1"></a>  <span class="st">"-"</span> <span class="op">*</span> <span class="dv">80</span>)</span>
-<span id="cb138-1192"><a href="#cb138-1192" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb138-1193"><a href="#cb138-1193" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(output)</span>
-<span id="cb138-1194"><a href="#cb138-1194" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb138-1155"><a href="#cb138-1155" aria-hidden="true" tabindex="-1"></a>To investigate this, confusion matrices and classification reports for each model are constructed below.</span>
+<span id="cb138-1156"><a href="#cb138-1156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1157"><a href="#cb138-1157" aria-hidden="true" tabindex="-1"></a><span class="fu">##### &lt;u&gt; 2.2.5.5: Model Evaluation - Classification Reports &amp; Confusion Matrices &lt;/u&gt;</span></span>
+<span id="cb138-1158"><a href="#cb138-1158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1159"><a href="#cb138-1159" aria-hidden="true" tabindex="-1"></a><span class="fu">###### &lt;u&gt;**Biomarker Class Report + Confusion Matrix Analysis** &lt;/u&gt;</span></span>
+<span id="cb138-1160"><a href="#cb138-1160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1163"><a href="#cb138-1163" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb138-1164"><a href="#cb138-1164" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "bio-class-report-and-conf-maxtrix"</span></span>
+<span id="cb138-1165"><a href="#cb138-1165" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb138-1166"><a href="#cb138-1166" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb138-1167"><a href="#cb138-1167" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
+<span id="cb138-1168"><a href="#cb138-1168" aria-hidden="true" tabindex="-1"></a><span class="co">#biomarker model </span></span>
+<span id="cb138-1169"><a href="#cb138-1169" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Biomarker Model Classification Report: "</span>)</span>
+<span id="cb138-1170"><a href="#cb138-1170" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(Y_bio_test, Y_bio_pred))<span class="op">;</span></span>
+<span id="cb138-1171"><a href="#cb138-1171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1172"><a href="#cb138-1172" aria-hidden="true" tabindex="-1"></a>ConfusionMatrixDisplay.from_predictions(Y_bio_test, Y_bio_pred)<span class="op">;</span></span>
+<span id="cb138-1173"><a href="#cb138-1173" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Biomarker Model Confusion Matrix"</span>)<span class="op">;</span></span>
+<span id="cb138-1174"><a href="#cb138-1174" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb138-1175"><a href="#cb138-1175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1176"><a href="#cb138-1176" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb138-1177"><a href="#cb138-1177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1178"><a href="#cb138-1178" aria-hidden="true" tabindex="-1"></a>This classification report shows a balanced error structure across both classes, which addresses the class imbalance concern that was flagged earlier. For the non-NAFLD class (0), precision was 0.9 and recall was 0.95, which indicates the model can identify most true negatives correctly while producing very few false positives. For the NAFLD class (1), precision was higher at 0.93, but recall decreased to 0.86. This suggests the model is more conservative when predicting positive cases, but still misses \~14% of true positive NAFLD cases. This asymmetry may be clinically relevant since in screening contexts, false negatives tend to be more costly than false positives. This relatively lower recall for class one should therefore be noted as a limitation.</span>
+<span id="cb138-1179"><a href="#cb138-1179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1180"><a href="#cb138-1180" aria-hidden="true" tabindex="-1"></a>It is worth noting that the macro-averaged F1 score and weighted average F1 score are both 0.91, which confirms that model performance is distributed well across both classes, rather than being concentrated in the majority class. This balanced distribution is also confirmed directly in the confusion matrix. Out of the 327 true NAFLD cases, 45 were misclassified as false negatives, while only 22 of the 435 true negatives were flagged incorrectly (\~14% vs \~5%). Since our total test samples for this set is only 762, it is important to consider that these error counts carry more variance than those of the core model, and should be interpreted with that instability in mind.</span>
+<span id="cb138-1181"><a href="#cb138-1181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1182"><a href="#cb138-1182" aria-hidden="true" tabindex="-1"></a><span class="fu">###### &lt;u&gt;**Core Class Report + Confusion Matrix Analysis** &lt;/u&gt;</span></span>
+<span id="cb138-1183"><a href="#cb138-1183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1186"><a href="#cb138-1186" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb138-1187"><a href="#cb138-1187" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "core-class-report-and-conf-maxtrix"</span></span>
+<span id="cb138-1188"><a href="#cb138-1188" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb138-1189"><a href="#cb138-1189" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb138-1190"><a href="#cb138-1190" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
+<span id="cb138-1191"><a href="#cb138-1191" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-show: hold</span></span>
+<span id="cb138-1192"><a href="#cb138-1192" aria-hidden="true" tabindex="-1"></a><span class="co">#core model </span></span>
+<span id="cb138-1193"><a href="#cb138-1193" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Core Feature Model Classification Report: "</span>)</span>
+<span id="cb138-1194"><a href="#cb138-1194" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(Y_core_test, Y_core_pred))<span class="op">;</span></span>
 <span id="cb138-1195"><a href="#cb138-1195" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1196"><a href="#cb138-1196" aria-hidden="true" tabindex="-1"></a>Taken together, these classification reports' and confusion matrices' results clarify the nature of the performance gap identified in the model comparison. Both models demonstrate genuine discriminative ability across both classes, with neither is simply defaulting to the majority class. This is important because it validates the accuracy figures reported earlier as meaningful rather than inflated. However, the core model achieves substantially lower error rates in both directions, with false negative and false positive rates well below 3%, compared to 14% and 5% respectively in the biomarker model.</span>
-<span id="cb138-1197"><a href="#cb138-1197" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1198"><a href="#cb138-1198" aria-hidden="true" tabindex="-1"></a>The most practically significant difference is the biomarker model's recall for the NAFLD-positive class. A false negative rate of 14% would be a meaningful limitation in any clinical screening application, and would not pass professional standards for practical use or clinical implementation. This suggests the biomarker feature set, while genuinely informative, has not yet reached the sensitivity required to serve as a reliable standalone predictor.</span>
+<span id="cb138-1196"><a href="#cb138-1196" aria-hidden="true" tabindex="-1"></a>ConfusionMatrixDisplay.from_predictions(Y_core_test, Y_core_pred)<span class="op">;</span></span>
+<span id="cb138-1197"><a href="#cb138-1197" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Core Feature Model Confusion Matrix"</span>)<span class="op">;</span></span>
+<span id="cb138-1198"><a href="#cb138-1198" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
 <span id="cb138-1199"><a href="#cb138-1199" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1200"><a href="#cb138-1200" aria-hidden="true" tabindex="-1"></a>That reinforces the conclusion that biomarker signal exists but requires a more representative dataset, refined feature selection, and potentially a more expressive model architecture before it can approach the performance of established proxy-based classification.</span>
+<span id="cb138-1200"><a href="#cb138-1200" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb138-1201"><a href="#cb138-1201" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1202"><a href="#cb138-1202" aria-hidden="true" tabindex="-1"></a><span class="fu">### &lt;u&gt; 2.2.6: Core + Biomarker Models: A Comparison &amp; Discussion &lt;/u&gt;</span></span>
+<span id="cb138-1202"><a href="#cb138-1202" aria-hidden="true" tabindex="-1"></a>This core feature model analysis demonstrates strong and balanced performances across both classes. For the NAFLD class (1), precision, recall, and F1 scoring all are 0.98, and the same values are 0.97 for the non-NAFLD class (0). Out of 2232 true positives for class 0, only 53 were misidentified, and only 44 were missed out of 1665 for class 1, meaning only 97/3897 test samples were misclassified. With both error types having similar low and proportional rates, it indicates the core model is genuinely discriminating rather than exploiting the class distribution.</span>
 <span id="cb138-1203"><a href="#cb138-1203" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1204"><a href="#cb138-1204" aria-hidden="true" tabindex="-1"></a>Overall, when looking at the KNN results with the logistic regression, they both clearly establish that biomarker-derived features carry real predicative signalling for FLD status. However, they also show that signaling is less stable, more sensitive to modeling choices, and does not yet sufficiently match the classification strength of previously established proxy-based measures, like HSI.</span>
+<span id="cb138-1204"><a href="#cb138-1204" aria-hidden="true" tabindex="-1"></a><span class="fu">##### &lt;u&gt; 2.2.5.6: KNN Model Comparison &lt;/u&gt;</span></span>
 <span id="cb138-1205"><a href="#cb138-1205" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb138-1206"><a href="#cb138-1206" aria-hidden="true" tabindex="-1"></a>It is also worth acknowledging that both KNN and logistic regression are relatively simple machine learning model architectures and analysis of these features may be stronger under a more complex modeling approach. However, these results can be understood as a baseline characterization of biomarker signalling, though analysis of a more representative biomarker subset would be the next step to strengthen these conclusions.</span>
+<span id="cb138-1208"><a href="#cb138-1208" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb138-1209"><a href="#cb138-1209" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: "final-KNN-test-set-comparison"</span></span>
+<span id="cb138-1210"><a href="#cb138-1210" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb138-1211"><a href="#cb138-1211" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb138-1212"><a href="#cb138-1212" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: true</span></span>
+<span id="cb138-1213"><a href="#cb138-1213" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-show: hold</span></span>
+<span id="cb138-1214"><a href="#cb138-1214" aria-hidden="true" tabindex="-1"></a><span class="co">#now compare both directly </span></span>
+<span id="cb138-1215"><a href="#cb138-1215" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> (</span>
+<span id="cb138-1216"><a href="#cb138-1216" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Final KNN Test Set Comparison</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span></span>
+<span id="cb138-1217"><a href="#cb138-1217" aria-hidden="true" tabindex="-1"></a>  <span class="st">"-"</span> <span class="op">*</span> <span class="dv">80</span> <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> </span>
+<span id="cb138-1218"><a href="#cb138-1218" aria-hidden="true" tabindex="-1"></a>  <span class="ss">f"Biomarker model: K = </span><span class="sc">{</span>best_k_bio<span class="sc">}</span><span class="ss">, test accuracy = </span><span class="sc">{</span>bio_test_acc<span class="sc">:.3f}</span><span class="ch">\n</span><span class="ss">"</span> <span class="op">+</span></span>
+<span id="cb138-1219"><a href="#cb138-1219" aria-hidden="true" tabindex="-1"></a>  <span class="ss">f"Core model:      K = </span><span class="sc">{</span>best_k_core<span class="sc">}</span><span class="ss">, test accuracy = </span><span class="sc">{</span>core_test_acc<span class="sc">:.3f}</span><span class="ch">\n</span><span class="ss">"</span> <span class="op">+</span></span>
+<span id="cb138-1220"><a href="#cb138-1220" aria-hidden="true" tabindex="-1"></a>  <span class="st">"-"</span> <span class="op">*</span> <span class="dv">80</span>)</span>
+<span id="cb138-1221"><a href="#cb138-1221" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb138-1222"><a href="#cb138-1222" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(output)</span>
+<span id="cb138-1223"><a href="#cb138-1223" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb138-1224"><a href="#cb138-1224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1225"><a href="#cb138-1225" aria-hidden="true" tabindex="-1"></a>Taken together, these classification reports' and confusion matrices' results clarify the nature of the performance gap identified in the model comparison. Both models demonstrate genuine discriminative ability across both classes, with neither is simply defaulting to the majority class. This is important because it validates the accuracy figures reported earlier as meaningful rather than inflated. However, the core model achieves substantially lower error rates in both directions, with false negative and false positive rates well below 3%, compared to 14% and 5% respectively in the biomarker model.</span>
+<span id="cb138-1226"><a href="#cb138-1226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1227"><a href="#cb138-1227" aria-hidden="true" tabindex="-1"></a>The most practically significant difference is the biomarker model's recall for the NAFLD-positive class. A false negative rate of 14% would be a meaningful limitation in any clinical screening application, and would not pass professional standards for practical use or clinical implementation. This suggests the biomarker feature set, while genuinely informative, has not yet reached the sensitivity required to serve as a reliable standalone predictor.</span>
+<span id="cb138-1228"><a href="#cb138-1228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1229"><a href="#cb138-1229" aria-hidden="true" tabindex="-1"></a>That reinforces the conclusion that biomarker signal exists but requires a more representative dataset, refined feature selection, and potentially a more expressive model architecture before it can approach the performance of established proxy-based classification.</span>
+<span id="cb138-1230"><a href="#cb138-1230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1231"><a href="#cb138-1231" aria-hidden="true" tabindex="-1"></a><span class="fu">### &lt;u&gt; 2.2.6: Core + Biomarker Models: A Comparison &amp; Discussion &lt;/u&gt;</span></span>
+<span id="cb138-1232"><a href="#cb138-1232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1233"><a href="#cb138-1233" aria-hidden="true" tabindex="-1"></a>Overall, when looking at the KNN results with the logistic regression, they both clearly establish that biomarker-derived features carry real predicative signalling for FLD status. However, they also show that signaling is less stable, more sensitive to modeling choices, and does not yet sufficiently match the classification strength of previously established proxy-based measures, like HSI.</span>
+<span id="cb138-1234"><a href="#cb138-1234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-1235"><a href="#cb138-1235" aria-hidden="true" tabindex="-1"></a>It is also worth acknowledging that both KNN and logistic regression are relatively simple machine learning model architectures and analysis of these features may be stronger under a more complex modeling approach. However, these results can be understood as a baseline characterization of biomarker signalling, though analysis of a more representative biomarker subset would be the next step to strengthen these conclusions.</span>
 </code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
