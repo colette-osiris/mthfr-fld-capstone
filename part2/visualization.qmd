@@ -1,5 +1,1049 @@
 ---
 title: "2.3 Visualization & Analysis"
+format: 
+  html:
+    css: styles.css
+    code-fold: false
+    code-summary: "Show code"
+editor: visual
+execute:
+  echo: true
+  output: true
+toc-depth: 5
 ---
 
-*Content in progress.*
+### <u> 2.3.1: Overview & Setup </u>
+
+The R portion of Part 2 functions as a diagnostic and interpretive layer on top of the machine learning pipeline established in section 2.2, which focused on classification modeling and validation metrics. 
+
+##### <u> 2.3.1.1: Purpose </u>
+
+This section uses R to examine the structural and distributional features of the dataset that shaped the ML portion results. R was selected for this portion because it is often used by computational biologists for cohort stratification and distributional trend analysis, which aligns with the core analytical approach for this stage of the project.
+
+Specifically, this section addresses four questions left open or only partially resolved by the ML Python analysis:
+
+1.  How is missingness structured in the biomarker subset, and how well does that subset demographically represent the full cohort? 
+
+2.  Do the novel biomarker distributions separate meaningfully across HSI severity categories, and do those distributions contribute to an explanation for the counter-intuitive logistic regression coefficients observed in section 2.2.4.3?
+
+3.  What are the structural implications of the sex imbalance identified in the biomarker subset section 2.2.4.4 for downstream interpretation? 
+
+4.  How do the four trained models (core and biomarker, logistic regression & KNN) compare when their performance metrics are viewed side-by-side rather than as separate outputs? 
+
+These diagnostic questions are designed to complement the modeling work in section 2.2, rather than replicate it. No models are refit in R. The intent of this portion is to investigate the dataset characteristics that contextualize Part 2's  findings, especially those that remain unclear, to improve thewieght and clarity of the coding contribution in Part 1–Part 2 integration discussion.
+
+##### <u> 2.3.1.2: Load Packages & Data </u>
+
+Packages are loaded using "pacman::p_load" to streamline installation. 
+
+The dataset that is read in below is is the final analysis-ready NHANES file that was constructed via the PostgreSQL pipeline described in section 2.1 and used for the Python analysis in section 2.2.  
+
+Full scripts for file construction pipeline can be found on the GitHub project repository (link: ). 
+
+```{r}
+#| label: install-packages 
+#| code-fold: true
+##| output: false
+
+
+# LOAD PACKAGES -  -------------
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse,
+               stringr,
+               ggridges, #new feature
+               janitor, #new feature 
+               viridis, 
+               patchwork, 
+               scales, 
+               here, 
+               grid, 
+               flextable, 
+               update = FALSE)
+```
+
+placeholder 
+
+```{r}
+#| label: data-import-exploration 
+#| code-fold: true
+##| output: false
+
+# read in final analysis-ready NHANES file from PostgreSQL pipeline (sect. 2.1)
+NHANES.dataset.01 <- readr::read_csv(here::here("data",
+                                        "clean_data",
+                                        "nhanes_final.csv"),
+                                        name_repair = "universal")
+
+##explore data 
+glimpse(NHANES.dataset.01)
+names(NHANES.dataset.01) 
+```
+
+##### <u> 2.3.1.3: Label Reconstruction </u>
+
+HSI and its derived labels (NAFLD, HSI_category) are re-constructed here rather than imported from the Python analysis for reproducibility purposes. This way, any reader running this file in isolation arrives at the same labels that were used in section 2.2 independently. 
+
+```{r}
+#| label: HSI-component-derivatives 
+#| output: false
+
+
+# DERIVE HSI COMPONENTS & LABELS -  -------------
+#
+#using same formulas as 2.2.3.4 in ML doc
+#adapt from project code - look at PLSC426 content for exact formatting 
+NHANES.dataset.01 <- NHANES.dataset.01 %>%
+  dplyr::mutate(
+    #sex indicator: 1 = female, 0 = male
+    female = dplyr::case_when(
+      sex == 2 ~ 1L, 
+      TRUE ~ 0L),
+    #diabetes indicator: 1 = yes, 0 = no
+    #need to collapse all other options (7/9/etc)
+    diabetic = dplyr::case_when(
+      diabetes == 1 ~ 1L, 
+      TRUE ~ 0L),
+    #ALT/AST ratio (used in HSI)
+    alt_ast_ratio = alt / ast,
+    #HSI formula: 8*(ALT/AST) + BMI + 2*(if diabetic) + 2*(if female)
+    HSI = 8 * alt_ast_ratio + bmi + (2 * diabetic) + (2 * female),
+    #binary NAFLD label: 1 = NAFLD (HSI >= 36), 0 = healthy
+    NAFLD = as.integer(HSI >= 36),
+    #same three-level severity category - use later for distributional analysis
+    HSI_category = dplyr::case_when(
+      #need to address NA so they dont get misclassified 
+      is.na(HSI) ~ NA_character_,
+      HSI < 30 ~ "healthy",
+      HSI < 36 ~ "borderline",
+      HSI >= 36 ~ "nafld_like"), #don't forget TRUE catch-all
+    #set ordered factor so healthy -> borderline -> nafld_like reads left-to-right
+    HSI_category = forcats::fct_relevel(HSI_category,
+                                        "healthy", 
+                                        "borderline", 
+                                        "nafld_like"))
+
+#view it 
+NHANES.dataset.01
+```
+
+A brief integrity check below confirms the R-derived labels match the derived labels from section 2.2.3.5 (nafld_like = 6,977; borderline = 4,022; healthy = 3,416).
+
+```{r}
+#| code-fold: true
+#| echo: true
+#| output: true
+
+#confirm category counts match Python-derived labels from §2
+hsi_category_flextable <- NHANES.dataset.01 %>%
+  dplyr::count(HSI_category, 
+               name = "count") %>%
+  #use flextable formatting from class 
+  flextable::flextable() %>%
+  flextable::theme_booktabs(bold_header = TRUE) %>%
+  flextable::align(align = "center", part = "all") %>%
+  flextable::valign(valign = "bottom", part = "header") %>% 
+  flextable::padding(padding = 1, part = "all") %>% 
+  flextable::autofit()
+
+
+#view it 
+hsi_category_flextable
+
+#save flextable 
+flextable::save_as_image(x = hsi_category_flextable, path = "../plots/part2/hsi_category_flextable.png")
+```
+
+With labels reconstructed and validated, the analysis proceeds to the diagnostic examinations outlined above.
+
+### <u> 2.3.2: Missingness & Subset Representativeness </u>
+
+##### <u> 2.3.2.1: Biomarker Missingness by Cohort </u>
+```{r}
+#| label: biomarker-missingness-table
+#| code-fold: true
+#| output: true
+
+# BIOMARKER MISSINGNESS HEATMAP -  -------------
+#tile heatmap of biomarker coverage % per cohort 
+missingness_data <- NHANES.dataset.01 %>% 
+  dplyr::select(cohort, 
+                homocysteine, 
+                serum_folate, 
+                rbc_folate, 
+                crp,
+                mm_acid, 
+                ggt, 
+                vit_b12, 
+                ferritin) %>% 
+  #pivot longer so biomarkers become a variable 
+  tidyr::pivot_longer(
+    cols = -cohort, 
+    names_to = "biomarker",
+    values_to = "value") %>% 
+  #compute coverage per biomarker per cohort 
+  dplyr::summarise(
+    coverage_pct = sum(!is.na(value)) / dplyr::n() * 100,
+    .by = c(cohort, biomarker)) %>% 
+  dplyr::mutate(
+    #rename biomarkers for cleaner display 
+    biomarker = dplyr::recode(
+      biomarker,
+      "homocysteine" = "Homocysteine",
+      "serum_folate" = "Serum Folate",
+      "rbc_folate" = "RBC Folate",
+      "crp" = "CRP",
+      "mm_acid" = "MMA",
+      "ggt" = "GGT",
+      "vit_b12" = "Vitamin B12",
+      "ferritin" = "Ferritin"),
+    #order biomarkers by lowest avg coverage 
+    biomarker = forcats::fct_reorder(biomarker, coverage_pct, .fun = mean),
+    #clean cohort labels 
+    cohort = dplyr::case_when(
+      cohort == "c1_2001_2002" ~ "2001-2002",
+      cohort == "c2_2003_2004" ~ "2003-2004"))
+
+#plot 
+missingness_plot <- missingness_data %>% 
+  ggplot(aes(
+    x = cohort, 
+    y = biomarker, 
+    fill = coverage_pct)) +
+  geom_tile(color = "white") + 
+  #add % labels in cells - had to look up correct geom for annotations like this
+  geom_text(
+    aes(label = paste0(round(coverage_pct, 1), "%")),
+    color = "white", #changed - black looked odd 
+    fontface = "bold",
+    size = 4) +
+  #color theme is same as R project but continous 
+  scale_fill_viridis_c(
+    option = "plasma",
+    begin = 0, 
+    end = 0.7,    #avoid blinding yellow end 
+    name = "Coverage (%)") +
+  labs(
+    x = "Cohort", 
+    y = "Biomarker",
+    title = "Biomarker Coverage by NHANES Cohort \n (% of Participants with Non-Missing Values)") +
+  theme_minimal() +
+  #title/legend position wrangling 
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_text(hjust = 0.5),
+    panel.grid = element_blank())
+
+#save plot - ggplot not flextable syntax 
+ggsave(
+  filename = here::here("plots", "part2", "biomarker_missingness_tile.png"),
+  plot = missingness_plot,
+  dpi = 400,
+  width = 10,
+  height = 7,
+  units = "in",
+  bg = "white") #was saving grey - this fixed it
+
+#view it 
+missingness_plot
+```
+-notes to refine: 
+- immediately see a gap in coverage for core biomarkers of C1 
+- huge cohort imbalance though proportional distribution across skew per variable 
+is relatovely stable - need to discuss skew impact and possible reasoning behind 
+such low coverage in C1
+-  ~7% c1 coverage matches the documented biomarker subset size from preprocessing 
+in 2.1.5 - confirms this is a source-level NHANES data artifact, not a pipeline error
+- CRP and GGT at 93%+ in both cohorts - worth noting came from different source files 
+- not the shared L06 biomarker file -  Maybe why their coverage doesn't collapse 
+with the others in c1.
+- Ferritin c2 at 31.3% — matches preprocessing in 2.1.7 - also note that ferritin lived in a separate source file  for c2 with partial coverage. 
+
+expanding to include all variables to view if coverage scope is biomarker specific 
+
+```{r}
+#| label: full-missingness-table
+#| code-fold: true
+#| output: true
+
+# BIOMARKER MISSINGNESS HEATMAP -  -------------
+#tile heatmap of biomarker coverage % per cohort 
+full_missingness_data <- NHANES.dataset.01 %>% 
+  dplyr::select(cohort,
+                alt,
+                ast, 
+                diabetes, 
+                bmi,
+                sex, 
+                homocysteine, 
+                serum_folate, 
+                rbc_folate, 
+                crp,
+                mm_acid, 
+                ggt, 
+                vit_b12, 
+                ferritin) %>% 
+  #pivot longer so biomarkers become a variable 
+  tidyr::pivot_longer(
+    cols = -cohort, 
+    names_to = "biomarker",
+    values_to = "value") %>% 
+  #compute coverage per biomarker per cohort 
+  dplyr::summarise(
+    coverage_pct = sum(!is.na(value)) / dplyr::n() * 100,
+    .by = c(cohort, biomarker)) %>% 
+  dplyr::mutate(
+    #rename biomarkers for cleaner display 
+    biomarker = dplyr::recode(
+      biomarker,
+      "homocysteine" = "Homocysteine",
+      "serum_folate" = "Serum Folate",
+      "rbc_folate" = "RBC Folate",
+      "crp" = "CRP",
+      "mm_acid" = "MMA",
+      "ggt" = "GGT",
+      "vit_b12" = "Vitamin B12",
+      "ferritin" = "Ferritin",
+      "alt" = "ALT",
+      "ast" = "AST",
+      "bmi" = "BMI",
+      "sex" = "Sex",
+      "diabetes" = "Diabetes"),
+    #order biomarkers by lowest avg coverage 
+    biomarker = forcats::fct_reorder(biomarker, coverage_pct, .fun = mean),
+    #clean cohort labels 
+    cohort = dplyr::case_when(
+      cohort == "c1_2001_2002" ~ "2001-2002",
+      cohort == "c2_2003_2004" ~ "2003-2004"))
+
+#plot 
+full_missingness_plot <- full_missingness_data %>% 
+  ggplot(aes(
+    x = cohort, 
+    y = biomarker, 
+    fill = coverage_pct)) +
+  geom_tile(color = "white") + 
+  #add % labels in cells - had to look up correct geom for annotations like this
+  geom_text(
+    aes(label = paste0(round(coverage_pct, 1), "%")),
+    color = "white", #changed - black looked odd 
+    fontface = "bold",
+    size = 4) +
+  #color theme is same as R project but continous 
+  scale_fill_viridis_c(
+    option = "plasma",
+    begin = 0, 
+    end = 0.7,    #avoid blinding yellow end 
+    name = "Coverage (%)") +
+  labs(
+    x = "Cohort", 
+    y = "Biomarker",
+    title = "Feature Coverage by NHANES Cohort \n (% of Participants with Non-Missing Values)") +
+  theme_minimal() +
+  #title/legend position wrangling 
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_text(hjust = 0.5),
+    panel.grid = element_blank())
+
+#save plot - ggplot not flextable syntax 
+#ggsave(
+  #filename = here::here("plots", "part2", "biomarker_missingness_tile.png"),
+  #plot = missingness_plot,
+  #dpi = 400,
+  #width = 10,
+  #height = 7,
+  #units = "in",
+  #bg = "white") #was saving grey - this fixed it
+
+#view it 
+full_missingness_plot
+```
+
+- might yse this instead idk yet 
+need to answer: 1.  How is missingness structured in the biomarker subset, and how well does that subset demographically represent the full cohort? 
+
+The visual story the figure tells: c1 has a severe biomarker gap from the L06 source file structure; c2 has more uniform coverage except for ferritin. That's a clean two-story finding.
+
+##### <u> 2.3.2.2: Demographic Comparison: Core vs Biomarker Subset </u>
+
+- importnat to consider when generalizing applications to gen pop
+-esp given sex skew 
+- can pull from R project syntax for MTHFR mutation freq vs demographic graph
+
+```{r}
+#| label: core-vs-biomarker-dataset-extraction
+#| code-fold: true
+#| output: true
+
+# DEMOGRAPHIC COMPARISON: CORE VS BIOMARKER SUBSET -  -------------
+#want to compare sex and race/ethnicity across full core dataset and biomarker subset
+#to show how selection bias manifests in the complete-case subset 
+
+#first need to set up both datasets 
+#core dataset - same columns Python uses for core model (drop NAs in core vars)
+core_dataset <- NHANES.dataset.01 %>% 
+  dplyr::filter(
+    !is.na(alt), 
+    !is.na(ast), 
+    !is.na(bmi), 
+    !is.na(sex), 
+    !is.na(diabetes)) %>% 
+  dplyr::mutate(dataset = "Core Dataset")
+
+#biomarker subset - all 13 features (8 biomarkers + 5 core)
+biomarker_subset <- NHANES.dataset.01 %>% 
+  dplyr::filter(
+    !is.na(homocysteine), 
+    !is.na(serum_folate), 
+    !is.na(rbc_folate), 
+    !is.na(crp), 
+    !is.na(mm_acid), 
+    !is.na(ggt), 
+    !is.na(vit_b12), 
+    !is.na(ferritin), 
+    !is.na(alt), 
+    !is.na(ast), 
+    !is.na(bmi), 
+    !is.na(sex), 
+    !is.na(diabetes)) %>% 
+  dplyr::mutate(dataset = "Biomarker Subset")
+
+#print sample sizes for prose reference 
+cat("Core dataset n:", nrow(core_dataset), "\n")
+cat("Biomarker subset n:", nrow(biomarker_subset), "\n")
+```
+
+placeholder 
+```{r}
+#| label: core-vs-biomarker-demographic-plot-prep
+#| code-fold: true
+#| output: true
+
+#stack them into one long df for plotting - look at data for actual labels used
+demographic_comparison <- dplyr::bind_rows(core_dataset, biomarker_subset) %>% 
+  dplyr::mutate(
+    #recoded sex for readability 
+    sex_label = dplyr::case_when(
+      sex == 1 ~ "Male",
+      sex == 2 ~ "Female"),
+    #recode race/ethnicity using NHANES codes - need to look at data for actual used
+    #labels found as follows: 
+    #1 = Mexican American, 2 = Other Hispanic, 3 = Non-Hispanic White,
+    #4 = Non-Hispanic Black, 5 = Other/Multi 
+    race_label = dplyr::case_when(
+      race_ethnicity == 1 ~ "Mexican American",
+      race_ethnicity == 2 ~ "Other Hispanic",
+      race_ethnicity == 3 ~ "Non-Hispanic White",
+      race_ethnicity == 4 ~ "Non-Hispanic Black",
+      race_ethnicity == 5 ~ "Other/Multi"))
+
+#sex proportionality summary per dataset 
+sex_summary <- demographic_comparison %>% 
+  dplyr::count(dataset, 
+               sex_label, 
+               name = "count") %>% 
+  dplyr::mutate(
+    proportion = count / sum(count),
+    .by = dataset)
+
+#race/ethnicity proportional summary per dataset 
+race_summary <- demographic_comparison %>% 
+  dplyr::filter(!is.na(race_label)) %>% #need to drop any NA race rows 
+  dplyr::count(dataset, 
+               race_label, 
+               name = "count") %>% 
+  dplyr::mutate(
+    proportion = count / sum(count),
+    .by = dataset,
+    #order race categories for consistent plotting 
+    race_label = forcats::fct_reorder(race_label, proportion, .desc = TRUE))
+
+```
+placeholder - likely wont need anything here since no output, just organization 
+
+```{r}
+#| label: core-vs-biomarker-sex-plot
+#| code-fold: true
+#| output: true
+
+#plot 1: sex comparison 
+sex_comparison_plot <- sex_summary %>% 
+  ggplot(aes(
+    x = sex_label, 
+    y = proportion, 
+    fill = dataset)) +
+  #dodge lets me avoid stacking - would be more than 100% female w skew in 2.2
+  geom_col(position = "dodge") + 
+  #geom_col() +
+  #use related color theme
+  scale_fill_viridis_d(
+    option = "magma", #related palette
+    begin = 0.2, 
+    end = 0.6) + #avoid the blinding white end
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 1)) +
+    #limits = c(0, 1)) +
+  labs(
+    x = "Sex",
+    y = "Proportion of Dataset",
+    title = "Sex Distribution: Core Dataset vs Biomarker Subset",
+    fill = "Dataset") +
+  theme_minimal() +
+  #title/legend position wrangling 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust =0.5))
+#may want to finilzie without gridlines - need to think and come back 
+  
+#view it 
+#sex_comparison_plot
+
+print(sex_comparison_plot)
+
+#need to decide if i want to save this indivifduals - if so get ggsave block
+
+```
+
+laceholder - likely wont need anything here since no output, just organization 
+
+
+```{r}
+#| label: core-vs-biomarker-demo-plot
+#| code-fold: true
+#| output: true
+
+#plot 2: race/ethnicity comparison 
+race_comparison_plot <- race_summary %>% 
+  ggplot(aes(
+    x = race_label, 
+    y = proportion, 
+    fill = dataset)) +
+  #same as before to avoid stacking
+  geom_col(position = "dodge") +
+  coord_flip() +     #flip axes b/c long race/ethnicity labels 
+  #use consistent theme and scale 
+  scale_fill_viridis_d(
+    option = "magma", 
+    begin = 0.2, 
+    end = 0.6) +
+  scale_y_continuous(
+    #use percent, not number form 
+    labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    x = "Race/Ethnicity",
+    y = "Proportion of Dataset",
+    title = "Race/Ethnicity Distribution: Core Dataset vs Biomarker Subset",
+    fill = "Dataset") +
+  theme_minimal() +
+  #title/legend position wrangling 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5))
+
+
+#view it 
+#race_comparison_plot
+
+print(race_comparison_plot)
+
+#need to decide if i want to save this individuals - if so get ggsave block
+
+```
+
+##### <u> 2.3.2.3: Representativeness Summary </u>
+
+- now multiplot
+
+```{r}
+#| label: core-vs-biomarker-distr-comparison-plot
+#| code-fold: true
+#| output: true
+
+#multiplot - want to keep original plots independent from multi-plot formatting
+#so I can use them in powerpoint  
+#step 1: 2 panels/plots stacked vertically 
+graph_stack <- (
+  (sex_comparison_plot +
+     #remove double elements (titles, axes titles, etc) 
+     theme(
+       plot.title = element_blank(),
+       axis.title.y = element_blank())) /
+    (race_comparison_plot +
+       theme(
+         plot.title = element_blank(),
+         axis.title.y = element_blank()))
+)
+
+#step 2: compose final multiplot w/ shared legend and overall title 
+demographic_multiplot <- graph_stack +
+  plot_layout(
+    guides = "collect",
+    heights = c(1, 1)) +
+  plot_annotation(
+    title = "Demographic Composition: \n Core Dataset vs Biomarker Complete-Case Subset",
+    subtitle = "Top: Sex   |   Bottom: Race/Ethnicity",
+    theme = theme(
+      plot.title = element_text(hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5))) &
+  theme(legend.position = "bottom")
+
+#show
+demographic_multiplot
+
+
+#not sure I like this more than individuals plots -need to ask Jeff
+#maybe add coord flip to sex? 
+#- also need to suppress sex x axis label 
+
+```
+notes:
+- confirms sex skew from 2.2 
+- race is slightly more representative but still not great or all encompassing (Asia/middle east/oceania)
+
+
+-DRAFT: The selection bias is dominantly a sex effect, secondarily a race effect, and the sex effect is large enough that the biomarker model's interpretation of any sex-related feature is compromised.
+
+### <u> 2.3.3: Biomarker Distributions Across HSI Categories </u>
+
+##### <u> 2.3.3.1: Distribution Panel </u>
+
+```{r}
+#| label: biomarker-distribution-panel
+#| code-fold: true
+#| output: true
+
+# BIOMARKER DISTRIBUTIONS ACROSS HSI CATEGORIES -  -------------
+#
+#violin + sina plot panel of 8 novel biomarkers faceted across healthy/borderline/nafld_like
+#applied to biomarker subset so all rows have complete biomaarker data 
+
+#first need to pivot biomarkers into long format for facetting 
+#same reshape pattern as PLSC476 demographic_table 
+#
+biomarker_long <- biomarker_subset %>% 
+  dplyr::filter(!is.na(HSI_category)) %>%    #drop any HSI NA rows 
+  dplyr::select(HSI_category, 
+                homocysteine, 
+                serum_folate, 
+                rbc_folate, 
+                crp,
+                mm_acid, 
+                ggt, 
+                vit_b12, 
+                ferritin) %>% 
+  #pivot longer so biomarkers become a variable 
+  tidyr::pivot_longer(
+    cols = -HSI_category, 
+    names_to = "biomarker",
+    values_to = "value") %>% 
+  dplyr::mutate(
+    #rename biomarkers for cleaner display 
+    biomarker = dplyr::recode(
+      biomarker,
+      "homocysteine" = "Homocysteine",
+      "serum_folate" = "Serum Folate",
+      "rbc_folate" = "RBC Folate",
+      "crp" = "CRP",
+      "mm_acid" = "MMA",
+      "ggt" = "GGT",
+      "vit_b12" = "Vitamin B12",
+      "ferritin" = "Ferritin"))
+
+
+#now plot - violin + sina layered, faceted by biomarker 
+#same pattern as hw3 PLOT E (violin + sina) 
+biomarker_distribution_plot <- 
+  ggplot(biomarker_long, aes(x = HSI_category,
+                             y = value,
+                             color = HSI_category,
+                             fill = HSI_category)) +
+  geom_violin(alpha = 0) +
+  ggforce::geom_sina(alpha = 0.5) +
+  #log transform y-axis for skewed biomarker distributions - from Unit 07.A
+  scale_y_continuous(trans = "log10") +
+  #same color theme as PLSC476 - need both color and fill since mapped in aes
+  scale_color_viridis_d(
+    option = "plasma", 
+    begin = 0, 
+    end = 0.7) +
+  scale_fill_viridis_d(
+    option = "plasma", 
+    begin = 0, 
+    end = 0.7) + #avoid blinding yellow end 
+  #facet by biomarker - free_y lets each biomarker have its own scale range 
+  #scaling options used in class did not work
+  # - had to look this one up but seems to address variation okay 
+  facet_wrap(~biomarker, 
+             scales = "free_y",
+             ncol = 4) +
+  labs(
+    x = NULL,
+    #x = "HSI Category",
+    color = "HSI Category",
+    fill = "HSI Category", #now show in legend
+    y = "Biomarker Value (log10 scale)",
+    title = "Novel Biomarker Distributions \n Across HSI Severity Categories") +
+  theme_minimal() +
+  #title/legend position wrangling
+  theme(legend.position = "bottom",
+        axis.text.x = element_blank(),     #hide x tick labels - redundant w/ legend
+        axis.ticks.x = element_blank(),    #hide x tick marks too 
+        plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5),
+        panel.grid.minor = element_blank())
+
+
+#save plot 
+#ggsave(
+  #filename = here::here("plots", "part2", "biomarker_distribution_panel.png"),
+  #plot = biomarker_distribution_plot,
+  #dpi = 400,
+  #width = 14,
+  #height = 9,
+  #units = "in",
+  #bg = "white")
+
+#view it 
+biomarker_distribution_plot
+```
+##### <u> 2.3.3.2: Biomarker-by-Biomarker Interpretation </u>
+
+notes:
+- distirubtions seem pretty equal across category and biomarker
+- crp, ferritin, GGT show directional shifts 
+- seems to be some outliers worth addressing and then redoing in next run through
+
+##### <u> 2.3.3.3: Connection to Model Performance </u>
+
+- come back to this 
+
+### <u> 2.3.4: Sex-Stratified View of Biomarker Subset </u>
+
+##### <u> 2.3.4.1: NAFLD Class Counts by Sex </u>
+
+- need table here 
+```{r}
+#| label: nafld-by-sex-biomarker-subset-prep
+#| code-fold: true
+#| output: true
+
+# NAFLD CLASS COUNTS BY SEX IN BIOMARKER SUBSET -  -------------
+#
+#grouped bar chart showing NAFLD +/- counts broken down by sex 
+#within the biomarker subset to visualize the inverted prevalence flagged in 2.2.4.4 
+
+#summary of NAFLD counts by sex 
+nafld_sex_summary <- biomarker_subset %>% 
+  dplyr::filter(!is.na(NAFLD),
+                !is.na(sex)) %>% 
+  dplyr::mutate(
+    #recode sex for readability 
+    sex_label = dplyr::case_when(
+      sex == 1 ~ "Male",
+      sex == 2 ~ "Female"),
+    #recode NAFLD for readability 
+    nafld_label = dplyr::case_when(
+      NAFLD == 1 ~ "NAFLD-positive",
+      NAFLD == 0 ~ "Healthy")) %>% 
+  dplyr::count(sex_label, 
+               nafld_label, 
+               name = "count") %>% 
+  dplyr::mutate(
+    #proportion within sex so bars are comparable across sex groups 
+    proportion = count / sum(count),
+    .by = sex_label)
+
+```
+placehllder 
+
+```{r}
+#| label: nafld-by-sex-biomarker-subset-plot
+#| code-fold: true
+#| output: true
+
+#okay now I can plot 
+nafld_sex_plot <- 
+  ggplot(nafld_sex_summary, aes(x = sex_label,
+                                y = proportion,
+                                fill = nafld_label)) +
+  geom_col(position = "dodge") + 
+  scale_fill_viridis_d(
+    option = "magma",
+    begin = 0.2,
+    end = 0.6) + #avoid blinding white end 
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    x = "Sex",
+    y = "Proportion within Sex",
+    title = "NAFLD Class Distribution by Sex \n in Biomarker Subset",
+    fill = "NAFLD Status") +
+  theme_minimal() +
+  #title/legend position wrangling 
+  theme(plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5),
+        panel.grid.minor = element_blank())
+
+
+#save plot 
+ggsave(
+  filename = here::here("plots", "part2", "nafld_by_sex_biomarker_subset.png"),
+  plot = nafld_sex_plot,
+  dpi = 400,
+  width = 12,
+  height = 7,
+  units = "in",
+  bg = "white")
+
+#view it 
+nafld_sex_plot
+
+```
+notes: 
+
+- skew not as visually bad as anticipated but still significant 
+- matches ML portion findings 
+- pretty equal class balance in males, females skew more towards healthy 
+  - need to figure out how this implicitely impacts sex skew since females make up 
+    most of data set and also skew towards healthy? 
+  - minimially further evidence that sex coefficient from ML is unstable/unreliable 
+
+
+##### <u> 2.3.4.2: Homocysteine by Sex & HSI Category </u>
+
+```{r}
+#| label: homocysteine-by-sex-hsi
+#| code-fold: true
+#| output: true
+
+# HOMOCYSTEINE DISTRIBUTION BY SEX AND HSI CATEGORY -  -------------
+#
+#violin + sina of homocysteine across HSI categories, faceted by sex 
+#tests whether Hcy pattern differs between sexes - ties to MTHFR pathway narrative 
+
+#homocysteine long format w/ sex labels - prep but small so same chunk 
+hcy_sex_data <- biomarker_subset %>% 
+  #get rid of any na skew 
+  dplyr::filter(!is.na(HSI_category),
+                !is.na(sex),
+                !is.na(homocysteine)) %>% 
+  dplyr::mutate(
+    sex_label = dplyr::case_when(
+      sex == 1 ~ "Male",
+      sex == 2 ~ "Female"))
+
+
+#plot - violin + sina pattern same as 2.3.3, but this time faceted by sex - 
+#need to evestigate results of previous chunk further 
+hcy_sex_plot <- 
+  ggplot(hcy_sex_data, aes(x = HSI_category,
+                           y = homocysteine,
+                           color = HSI_category,
+                           fill = HSI_category)) +
+  geom_violin(alpha = 0) +
+  ggforce::geom_sina(alpha = 0.5) +
+  #log transform since homocysteine is right-skewed 
+  scale_y_continuous(trans = "log10") +
+  scale_color_viridis_d(
+    option = "plasma", 
+    begin = 0, 
+    end = 0.7) +
+  scale_fill_viridis_d(
+    option = "plasma", 
+    begin = 0, 
+    end = 0.7) + 
+  #facet by sex 
+  facet_wrap(~sex_label, ncol = 2) + 
+  labs(
+    x = NULL, 
+    y = "Homocysteine (log10 scale)",
+    title = "Homocysteine Distribution by Sex \n Across HSI Severity Categories",
+    fill = "HSI Category",
+    color = "HSI Category") +
+  theme_minimal() +
+  #title/legend position wrangling 
+  theme(legend.position = "bottom",
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5),
+        panel.grid.minor = element_blank())
+
+
+#save plot 
+ggsave(
+  filename = here::here("plots", "part2", "homocysteine_by_sex_hsi.png"),
+  plot = hcy_sex_plot,
+  dpi = 400,
+  width = 12,
+  height = 7,
+  units = "in",
+  bg = "white")
+
+#view it 
+hcy_sex_plot
+```
+notes:
+- immediately can see sex based population skew 
+- males seem to exhibit higher homocysteine - not explicitely stated this project, 
+  bc uses mouse model but ANSC project paper notes that men seen to use BHMT pathway
+  to compensate - so why increased hcy? bc women are skewed healthier? 
+ -  wish i had MTHFR data 
+  - also makes me question applicability of stats to gen pop, esp with women seemingly more healthy
+    - doesnt align with known data, need to verify. -worthy of discussion 
+    - meaningful differences - should proceed with secondary analysis of most variable features (ggt, crp)
+
+##### <u> 2.3.4.3: CRP & GGT by Sex & HSI Category </u>
+
+```{r}
+#| label: crp-ggt-by-sex-hsi
+#| code-fold: true
+#| output: true
+
+# CRP & GGT DISTRIBUTIONS BY SEX AND HSI CATEGORY -  -------------
+
+#pivot CRP & GGT into long format w/ sex labels  
+crp_ggt_sex_data <- biomarker_subset %>% 
+  dplyr::filter(!is.na(HSI_category),
+                !is.na(sex),
+                !is.na(crp),
+                !is.na(ggt)) %>% 
+  dplyr::mutate(
+    sex_label = dplyr::case_when(
+      sex == 1 ~ "Male",
+      sex == 2 ~ "Female")) %>% 
+  dplyr::select(HSI_category, 
+                sex_label, 
+                crp, 
+                ggt) %>% 
+  #pivot longer so biomarkers become a variable 
+  tidyr::pivot_longer(
+    cols = c(crp, ggt), 
+    names_to = "biomarker",
+    values_to = "value") %>% 
+  dplyr::mutate(
+    #rename for cleaner display 
+    biomarker = dplyr::recode(
+      biomarker,
+      "crp" = "CRP",
+      "ggt" = "GGT"))
+
+
+#plot - violin + sina, faceted by biomarker (rows) x sex (cols) 
+crp_ggt_sex_plot <- 
+  ggplot(crp_ggt_sex_data, aes(x = HSI_category,
+                               y = value,
+                               color = HSI_category,
+                               fill = HSI_category)) +
+  geom_violin(alpha = 0) +
+  ggforce::geom_sina(alpha = 0.5) +
+  #log transform y-axis for skewed biomarker distributions
+  scale_y_continuous(trans = "log10") +
+  scale_color_viridis_d(
+    option = "plasma", 
+    begin = 0, 
+    end = 0.7) +
+  scale_fill_viridis_d(
+    option = "plasma", 
+    begin = 0, 
+    end = 0.7) + 
+  #facet grid - biomarker rows x sex columns; free_y lets each biomarker have its own scale 
+  facet_grid(biomarker ~ sex_label, 
+             scales = "free_y") +
+  labs(
+    x = NULL,
+    y = "Biomarker Value (log10 scale)",
+    title = "CRP & GGT Distributions by Sex \n Across HSI Severity Categories",
+    fill = "HSI Category",
+    color = "HSI Category") +
+  theme_minimal() +
+  #title/legend position wrangling 
+  theme(legend.position = "bottom",
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        strip.text = element_text(face = "bold"))
+
+
+#save plot 
+#ggsave(
+  #filename = here::here("plots", "part2", "crp_ggt_by_sex_hsi.png"),
+  #plot = crp_ggt_sex_plot,
+  #dpi = 400,
+  #width = 12,
+  #height = 9,
+  #units = "in",
+  #bg = "white")
+
+#view it 
+crp_ggt_sex_plot
+
+#ask jeff opinion on flipping order axes vs label for y 
+#- i know its not conventions but i felt like i naturally looked for the labels first, then the measurements 
+
+```
+
+notes:
+
+- also displays sex difference, especially the healthy class
+- need to look for sex changes 
+- whats going on witht the linear trend for CRP females low end 
+- dont forget outlier removal on next pass - maybe will do upstream all at once 
+  since seems to be an issue repeatedly 
+
+##### <u> 2.3.4.4: Structural Implications </u>
+
+### <u> 2.3.5: Model Performance Synthesis </u>
+
+##### <u> 2.3.5.1: Unified Performance Table </u>
+
+- going to use janitor/flextable combo like PLSC476 project 
+- consolidate 4 model results (Core LR, Core KNN, Bio LR, Bio KNN) into one flextable 
+
+```{r}
+#| label: unified-model-performance-synthesis-table
+#| code-fold: true
+#| output: true
+
+# MODEL PERFORMANCE SYNTHESIS TABLE -  -------------
+
+#I need scores from ML - could hard code them but that defeats all reproducibility efforts 
+#need to go back to ML and explore those memtrics into a csv that i read in here 
+## too tired to do that now - will do later and build framework then call it a night 
+
+
+#read in data 
+Model.Performance.Data.01 <- 
+  readr::read_csv(here::here("data",
+                             "clean_data",
+                             "model_performance_metrics.csv"),#DOESNT EXIST YET 
+                  name_repair = "universal")
+
+##explore data 
+glimpse(Model.Performance.Data.01)
+names(Model.Performance.Data.01)
+
+#flextable formatting from PLSC476 
+model_performance_flextable <- Model.Performance.Data.01 %>% 
+  flextable::flextable() %>% 
+  flextable::theme_booktabs(bold_header = TRUE) %>% 
+  flextable::align(align = "center", part = "all") %>% 
+  flextable::valign(valign = "bottom", part = "header") %>% 
+  flextable::padding(padding = 1, part = "all") %>% 
+  flextable::autofit()
+
+
+#view it 
+model_performance_flextable
+
+#save flextable 
+flextable::save_as_image(x = model_performance_flextable, 
+                         path = here::here("plots", "part2", "model_performance_synthesis.png"))
+
+```
+
+##### <u> 2.3.5.2: Cross-Model Observations </u>
+
+### <u> 2.3.6: Summary & Integration with Part 2 Findings </u>
+
+These diagnostic observations refine, but do not replace, the interpretive framing carried forward from Part 1. The extent to which MTHFR-pathway biomarker patterns observed in Part 1 map onto population-level FLD signal is taken up in the integration discussion that follows.
