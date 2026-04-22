@@ -207,6 +207,7 @@ df['HSI_category'] = np.where(
     np.where(df['HSI'] < 36, "borderline", "nafld_like"))
 
 
+
 ```
 
 ##### <u>2.2.3.5: Label Validation </u>
@@ -344,7 +345,7 @@ print(X_bio_train.shape, X_bio_test.shape)
 
 ```
 
-Since stratified sampling was used, the expected proportion of NAFLD-like vs. Healthy patients in the training and test sets should match the overall data set. To test this, the plot below explores the distribution of classes across the training and test sets in order to confirm that both sets are representative of the original data.
+Since stratified sampling was used, the expected proportion of NAFLD-like vs. Healthy patients in the training and test sets should match the overall data set.To test this, the plot below explores the distribution of classes across the training and test sets in order to confirm that both sets are representative of the original data.
 
 ```{python}
 
@@ -943,6 +944,8 @@ for k in candidate_ks:
     test_acc  = accuracy_score(Y_core_test,  knn.predict(X_core_test_scaled))
     print(f"{k:<3} | {test_acc:8.3f}")
 ```
+-everything past here looks good 
+
 
 In contrast to the biomarker model, the core feature model demonstrates consistently high test set accuracy across both unscaled and scaled conditions. In both cases, accuracy peaks at K=3, (0.968 and 0.981 respectively). This behavior aligns with expectations since the feature set is reflective of established HSI-predictive-based outcomes. These results show strong class separation with insensitivity to scaling. However, it's worth noting that accuracy alone may not fully characterize model performance given the class imbalance established in this dataset. The confusion matrix and classification report metrics presented later in this analysis provide some additional insight into this error structure and impact on class-specific performance.
 
@@ -950,35 +953,31 @@ When both model results are compared together, the biomarker model exhibits weak
 
 ##### <u> 2.2.5.2: Elbow Plots </u>
 
-The previous section identified K=7 and K=3 as the highest-accuracy values for the scaled biomarker and core feature model, respectively. To select final K values, elbow plots were created using cross-validated mean accuracy across all odd K values from 1 to 29 in order to visually confirm those selections and refine them if needed. The elbow point, which is the highest value on the plot before declining or plateauing, represents the best balance between over-fitting and under-fitting.
+The previous section identified K=7 and K=3 as candidate values for the scaled biomarker and core feature model, respectively. Elbow plots were created using cross-validated mean accuracy across all odd K values from 1 to 30 in order to visually confirm those selections and refine them if needed. The elbow point, which is the highest value on the plot before declining or plateauing, represents the best balance between over-fitting and under-fitting.
 
 ```{python}
-#| label: "bio-opt-k-csv-scaled"
+#| label: "core-CV-calc"
 #| code-fold: true
 #| echo: true
 #| output: true
 #| fig-show: hold
-# BIOMARKER MODEL: choose k using cross-validation on scaled training data
+# CORE MODEL: choose k using cross-validation on scaled training data
 
-# pick a range of k values to test
-k_values = list(range(1, 31))
-cv_scores = []
+core_k_values = list(range(1, 31))
+core_cv_scores = []
 
-# stratified 5-fold cross-validation - using stratified instead of standard to maintain consistent class proportions 
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=MY_RANDOM_STATE)
 
-for k in k_values:
-    knn_cv = KNeighborsClassifier(n_neighbors=k)
-    #need to scale
+for k in core_k_values:
+    core_knn_cv = KNeighborsClassifier(n_neighbors=k)
     scores = cross_val_score(
-        knn_cv,
-        X_bio_train_scaled,
-        Y_bio_train,
+        core_knn_cv,
+        X_core_train_scaled,
+        Y_core_train,
         cv=skf,
         scoring='accuracy'
     )
-    
-    cv_scores.append(scores.mean())
+    core_cv_scores.append(scores.mean())
 ```
 
 ```{python}
@@ -989,63 +988,35 @@ for k in k_values:
 #| fig-show: hold
 # BIOMARKER MODEL: choose k using cross-validation on scaled training data
 
-# pick a range of k values to test
 bio_k_values = list(range(1, 31))
 bio_cv_scores = []
 
-# stratified 5-fold cross-validation - using stratified instead of standard to maintain consistent class proportions 
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=MY_RANDOM_STATE)
 
 for k in bio_k_values:
     bio_knn_cv = KNeighborsClassifier(n_neighbors=k)
-    #need to scale
-    bio_scores = bio_cross_val_score(
+    bio_scores = cross_val_score(          # <-- fixed typo
         bio_knn_cv,
         X_bio_train_scaled,
         Y_bio_train,
         cv=skf,
         scoring='accuracy'
     )
-    
     bio_cv_scores.append(bio_scores.mean())
 
-# identify best k
 best_k_bio = bio_k_values[bio_cv_scores.index(max(bio_cv_scores))]
-#best_score_bio = max(cv_scores)
-best_k_core = bio_k_values[cv_scores.index(max(cv_scores))]
+best_k_core = core_k_values[core_cv_scores.index(max(core_cv_scores))]
 
-output=(
-  f"Best biomarker K: {best_k_bio}\n" +
-  f"Best biomarker CV accuracy: {best_k_bio}")
-print(output)
+print(
+    f"Best biomarker K: {best_k_bio}\n"
+    f"Best biomarker CV accuracy: {max(bio_cv_scores):.3f}\n"   # <-- fixed print bug
+    f"Best core K: {best_k_core}\n"
+    f"Best core CV accuracy: {max(core_cv_scores):.3f}"
+)
+
 ```
-#code block is a mess. It's 2:39 AM im going to bed
 
-
-
-
-
-
-###### <u>**Biomarker Model Elbow Plot** </u>
-
-```{python}
-#| label: "bio-elbow-plot"
-#| code-fold: true
-#| echo: true
-#| output: true
-# plot results
-plt.figure(figsize=(8, 4));
-plt.plot(k_values, cv_scores, marker='o');
-plt.xlabel('Number of Neighbors (K)');
-plt.ylabel('Mean CV Accuracy');
-plt.title('Core Feature Model: K Selection for KNN');
-plt.xticks(k_values[::2], rotation=45);
-plt.grid(True);
-plt.tight_layout();
-#now show 
-plt.show();
-```
-This cross-validation elbow plot confirms the biomarker model accuracy peaks at K=9 with a mean CV accuracy of 0.902. It is worth noting that the curve shows considerable variability across K values instead of the commonly observed smooth rise-to-plateau pattern, which could be indicative of significant noise in the biomarker feature set. However, this variability is consistent with the sensitivity to pre-processing that was observed in the training section earlier in the analysis, which showed substantial differences in scaled and unscaled results in the biomarker feature set. For this model, K=9 is selected as the final biomarker K, since it represents the peak CV accuracy and provides slightly more smoothing than the K=7 identified previously.
+Cross-validation identified K=9 as the optimal biomarker K (mean CV accuracy: 0.902) and K=7 as the optimal core K (mean CV accuracy: 0.981). The elbow plots below visualize these results for each model.
 
 ###### <u>**Core Model Elbow Plot** </u>
 
@@ -1056,19 +1027,41 @@ This cross-validation elbow plot confirms the biomarker model accuracy peaks at 
 #| output: true
 # plot results
 plt.figure(figsize=(8, 4));
-plt.plot(k_values, cv_scores, marker='o');
+plt.plot(core_k_values, core_cv_scores, marker='o');
 plt.xlabel('Number of Neighbors (K)');
 plt.ylabel('Mean CV Accuracy');
 plt.title('Core Feature Model: K Selection for KNN');
-plt.xticks(k_values[::2], rotation=45);
+plt.xticks(core_k_values[::2], rotation=45);
 plt.grid(True);
 plt.tight_layout();
 #now show 
 plt.show();
 ```
 
+The core feature elbow plot shows a clearer pattern, with accuracy peaking at K=7 with a mean CV accuracy of 0.981 that consistently declines after the peak. This trend is more consistent with classical elbow curves, which aligns logically since it reflects the stronger, more stable signal of the core feature set. Therefore, K=7 is selected as the final core model K, which replaces the K=3 identified in the initial test set sweep. 
 
-The core feature elbow plot shows a clearer pattern, with accuracy peaking at K=7 with a mean CV accuracy of 0.981 that consistently declines after the peak. This trend is more consistent with classical elbow curves, which aligns logically since it reflects the stronger, more stable signal of the core feature set. Therefore, K=7 is selected as the final core model K, which replaces the K=3 identified in the initial test set sweep. With optimal K values confirmed via cross-validation, both models can now be finalized for evaluation.
+###### <u>**Biomarker Model Elbow Plot** </u>
+
+```{python}
+#| label: "bio-elbow-plot"
+#| code-fold: true
+#| echo: true
+#| output: true
+# plot results
+plt.figure(figsize=(8, 4));
+plt.plot(bio_k_values, bio_cv_scores, marker='o');
+plt.xlabel('Number of Neighbors (K)');
+plt.ylabel('Mean CV Accuracy');
+plt.title('Biomarker Feature Model: K Selection for KNN');
+plt.xticks(bio_k_values[::2], rotation=45);
+plt.grid(True);
+plt.tight_layout();
+#now show 
+plt.show();
+```
+This cross-validation elbow plot identifies the biomarker model accuracy peaks at K=9 with a mean CV accuracy of 0.902. It is worth noting that the curve shows considerable variability across K values instead of the commonly observed smooth rise-to-plateau pattern, which could be indicative of significant noise in the biomarker feature set. However, this variability is consistent with the sensitivity to preprocessing that was observed in the training section earlier in the analysis, which showed substantial differences in scaled and unscaled results in the biomarker feature set. The elbow plot identifies K=9 as the peak value for this model, superseding the K=7 that was identified in the initial sweep. 
+
+With optimal K values confirmed via cross-validation, both models can now be finalized for evaluation.
 
 ##### <u> 2.2.5.3: Model Training and Evaluation </u>
 
