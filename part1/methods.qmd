@@ -23,7 +23,9 @@ Per PRISMA guidelines, for every source searched, the following information was 
 
 An example of a search log entry is provided below: 
 
--still need to imbed example somehow
+
+
+![PRISMA search log example](../images/capstone-search-log-example.png){fig-align="center" width="80%"}
 
 ### <u>1.2.3 Screening Workflow</u>
 
@@ -52,6 +54,58 @@ Studies were excluded if they met the following criteria:
 
 ### <u>1.2.5 Study Characteristics Table</u>
 
- - coming back to this section when rest of part 1 is complete
+Here is the study characteristics table for the sources that were included for each biomarkers' synthesis. 
+
+```{r}
+#| label: study-characteristics-table
+#| code-fold: true
+#| output: true
+
+# STUDY CHARACTERISTICS TABLE BY BIOMARKER -------------
+
+#read in study characteristics data from manual excel input 
+study.characteristics.01 <- readxl::read_excel("../data/clean_data/study-characteristics-table.xlsx",
+  .name_repair = "universal")
+##explore data 
+glimpse(study.characteristics.01)
+names(study.characteristics.01)
+
+#flextable formatting from PLSC476 
+study_characteristics_flextable <- study.characteristics.01 %>% 
+  flextable::flextable() %>% 
+  flextable::set_header_labels(
+  N.Range = "N Range",
+  Types.of.Evidence = "Types of Evidence",
+  Contributing.Studies = "Contributing Studies") %>%
+  flextable::theme_booktabs(bold_header = TRUE) %>% 
+  flextable::align(align = "center", part = "all") %>% 
+  flextable::valign(valign = "bottom", part = "header") %>% 
+  flextable::padding(padding = 1, part = "all") %>% 
+  flextable::border_inner_h(
+    border = officer::fp_border(color = "gray60", width = 0.5),
+    part = "all"
+  ) %>%
+  flextable::border_inner_v(
+    border = officer::fp_border(color = "gray60", width = 0.5),
+    part = "all"
+  ) %>%
+  flextable::border_outer(
+    border = officer::fp_border(color = "gray40", width = 0.75),
+    part = "all"
+  ) %>%
+  #footnotes per discussion - NORCCAP cohort overlap + abbreviations 
+  flextable::add_footer_lines("Note: The NORCCAP cohort (n=10,601 Norwegian adults) contributed to multiple analyses represented in this table: Hustad 2007, Midttun 2007, Fredriksen 2007, and Holm 2007.") %>% 
+  flextable::add_footer_lines("Abbreviations: GWAS = genome-wide association study; RCT = randomized controlled trial; LC-MS/MS = liquid chromatography-tandem mass spectrometry; BHMT = betaine-homocysteine methyltransferase.") %>% 
+  flextable::autofit()
+
+
+#view it 
+study_characteristics_flextable
+
+#save flextable 
+flextable::save_as_image(x = study_characteristics_flextable, 
+                         path = here::here("tables", "part1", "study_characteristics.png"))
+```
+
 
 ::: 
