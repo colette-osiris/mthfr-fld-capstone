@@ -53,7 +53,7 @@ More details on each biomarker are provided below:
 
 5\) **Gamma-Glutamyl Transferase (GGT)** = a hepatic enzyme involved in glutathione metabolism and oxidative stress pathways; GGT is a more sensitive FLD marker than ALT in many contexts, and elevated levels are consistently associated with NAFLD and metabolic syndrome (Dillon & Miller, 2016).
 
-6\) **C-Reactive Protein (CRP)** = an acute-phase inflammatory marker that is used for detection across several disease states. CRP is significantly elevated in NAFLD when compared to controls, and it is a strong indicator of FLD, which reflects its central role in low-grade inflammation detection in disease pathogenesis (Yeniova et al., 2014).
+6\) **C-Reactive Protein (CRP)** = an acute-phase inflammatory marker that is used for detection across several disease states; CRP is significantly elevated in NAFLD when compared to controls, and it is a strong indicator of FLD, which reflects its central role in low-grade inflammation detection in disease pathogenesis (Yeniova et al., 2014).
 
 7\) **Vitamin B12** = is an important cofactor for methylation and carbon metabolism (Hustad et al., 2007). The CDC has noted Vitamin B12 levels differ between NAFLD and controls, as per the National Health and Nutrition Examination Survey (NHANES) 1999-2004 cohort analysis (Li et. al, 2022).
 
@@ -583,6 +583,8 @@ This skew likely influenced the fitted logistic regression coefficients. In the 
 
 This highlights a key limitation of the biomarker analysis: the subset with complete biomarker data is not representative of the full cohort, and model-derived associations may therefore be sensitive to selection bias. Further investigation should address this limitation by using a more representative subset to improve generalizability for further population approximation analysis.
 
+-everything past here is done for rendering inspection 
+
 ##### <u> 2.2.4.5: Feature Effect Visualization </u>
 
 Since this model here uses thirteen input features instead of just one, I created a multiplot of all the feature 2D plots to see each biomarker feature's individual effect. Each plot holds one feature constant while varying the others. For each point along the x-axis, the plot shows the model’s predicted probability of the patient having NAFLD. Because we are looking at biomarker profiles, I did not repeat these plots for the core feature set.
@@ -877,23 +879,30 @@ The next technique used for this model analysis is K-Nearest Neighbors (KNN). KN
 The following code block tests the impact of various K values on test set accuracy for both models, with and without standardization.
 
 ```{python}
-#| output: false
+#| label: bio-accuracy-scaled-unscaled
+#| code-fold: true
+#| echo: true
+#| output: true
+#| code-summary: "View code"
+
 from sklearn import set_config
 set_config(display='text')
 
 #biomarker model 
 candidate_ks = [1, 3, 5, 7, 9, 11, 15, 21, 31]
 
-print("K   | Accuracy")
-print("-"*30)
+#set up rendering output
+output = "Biomarker model, unscaled\n"
+output += "K   | Accuracy\n"
+output += "-" * 30 + "\n"
 
 for k in candidate_ks:
     knn = KNeighborsClassifier(n_neighbors=k);
     _ = knn.fit(X_bio_train, Y_bio_train);
     test_acc  = accuracy_score(Y_bio_test,  knn.predict(X_bio_test))
-    print(f"{k:<3} | {test_acc:8.3f}");
+    output += f"{k:<3} | {test_acc:.3f}\n"
 
-
+print(output)
 # KNN  scaling: split first, then scale X_bio_train/X_bio_test
 # scale - need to do after splitting to avoid data leakage
 scaler = StandardScaler();
@@ -901,51 +910,64 @@ X_bio_train_scaled = scaler.fit_transform(X_bio_train);
 X_bio_test_scaled  = scaler.transform(X_bio_test);
 
 
-print("K   | Accuracy")
-print("-"*30)
+#set up rendering output
+output = "Biomarker model, scaled\n"
+output += "K   | Accuracy\n"
+output += "-" * 30 + "\n"
 
 for k in candidate_ks:
     knn = KNeighborsClassifier(n_neighbors=k);
     #need to set = to placeholder to eliminite print line 
     _ = knn.fit(X_bio_train_scaled, Y_bio_train);
     test_acc  = accuracy_score(Y_bio_test,  knn.predict(X_bio_test_scaled))
-    print(f"{k:<3} | {test_acc:8.3f}")
+    output += f"{k:<3} | {test_acc:.3f}\n"
+    
+print(output)
 ```
 
 Based on these results, the unscaled biomarker peaks at K=11 (0.696) before declining. However, when scaled, the peak value is K=7, with accuracy peaking at 0.916. This increase in accuracy (+0.22) after scaling indicates that unscaled distance calculations were disproportionately influenced by the individual feature range magnitudes. After standardization, the biomarker model more accurately reflects relative biological variation across features.
 
 ```{python}
+#| label: core-accuracy-scaled-unscaled
+#| code-fold: true
+#| echo: true
+#| output: true
+#| code-summary: "View code"
 #core model 
 candidate_ks = [1, 3, 5, 7, 9, 11, 15, 21, 31]
 
-print("K   | Accuracy")
-print("-"*30)
+#set up rendering output
+output = "Core model, unscaled\n"
+output += "K   | Accuracy\n"
+output += "-" * 30 + "\n"
 
 for k in candidate_ks:
     knn = KNeighborsClassifier(n_neighbors=k)
     _ = knn.fit(X_core_train, Y_core_train)
     test_acc  = accuracy_score(Y_core_test,  knn.predict(X_core_test))
-    print(f"{k:<3} | {test_acc:8.3f}")
-    
+    output += f"{k:<3} | {test_acc:.3f}\n"
 
+print(output)
+    
 # KNN  scaling: split first, then scale X_bio_train/X_bio_test
 # scale - need to do after splitting to avoid data leakage
 scaler = StandardScaler()
 X_core_train_scaled = scaler.fit_transform(X_core_train)
 X_core_test_scaled  = scaler.transform(X_core_test)
 
-
-print("K   | Accuracy")
-print("-"*30)
+#set up rendering output
+output = "Core model, scaled\n"
+output += "K   | Accuracy\n"
+output += "-" * 30 + "\n"
 
 for k in candidate_ks:
     knn = KNeighborsClassifier(n_neighbors=k)
     _ = knn.fit(X_core_train_scaled, Y_core_train)
     test_acc  = accuracy_score(Y_core_test,  knn.predict(X_core_test_scaled))
-    print(f"{k:<3} | {test_acc:8.3f}")
+    output += f"{k:<3} | {test_acc:.3f}\n"
+    
+print(output)
 ```
--everything past here looks good 
-
 
 In contrast to the biomarker model, the core feature model demonstrates consistently high test set accuracy across both unscaled and scaled conditions. In both cases, accuracy peaks at K=3, (0.968 and 0.981 respectively). This behavior aligns with expectations since the feature set is reflective of established HSI-predictive-based outcomes. These results show strong class separation with insensitivity to scaling. However, it's worth noting that accuracy alone may not fully characterize model performance given the class imbalance established in this dataset. The confusion matrix and classification report metrics presented later in this analysis provide some additional insight into this error structure and impact on class-specific performance.
 
