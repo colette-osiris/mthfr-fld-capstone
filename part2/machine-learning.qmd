@@ -12,7 +12,6 @@ execute:
 toc-depth: 5
 ---
 
-
 ### <u>2.2.1: Background</u>
 
 Fatty Liver Disease (FLD) is a broad clinical term used to describe the accumulation of lipid droplets in hepatocytes (Younossi et al., 2023). The most prevalent sub-type of FLD is Non-Alcoholic Fatty Liver Disease (NAFLD), which was renamed Metabolic dysfunction-Associated Steatotic Liver Disease (MASLD) in 2023 via international consensus; MASLD is now defined by hepatic steatosis occurring in the presence of cardiometabolic risk factors but in the absence of significant/harmful levels of alcohol consumption (Rinella & Sookoian, 2024). It is the most common cause of liver disease both domestically and globally, affecting up to 42.2% of adults in the US, and continuing to rise as obesity and type 2 diabetic reports also increase (Jones et al., 2022). FLD causes impaired liver function; though it is often asymptomatic in early stages, it can include symptoms like abdominal pain/discomfort, weight loss, loss of appetite, and fatigue before progressing to more serious effects like fibrosis, cirrhosis, and cancer (Zhu, 2024).
@@ -23,7 +22,7 @@ The Hepatic Steatosis Index (HSI) is a validated and non-invasive screening tool
 
 HSI is calculated by:
 
-*𝐻𝑆𝐼* =  8  ∗  (*𝐴𝐿𝑇* /*𝐴𝑆𝑇* )  +  *𝐵𝑀𝐼*  +  (2,  *𝑐𝑜𝑛𝑑* : *𝑑𝑖𝑎𝑏𝑒𝑡𝑒𝑠*)  +  (2,  *𝑐𝑜𝑛𝑑* : *𝑓𝑒𝑚𝑎𝑙𝑒*)
+*𝐻𝑆𝐼* = 8 ∗ (*𝐴𝐿𝑇* /*𝐴𝑆𝑇* ) + *𝐵𝑀𝐼* + (2, *𝑐𝑜𝑛𝑑* : *𝑑𝑖𝑎𝑏𝑒𝑡𝑒𝑠*) + (2, *𝑐𝑜𝑛𝑑* : *𝑓𝑒𝑚𝑎𝑙𝑒*)
 
 The following variables are included in HSI calculation:
 
@@ -75,9 +74,10 @@ The core model functions as methodological validation and reconstruction of the 
 
 ##### <u> 2.2.3.1: Environment </u>
 
-For reproducibility purposes, Python is pinned to a fixed interpreter using a .Renviron file. This prevents defaulting to the reticulated cache environment across sessions.   
+For reproducibility purposes, Python is pinned to a fixed interpreter using a .Renviron file. This prevents defaulting to the reticulated cache environment across sessions.
 
 ```{r}
+#| label: config-chunk
 #| code-fold: true
 #| output: false
 ##python was acting unstable and automatically using the reticulate cache - created .Renviron file to fix this issue so the same python and interpreter are used everytime RStudio or Quarto runs. 
@@ -91,6 +91,7 @@ py_config()
 ```
 
 ```{python}
+#| label: systems-chunk
 #| echo: false
 #| output: false
 import sys
@@ -99,9 +100,10 @@ print(sys.executable)
 
 ##### <u> 2.2.3.2: Load Packages & Data</u>
 
-The export package list can be found in the requirements.txt file. 
+The export package list can be found in the requirements.txt file.
 
 ```{python}
+#| label: imports-chunk
 #| code-fold: true
 # Load libraries and dataset
 
@@ -134,13 +136,20 @@ df = pd.read_csv("../data/clean_data/nhanes_final.csv")
 ##### <u> 2.2.3.3: Structural Validation</u>
 
 ```{python}
+#| label: structural-validation-shape 
 #| code-fold: true
 #Structural Validation: shape, column names, data types, and missingness 
 
 #check data
 #shape
 rows, cols = df.shape
-print(f"The model dataset contains {rows} rows and {cols} columns.")
+print(f"The model dataset contains {rows} observations and {cols} variables.")
+```
+
+```{python}
+#| label: structural-validation-check
+#| echo: false
+#| output: false
 
 #headers
 #print(f"It is comprised of the following features: \n")
@@ -149,35 +158,67 @@ print(f"The model dataset contains {rows} rows and {cols} columns.")
     #print(f"- {col}")
 
 pd.DataFrame({'feature': df.columns, 'dtype': df.dtypes.values})
-
-#overall distribution check 
-df.describe()
-#distribution check for core features
-df[['alt','ast','bmi','homocysteine']].describe()
 ```
+
+The following blocks show summary statistics and missingness overview for key modeling variables.
+
 ```{python}
+#| label: overall-and-main-distribution-check
+#| code-fold: true
 #| echo: false
-#| output: false
+#| output: true
+
+#need to fix rendering to look nicer 
+#overall distribution check 
+overall_dist = df.describe().round(3)
+
+#distribution check for core features
+core_dist = df[['alt','ast','bmi','homocysteine']].describe().round(3)
+
+#introduce info
+#print(overall_dist)
+print(core_dist)
+
+```
+
+```{python}
+#| label: missingness-check
+#| echo: false
+#| output: true
 
 #print(df.dtypes)
-display(df.dtypes.to_frame(name="data_type"))
+#display(df.dtypes.to_frame(name="data_type"))
 
-#check missingness 
-display(df.isna().sum().to_frame(name="missing_count"))
+# check missingness
+missing_dist = df.isna().sum().to_frame(name="missing_count")
 
+#cant sort Nonetypes - need to convert 
+# convert missing_count to integer
+missing_dist["missing_count"] = missing_dist["missing_count"].astype(int)
+
+#too long when rendered - need to prioritize/sort
+missing_dist = missing_dist.sort_values(
+    by="missing_count",
+    ascending=False
+)
+
+print(missing_dist)
 ```
 
-The dataset loads with expected dimensions and correct column types and core variables, with no signs of data corruption. It's important to note that this validation brought two patterns to attention that will need to be addressed downstream in the R portion of this analysis.
+The dataset loads with expected dimensions and correct column types and core variables, with no obvious signs of data corruption. It's important to note that this validation brought two patterns to attention that will need to be addressed downstream in the R portion of this analysis.
 
 The first revealed pattern is a moderate-high level of missingness in the biomarker variables, though this was first identified in pre-processing. Rather than imputing missing values, complete-case subsetting was applied at the model level in order to preserve data integrity, though this came at the cost of a reduced sample size in the biomarker model.
 
-The second pattern is the appearance of extreme outliers across several continuous features that will need to be addressed downstream. There may also need to be some encoding adjustments across variables sex (int64), race_ethnicity (int64) and cohort (object) downstream as well.
+The second pattern is the presence of extreme values across several continuous features that will need to be addressed downstream. There may also need to be some encoding adjustments across variables sex (int64), race_ethnicity (int64) and cohort (object) downstream as well.
 
 ##### <u>2.2.3.4: Construct Labels</u>
 
 HSI is calculated from available NHANES data and used as the ground truth label for NAFLD classification. The code below creates three new variables : 'HSI', 'NAFLD', and 'HSI_category'. 'HSI' functions as a continuous score while 'NAFLD', acts as the primary binary classification label. 'HSI_category' was created to provide a descriptive severity grouping for downstream analysis in R, which includes the groups: 'healthy', 'borderline', and 'nafld_like'.
 
 ```{python}
+#| label: variable-extraction
+#| echo: true
+
 #need to set/extract relevant label values
 #ALT/AST ratio
 df['alt_ast_ratio'] = df['alt'] / df['ast']
@@ -199,35 +240,39 @@ df['HSI'] = (
 
 #new use HSI to determine NAFLD label (binary ML label)
 #scoring: 1 = NAFLD (HSI >= 36), 0 = healthy
-df['NAFLD'] = (df['HSI'] >= 36).astype(int)
+#found error in R data integrity check that leads back here -need to address misclassified NAs 
+df['NAFLD'] = np.where(df['HSI'].isna(), np.nan, (df['HSI'] >= 36).astype(int))
 
 #three-level interpretive category (used downstream)
 df['HSI_category'] = np.where(
-    df['HSI'] < 30, "healthy",
-    np.where(df['HSI'] < 36, "borderline", "nafld_like"))
-
-
-
+  df['HSI'].isna(), np.nan, 
+  np.where(df["HSI"] < 30, "healthy",
+  np.where(df['HSI'] < 36, "borderline", "nafld_like")))
 ```
 
 ##### <u>2.2.3.5: Label Validation </u>
 
-The HSI distribution has a mean of 35.47 and median of 34.53, which is aligned with expectations given the 36.0 value classification threshold. This is consistent with expectations given the population composition and confirms an absence of scaling issues or computation errors. The categorical distribution is also promising, with 'nafld-like', 'borderline', and 'healthy' showing 6,977, 4022, and 3,416 counts, respectively. All three bins are present and populated without being dominated by one class, which supports the use of these groupings for downstream analysis.
+The HSI distribution has a mean of 35.47 and median of 34.53, which is aligned with expectations given the 36.0 value classification threshold. This is consistent with expectations given the population composition and confirms an absence of scaling issues or computation errors. The categorical distribution is also promising, with 'nafld-like', 'borderline', and 'healthy' showing 5,551, 4,022, and 3,416 counts, respectively, with 1,446 additional rows filtered out due to missing HSI inputs. All three bins are present and populated without being dominated by one class, which supports the use of these groupings for downstream analysis.
 
-The cross tab check evaluates the binning method for logical inconsistencies and revealed a structural feature worth addressing explicitly. The 'borderline' and 'healthy' bins behave as expected, with 0 individuals being labeled as 'NAFLD' = 1. However, the 'nafld_like' bin results show that not all individuals in the high HSI range are classified as NAFLD-positive under the strict established threshold.
-
-Functionally, this means that while all NAFLD-positive fall into the 'nafld_like' bin, a subset of individuals remain below the diagnostic threshold of 36 that still qualify as "high risk." This is not an inconsistency, but rather an accurate reflection of HSI as a continuous screening metric and proxy measure for FLD status, rather than a hard diagnostic boundary. Not only does this align with clinical uses of HSI, it supports the analysis approach to include a 'borderline' bin for edge case inclusion for interpretative purposes without distorting the binary labels used for model training.
+The crosstab confirms a clean mapping between HSI_category and NAFLD label. The 'borderline' bin is kept along with the binary NAFLD label since the 30-36 value range represents a potentially clinically meaningful subset of the population that is collapsed during binary classification. This 'borderline' bin allows downstream analyses to 
+examine biomarkers across edge cases without affecting the binary labels used for model training. 
 
 The following code displays the first few rows of the data set and views summary statistics for the HSI, NAFLD, and HSI_category labels.
 
 ```{python}
+#| label: sample-records-sum
+#| code-fold: true
 #| echo: false
 #| output: true
 
+#needd to render better - format same approach
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', 1000)
 
 # 1. Display first few rows
 print("\n1. Sample records:\n")
-display(df.head())
+sample = df.head().round(2)
+print(sample)
 print("\n")
 
 ## 2. Summary statistics for features
@@ -236,13 +281,15 @@ print("\n2. Summary statistics:\n")
 #print(df['HSI'].describe())
 
 #HSI category counts 
-print(df['HSI_category'].value_counts())
+df['HSI_category'].value_counts().to_frame(name="count")
 
 #ML label balance 
-print(df['NAFLD'].value_counts())
+#print(df['NAFLD'].value_counts())
+df['NAFLD'].value_counts().to_frame(name="count")
 
 #cross check bins 
-print(pd.crosstab(df['HSI_category'], df['NAFLD']))
+#print(pd.crosstab(df['HSI_category'], df['NAFLD']))
+pd.crosstab(df['HSI_category'], df['NAFLD'])
 ```
 
 ##### <u> 2.2.3.6: Feature Set Definition </u>
@@ -256,6 +303,9 @@ It is important to note that the biomarker model also retains the core HSI varia
 While ideal, isolating the independent contribution of novel biomarkers would require a biomarker-only model that excluded HSI variables entirely. Given the significantly reduced sample size of the biomarker subset due to missingness constraints, that analysis is better suited for future work with a more complete dataset.
 
 ```{python}
+#| label: feature_columns_setup
+#| echo: true
+#| output: true
 
 #define features (x) and label (y)
 
@@ -298,30 +348,59 @@ Y_core = df_core['NAFLD'] # 0 = healthy, 1 = NAFLD
 #biomarker
 X_bio = df_bio[bio_feature_columns]
 Y_bio = df_bio['NAFLD'] # 0 = healthy, 1 = NAFLD
+```
 
-#now check sample sizes 
-print("Baseline model shape:", df_core.shape)
-print("Biomarker model shape:", df_bio.shape)
-
-
-#now check class balances 
-print(Y_core.value_counts())
-print(Y_bio.value_counts())
-
+```{python}
+#| label: display-models-shapes
+#| code-fold: true
+#| echo: false
+#| output: true
 
 #quick sanity check of inputs
-X_core.head(), X_bio.head()
+#needed to be reworked for rendeing 
+feature_summary = pd.DataFrame({
+    "Model": ["Core", "Biomarker"],
+    "Rows": [X_core.shape[0], X_bio.shape[0]],
+    "Features": [X_core.shape[1], X_bio.shape[1]]
+})
+
+display(feature_summary)
+
+```
+
+The following tables show the class imbalance for each model.
+
+```{python}
+#| label: display-model-class-imbalances
+#| code-fold: true
+#| echo: false
+#| output: true
+
+#now check class balances 
+core_class = Y_core.value_counts()
+bio_class = Y_bio.value_counts()
+
+#Also need to compensate for pandas formatting 
+print("Baseline class balance:")
+display(core_class.to_frame(name="count"))
+
+print("\nBiomarker class balance:")
+display(bio_class.to_frame(name="count"))
 ```
 
 Complete-case subsetting retains nearly 13,000 observations for the core feature set and approximately 2,500 for the biomarker feature set. While reductions of this size are not ideal, it reflects the higher missingness limitation of the extended biomarker panel, which is a known limitation when working with richly measured but incompletely observed population survey data.
 
-This analysis indicates the class balances are the approximately equal at \~57/43 split (NAFLD-positive/healthy), which is a healthy split for classification. It is important to note that this consistency indicates that missingness did not distort class balance, and therefore the complete-case biomarker subset is not obviously biased towards a single outcome class. The biomarker model therefore represents a smaller but compositionally representative sample rather than a distorted or structurally skewed subset.
+This analysis indicates the class balances are the approximately equal at ~57/43 split (healthy/NAFLD-positive), which is a healthy split for classification. It is important to note that this consistency indicates that missingness did not distort class balance, and therefore the complete-case biomarker subset is not obviously biased towards a single outcome class. The biomarker model therefore represents a smaller but compositionally representative sample rather than a distorted or structurally skewed subset.
 
 ##### <u>2.2.3.7: Train-Test Split </u>
 
 Both datasets are split into training and testing sets. This approach used a 70/30 testing split and stratified sampling to preserve proportions across sets and minimize model bias.
 
 ```{python}
+#| label: display-core-class-balance
+#| code-fold: true
+#| echo: true
+#| output: true
 
 # core model - Split the data using stratified sampling - same structure as projects
 X_core_train, X_core_test, Y_core_train, Y_core_test = train_test_split(
@@ -331,7 +410,20 @@ X_core_train, X_core_test, Y_core_train, Y_core_test = train_test_split(
     stratify=Y_core
 )
 #look at split
-print(X_core_train.shape, X_core_test.shape)
+output = (
+    "Core model split:\n"
+    f"  Training set: {X_core_train.shape[0]} samples, {X_core_train.shape[1]} features\n"
+    f"  Test set:     {X_core_test.shape[0]} samples, {X_core_test.shape[1]} features"
+)
+
+print(output)
+```
+
+```{python}
+#| label: display-bio-class-balance
+#| code-fold: true
+#| echo: true
+#| output: true
 
 # bio-marker model - Split the data using stratified sampling - same structure as projects
 X_bio_train, X_bio_test, Y_bio_train, Y_bio_test = train_test_split(
@@ -341,13 +433,22 @@ X_bio_train, X_bio_test, Y_bio_train, Y_bio_test = train_test_split(
     stratify=Y_bio
 )
 #look at split
-print(X_bio_train.shape, X_bio_test.shape)
+bio_output = (
+    "\nBiomarker model split:\n"
+    f"  Training set: {X_bio_train.shape[0]} samples, {X_bio_train.shape[1]} features\n"
+    f"  Test set:     {X_bio_test.shape[0]} samples, {X_bio_test.shape[1]} features"
+)
 
+print(bio_output)
 ```
 
 Since stratified sampling was used, the expected proportion of NAFLD-like vs. Healthy patients in the training and test sets should match the overall data set.To test this, the plot below explores the distribution of classes across the training and test sets in order to confirm that both sets are representative of the original data.
 
 ```{python}
+#| label: bio-class-dist-plot
+#| code-fold: true
+#| echo: true
+#| output: true
 
 #BIOMARKER MODEL now test the sets - generate class distribution plot
 
@@ -356,7 +457,7 @@ bio_split_df = pd.concat([
     pd.DataFrame({"split": "Test",  "label": Y_bio_test})
 ], ignore_index=True)
 
-plt.figure(figsize=(6,4))
+plt.figure(figsize=(8,6))
 sns.countplot(data=bio_split_df, x="split", hue="label")
 
 plt.title("Biomarker Class Balance across Training and Test sets (NAFLD vs Healthy)")
@@ -365,17 +466,51 @@ plt.xlabel("")
 plt.legend(title="NAFLD label (0 = healthy, 1 = NAFLD)")
 plt.tight_layout()
 plt.show()
+```
+
+```{python}
+#| label: bio-class-dist-tables
+#| echo: false
+#| output: true
 
 # Generate tables to show class distribution
-
 print("\nOverall Biomarker Class Distribution:")
-display(pd.Series(Y_bio).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
+display(
+  pd.Series(Y_bio)
+  .value_counts(normalize=True)
+  .mul(100)
+  .round(1)
+  .astype(str)
+  .add("%")
+  .to_frame(name="Percent"))
 
 print("\nTrain Biomarker Class Distribution:")
-display(pd.Series(Y_bio_train).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
+display(
+  pd.Series(Y_bio_train)
+  .value_counts(normalize=True)
+  .mul(100)
+  .round(1)
+  .astype(str)
+  .add("%")
+  .to_frame(name="Percent"))
 
 print("\nTest Biomarker Class Distribution:")
-display(pd.Series(Y_bio_test).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
+display(
+  pd.Series(Y_bio_test)
+  .value_counts(normalize=True)
+  .mul(100)
+  .round(1)
+  .astype(str)
+  .add("%")
+  .to_frame(name="Percent"))
+```
+
+```{python}
+#| label: core-class-dist-plot
+#| code-fold: true
+#| echo: true
+#| output: true
+
 
 #CORE MODEL now test the sets - generate class distribution plot
 
@@ -384,32 +519,56 @@ core_split_df = pd.concat([
     pd.DataFrame({"split": "Test",  "label": Y_core_test})
 ], ignore_index=True)
 
-plt.figure(figsize=(6,4))
+plt.figure(figsize=(8,6))
 sns.countplot(data=core_split_df, x="split", hue="label")
 
-plt.title("Core Class Balance across Training and Test sets (NAFLD vs Healthy)")
+plt.title("Core Class Balance across Training and Test sets (NAFLD vs Healthy)", pad=15)
 plt.ylabel("Number of participants")
 plt.xlabel("")
 plt.legend(title="NAFLD label (0 = healthy, 1 = NAFLD)")
+plt.subplots_adjust(top=0.95)
 plt.tight_layout()
 plt.show()
-
-
-# Generate tables to show class distribution
-
-print("\nOverall Core Class distribution:")
-display(pd.Series(Y_core).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
-
-print("\nTrain Core Class distribution:")
-display(pd.Series(Y_core_train).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
-
-print("\nTest Core Class distribution:")
-display(pd.Series(Y_core_test).value_counts(normalize=True).mul(100).round(1).astype(str) + "%")
-
-
 ```
 
-The tables and plots above confirm a consistent \~57/43 split across the training, testing, and overall distributions of both models. While this represents a mild class imbalance and not a severely skewed distribution, stratified sampling will be employed throughout the analysis to ensure proportional representation is maintained across splits. This near-identical balance across both sets ensures internal model consistency and future evaluation metrics will be representative of model performance on the broader data rather than symptoms of uneven sampling.
+```{python}
+#| label: core-class-dist-tables
+#| echo: false
+#| output: true
+
+# Generate tables to show class distribution
+print("\nOverall Core Class distribution:")
+display(
+  pd.Series(Y_core)
+  .value_counts(normalize=True)
+  .mul(100)
+  .round(1)
+  .astype(str)
+  .add("%")
+  .to_frame(name="Percent"))
+  
+print("\nTrain Core Class distribution:")
+display(
+  pd.Series(Y_core_train)
+  .value_counts(normalize=True)
+  .mul(100)
+  .round(1)
+  .astype(str)
+  .add("%")
+  .to_frame(name="Percent"))
+
+print("\nTest Core Class distribution:")
+display(
+  pd.Series(Y_core_test)
+  .value_counts(normalize=True)
+  .mul(100)
+  .round(1)
+  .astype(str)
+  .add("%")
+  .to_frame(name="Percent"))
+```
+
+The tables and plots above confirm a consistent ~57/43 split (healthy/HSI_category) across training, testing, and overall distributions of both models. While this represents a mild class imbalance and not a severely skewed distribution, stratified sampling will be employed throughout the analysis to ensure proportional representation is maintained across splits. This near-identical balance across both sets ensures internal model consistency and future evaluation metrics will be representative of model performance on the broader data rather than symptoms of uneven sampling.
 
 This next section focuses on the training and evaluating of both feature sets for logistic regression and KNN analysis.
 
@@ -437,6 +596,10 @@ Once the logistic model is trained on each feature set, it was tested on the est
 This code chunk also performs a classification report that includes precision, recall, and F1 scoring metrics. Precision measures the accuracy of positive predictions (high scores correlate to minimal false positives), while recall measures the model's ability to correctly identify all positive cases (high scores correlate to minimal false negatives). F1 scoring acts as a balance of precision and recall by computing a harmonic mean of the 2 metrics.
 
 ```{python}
+#| label: model-accuracy-comparison
+#| echo: false
+#| output: true
+
 #Core model Accuracy
 core_acc = accuracy_score(Y_core_test, core_logreg.predict(X_core_test))
 print(f"Logistic Regression Accuracy on Core test set: {core_acc:.3f}")
@@ -466,18 +629,32 @@ The biomarker logistic regression model estimates the log-odds of NAFLD as a lin
 Among the biomarkers of interest, serum folate and RBC folate both show negative coefficients, which indicates that higher folate levels are associated with lower predicted NAFLD probability. This is consistent with the established biological mechanism, given that folate deficiency impairs hepatic methylation and promotes lipid accumulation (Liu et al., 2023). This protective association with reduced FLD risk aligns with the underlying hypothesis that links folate deficiency (in the form of MTHFR mutations) to hepatic dysfunction.
 
 ```{python}
+#| label: logisitic-regression-equation
+#| echo: true
+#| code-fold: true
+#| output: true
+
 # Print biomarker model regression equation
 bio_intercept = bio_logreg.intercept_[0]
 bio_coefs = bio_logreg.coef_[0]
 bio_features = X_bio_train.columns
 
-print("Biomarker logistic regression equation (logit scale):")
-print(f"logit(P(NAFLD)) = {bio_intercept:.6f}")
+#reformat for image purposes
+equation = f"logit(P(NAFLD)) = {bio_intercept:.6f}"
 
 for i in range(len(bio_features)):
     feature = bio_features[i]
     coef = bio_coefs[i]
-    print(f" + ({coef:.6f} × {feature})")
+    equation += f"\n  {coef:+.4f} × {feature}"
+```
+
+```{python}
+#| label: display-lr-equation
+#| echo: false
+#| output: true
+
+print("Biomarker logistic regression equation (logit scale):\n")
+print(equation)
 ```
 
 It is important to note that the output above is expressed on the logit (log-odds) scale, not as a probability. Features were not standardized prior to logistic regression fitting, and therefore, coefficient magnitudes are expressed in the original units of each feature and cannot be directly compared across variables. For example, a coefficient of 0.15 for BMI (measured in kg/m²) cannot be meaningfully compared to a coefficient of -0.002 for RBC folate (measured in ng/mL) without accounting for their different scales and variances. This means that the directional interpretation (whether a feature is positively or negatively associated with NAFLD probability) remains valid regardless of scaling, but relative importance cannot be inferred from coefficient magnitude alone.
@@ -489,8 +666,12 @@ In contrast, homocysteine and methylmalonic acid display strong negative associa
 ##### <u> 2.2.4.4: Biomarker Multicollinearity Assessment </u>
 
 ```{python}
+#| label: multicollinearity-heatmap
+#| code-fold: true
+#| echo: true
+#| output: true
 
-# feature assessment for correlations to investigate multicollinearity 
+# feature assessment for correlations to investigate multicollinarity 
 
 # pull novel biomarkers only 
 novel_bio_cols = ['homocysteine', 'serum_folate', 'rbc_folate', 'crp', 
@@ -526,22 +707,29 @@ ax = sns.heatmap(novel_corr,
                  cbar_kws={'shrink': 0.8})
 plt.title('Novel Biomarker Feature Correlation Matrix \n (Non HSI Features)', fontsize=13, pad=16)
 #fix tic labels 
-plt.xticks(rotation=45, ha='right', fontsize=10)
-plt.yticks(rotation=0, fontsize=10)
+#for rendering - need temp values not to print
+_ = plt.xticks(rotation=45, ha='right', fontsize=10)
+_ = plt.yticks(rotation=0, fontsize=10)
 
 #tight layout not coorperating, need to manually choose 
 plt.subplots_adjust(bottom=0.25, left=0.25, top=0.77)
 
 #now show
 plt.show()
+```
+
+```{python}
+#| label: feature-pair-calc
+#| echo: false
+#| output: true
 
 #Want to flag highly correlated pairs - chose 0.3 after looking at initial map
-print("Feature pairs with |r| > 0.4:")
 for i in range(len(novel_corr.columns)):
     for j in range(i+1, len(novel_corr.columns)):
         if abs(novel_corr.iloc[i, j]) > 0.4:
             print(f"  {novel_corr.columns[i]} <-> {novel_corr.columns[j]}: r = {novel_corr.iloc[i, j]:.3f}")
-
+            
+print("Feature pairs with |r| > 0.4:")
 ```
 
 This heat map and correlation matrix provide preliminary evidence regarding the multicollinearity concerns outlined above. HSI relevant variables were not included since multicollinearity concerns surrounded novel biomarkers. The heat map revealed generally weak correlations across the features, with the majority of pairwise values falling under \|r\| = 0.20. This suggests that multicollinearity is not a strong concern for the majority of novel features in this model.
@@ -555,26 +743,64 @@ Overall, the correlation structure doesn't indicate evidence of significant mult
 Another important result was the negative correlation with female sex status, which is unexpected given it is positively associated with FLD proxy measures and is accounted for in the HSI formula. While this could be an accurate reflection of decreased sex weight on the condition as a result of increasing feature count, it is important to investigate this discrepancy to ensure it is not the result of modeling errors.
 
 ```{python}
+#| label: bimodal-sex-distribution
+#| code-fold: true
+#| echo: false
+#| output: true
+
 #testing sex distribution across models 
-print("Core dataset sex distribution:")
-print(X_core_train['female'].value_counts(normalize=True))
+print("\nCore dataset sex distribution:")
+display(pd.Series(X_core_train['female'])
+  .value_counts(normalize=True)
+  .mul(100)
+  .round(1)
+  .astype(str)
+  .add("%")
+  .to_frame(name="Percent"))
 
 print("\nBiomarker dataset sex distribution:")
-print(X_bio_train['female'].value_counts(normalize=True))
+display(pd.Series(X_bio_train['female'])
+  .value_counts(normalize=True)
+  .mul(100)
+  .round(1)
+  .astype(str)
+  .add("%")
+  .to_frame(name="Percent"))
 
+```
+
+```{python}
+#| label: sex-NAFLD-distribution
+#| echo: false
+#| output: true
 #testing sex distribution against NAFLD class within the biomarker model
 bio_df = X_bio_train.copy()
 bio_df['NAFLD'] = Y_bio_train
 
-print("\nNAFLD prevalence by sex (biomarker dataset):")
-print(bio_df.groupby('female')['NAFLD'].mean())
+#rework for rendering -same output approach as before
+result = bio_df.groupby("female")["NAFLD"].mean().round(3)
+result_table = result.to_frame(name="NAFLD prevalence")
+result_table.index = ["Male (0)", "Female (1)"]
+
+print("NAFLD prevalence by sex (biomarker dataset):")
+display(result_table)
+```
+
+```{python}
+#| label: female-proportion-distribution
+#| echo: false
+#| output: true
+
+#set variables for rendering 
+core_f_prop = X_core_train['female'].mean().round(5)
+bio_f_prop = X_bio_train['female'].mean().round(5)
 
 #testing against missingness bias across models 
-print("Proportion female in full dataset:")
-print(X_core_train['female'].mean())
+print(f"Proportion female in full dataset: {core_f_prop}")
+#print(X_core_train['female'].mean().round(5))
 
-print("Proportion female in biomarker subset:")
-print(X_bio_train['female'].mean())
+print(f"Proportion female in biomarker subset: {bio_f_prop}")
+
 ```
 
 The investigation revealed that the distribution of sex differs substantially between datasets. While the core dataset is approximately balanced (\~51% female), the biomarker subset is heavily skewed (\~89% female). Additionally, despite the imbalance in biomarker subset, NAFLD prevalence is higher among males (48.1%) compared to females (42.3%).
@@ -583,13 +809,14 @@ This skew likely influenced the fitted logistic regression coefficients. In the 
 
 This highlights a key limitation of the biomarker analysis: the subset with complete biomarker data is not representative of the full cohort, and model-derived associations may therefore be sensitive to selection bias. Further investigation should address this limitation by using a more representative subset to improve generalizability for further population approximation analysis.
 
--everything past here is done for rendering inspection 
-
 ##### <u> 2.2.4.5: Feature Effect Visualization </u>
 
 Since this model here uses thirteen input features instead of just one, I created a multiplot of all the feature 2D plots to see each biomarker feature's individual effect. Each plot holds one feature constant while varying the others. For each point along the x-axis, the plot shows the model’s predicted probability of the patient having NAFLD. Because we are looking at biomarker profiles, I did not repeat these plots for the core feature set.
 
 ```{python}
+#| label: biomarker-effect-multiplot
+#| echo: true
+#| output: true
 #| code-fold: true
 # BIOMARKER-ONLY MULTIPLOT
 # purpose: show the isolated effect of biomarker predictors on P(NAFLD)
@@ -852,10 +1079,10 @@ ax.tick_params(axis='both', labelsize=8)
 #cant do a tight layout - need to adjust 
 plt.subplots_adjust(hspace=1.15, wspace=0.4, top=0.86, left=0.12)
 #add overall y label for whole figure 
-fig.text(0.003, 0.5, 'P(NAFLD)', va='center', rotation='vertical', fontsize=10)
+_ = fig.text(0.003, 0.5, 'P(NAFLD)', va='center', rotation='vertical', fontsize=10)
 
 #now add global legend 
-fig.legend(loc='upper center', bbox_to_anchor=(0.5, 1.02), ncol=2, fontsize=9)
+_ = fig.legend(loc='upper center', bbox_to_anchor=(0.5, 1.02), ncol=2, fontsize=9)
 
 
 #now show
@@ -1060,7 +1287,7 @@ plt.tight_layout();
 plt.show();
 ```
 
-The core feature elbow plot shows a clearer pattern, with accuracy peaking at K=7 with a mean CV accuracy of 0.981 that consistently declines after the peak. This trend is more consistent with classical elbow curves, which aligns logically since it reflects the stronger, more stable signal of the core feature set. Therefore, K=7 is selected as the final core model K, which replaces the K=3 identified in the initial test set sweep. 
+The core feature elbow plot shows a clearer pattern, with accuracy peaking at K=7 with a mean CV accuracy of 0.981 that consistently declines after the peak. This trend is more consistent with classical elbow curves, which aligns logically since it reflects the stronger, more stable signal of the core feature set. Therefore, K=7 is selected as the final core model K, which replaces the K=3 identified in the initial test set sweep.
 
 ###### <u>**Biomarker Model Elbow Plot** </u>
 
@@ -1081,7 +1308,8 @@ plt.tight_layout();
 #now show 
 plt.show();
 ```
-This cross-validation elbow plot identifies the biomarker model accuracy peaks at K=9 with a mean CV accuracy of 0.902. It is worth noting that the curve shows considerable variability across K values instead of the commonly observed smooth rise-to-plateau pattern, which could be indicative of significant noise in the biomarker feature set. However, this variability is consistent with the sensitivity to preprocessing that was observed in the training section earlier in the analysis, which showed substantial differences in scaled and unscaled results in the biomarker feature set. The elbow plot identifies K=9 as the peak value for this model, superseding the K=7 that was identified in the initial sweep. 
+
+This cross-validation elbow plot identifies the biomarker model accuracy peaks at K=9 with a mean CV accuracy of 0.902. It is worth noting that the curve shows considerable variability across K values instead of the commonly observed smooth rise-to-plateau pattern, which could be indicative of significant noise in the biomarker feature set. However, this variability is consistent with the sensitivity to preprocessing that was observed in the training section earlier in the analysis, which showed substantial differences in scaled and unscaled results in the biomarker feature set. The elbow plot identifies K=9 as the peak value for this model, superseding the K=7 that was identified in the initial sweep.
 
 With optimal K values confirmed via cross-validation, both models can now be finalized for evaluation.
 
@@ -1152,9 +1380,9 @@ plt.show()
 
 ```
 
-This classification report shows a balanced error structure across both classes, which addresses the class imbalance concern that was flagged earlier. For the non-NAFLD class (0), precision was 0.9 and recall was 0.95, which indicates the model can identify most true negatives correctly while producing very few false positives. For the NAFLD class (1), precision was higher at 0.93, but recall decreased to 0.86. This suggests the model is more conservative when predicting positive cases, but still misses \~14% of true positive NAFLD cases. This asymmetry may be clinically relevant since in screening contexts, false negatives tend to be more costly than false positives. This relatively lower recall for class one should therefore be noted as a limitation.
+This classification report shows a balanced error structure across both classes, which addresses the class imbalance concern that was flagged earlier. For the non-NAFLD class (0), precision was 0.9 and recall was 0.95, which indicates the model can identify most true negatives correctly while producing very few false positives. For the NAFLD class (1), precision was higher at 0.93, but recall decreased to 0.86. This suggests the model is more conservative when predicting positive cases, but still misses ~14% of true positive NAFLD cases. This asymmetry may be clinically relevant since in screening contexts, false negatives tend to be more costly than false positives. This relatively lower recall for class one should therefore be noted as a limitation.
 
-It is worth noting that the macro-averaged F1 score and weighted average F1 score are both 0.91, which confirms that model performance is distributed well across both classes, rather than being concentrated in the majority class. This balanced distribution is also confirmed directly in the confusion matrix. Out of the 327 true NAFLD cases, 45 were misclassified as false negatives, while only 22 of the 435 true negatives were flagged incorrectly (\~14% vs \~5%). Since our total test samples for this set is only 762, it is important to consider that these error counts carry more variance than those of the core model, and should be interpreted with that instability in mind.
+It is worth noting that the macro-averaged F1 score and weighted average F1 score are both 0.91, which confirms that model performance is distributed well across both classes, rather than being concentrated in the majority class. This balanced distribution is also confirmed directly in the confusion matrix. Out of the 327 true NAFLD cases, 46 were misclassified as false negatives, while only 22 of the 435 true negatives were flagged incorrectly (~14% vs ~5%). Since our total test samples for this set is only 762, it is important to consider that these error counts carry more variance than those of the core model, and should be interpreted with that instability in mind.
 
 ###### <u>**Core Class Report + Confusion Matrix Analysis** </u>
 
@@ -1174,7 +1402,7 @@ plt.show()
 
 ```
 
-This core feature model analysis demonstrates strong and balanced performances across both classes. For the NAFLD class (1), precision, recall, and F1 scoring all are 0.98, and the same values are 0.97 for the non-NAFLD class (0). Out of 2232 true positives for class 0, only 53 were misidentified, and only 44 were missed out of 1665 for class 1, meaning only 97/3897 test samples were misclassified. With both error types having similar low and proportional rates, it indicates the core model is genuinely discriminating rather than exploiting the class distribution.
+This core feature model analysis demonstrates strong and balanced performances across both classes. For the NAFLD class (1), precision, recall, and F1 scoring all are 0.97, and the same values are 0.98 for the non-NAFLD class (0). Out of 2232 true negatives for class 0, only 53 were misidentified, and only 44 were missed out of 1665 for class 1, meaning only 97/3897 test samples were misclassified. With both error types having similar low and proportional rates, it indicates the core model is genuinely discriminating rather than exploiting the class distribution.
 
 ##### <u> 2.2.5.6: KNN Model Comparison </u>
 
@@ -1206,4 +1434,3 @@ That reinforces the conclusion that biomarker signal exists but requires a more 
 Overall, when looking at the KNN results with the logistic regression, they both clearly establish that biomarker-derived features carry real predicative signalling for FLD status. However, they also show that signaling is less stable, more sensitive to modeling choices, and does not yet sufficiently match the classification strength of previously established proxy-based measures, like HSI.
 
 It is also worth acknowledging that both KNN and logistic regression are relatively simple machine learning model architectures and analysis of these features may be stronger under a more complex modeling approach. However, these results can be understood as a baseline characterization of biomarker signalling, though analysis of a more representative biomarker subset would be the next step to strengthen these conclusions.
-
