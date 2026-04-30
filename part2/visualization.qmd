@@ -16,11 +16,11 @@ The R portion of Part 2 functions as a diagnostic and interpretive layer on top 
 
 This section uses R to examine the structural and distributional features of the dataset that shaped the ML portion results. R was selected for this portion because it is often used by computational biologists for cohort stratification and distributional trend analysis, which aligns with the core analytic approach for this stage of the project.
 
-Specifically, this section addresses four questions left open or only partially resolved by the ML Python analysis:
+Specifically, this section addresses four questions that were left open or only partially resolved by the ML Python analysis:
 
 1.  How is missingness structured in the biomarker subset, and how well does that subset demographically represent the full cohort?
 
-2.  Do the novel biomarker distributions separate meaningfully across HSI severity categories, and do those distributions contribute to an explanation for the counter-intuitive logistic regression coefficients observed in section 2.2.4.3?
+2.  What does biomarker distribution look like across HSI severity categories, and do those distributions contribute to an explanation for the counter-intuitive logistic regression coefficients observed in section 2.2.4.3?
 
 3.  What are the structural implications of the sex imbalance identified in the biomarker subset section 2.2.4.4 for downstream interpretation?
 
@@ -538,7 +538,7 @@ It is important to note that while this figure reflects the accurate preservatio
 
 ##### <u> 2.3.3.1: Distribution Panel </u>
 
-This section explores biomarker distributions across the three HSI categories to assess individual biomarkers for meaningful distribution separation that aligns with predictive signaling behavior observed in section 2.2. 
+This section explores biomarker distributions across the three HSI categories to assess individual biomarkers for meaningful distribution separation that aligns with predictive signaling behavior  observed in section 2.2.
 
 ```{r}
 #| label: biomarker-distribution-panel
@@ -647,62 +647,22 @@ ggsave(
 
 ##### <u> 2.3.3.2: Biomarker Interpretation </u>
 
-This figure shows how each biomarker trends across HSI categories, with each biomarker's y-axis scaled to it's respective value range and log transformed for consistency. Multiple features, including homocysteine, GGT, folate metrics, CRP, and B12 display possible outliers that may impact distribution trends. However, outlier identification and filtering could not be applied at this time due to project timeline constraints. Further investigation into outliers is heavily encouraged in follow up studies. 
+This figure shows how each biomarker trends across HSI categories, with each biomarker's y-axis scaled to its respective value range and log transformed for consistency. Multiple features, including homocysteine, GGT, folate metrics, CRP, and B12 display possible outliers that may impact distribution trends. However, outlier identification and filtering could not be applied at this time due to project timeline constraints. Further investigation into outliers is heavily encouraged in follow up studies. 
 
-- need to ask jeff before finalizing - wish i had more time for filtering outliers and re-running but i do not 
+ CRP showed the largest visual change, which was a positive directional shift that increased with NAFLD severity. CRP was also the only biomarker whose classes also ranged in density, with healthy and nafld_like classes showing completely different shapes. The healthy class is more heavily distributed at the bottom with notable lines at approximately 0.2 and 0.5, though the source of that pattern is unknown. CRP being positively associated with NAFLD severity mechanistically aligns with existing literature. 
+ 
+Ferritin and GGT both also displayed moderately strong positive associations with increasing HSI severity, though GGT's directional magnitude is less prominent than ferritin's. In addition to the directional aspect, GGT and ferritin show increasingly expanding ranges of values as severity increases. This indicates that NAFLD status shows a range of high and low iron and GGT levels that are not seen in the healthy class. This may point to the fact that HSI is a proxy measure, not a defined, bordered phenotype, which may explain this phenotypic plasticity observed in the data. It is worth noting that the Python model assigned ferritin a near 0 coefficient, indicating it wasn't a meaningful predictor, but this visual representation contradicts that assertion. In particular, the directional relationship does track with severity, but the expanding range shows a weaker signal. This could be caused by mechanistic distance, multicollinearity that went undetected by the Python model, or another unknown source. 
 
-- ask to confirm trends: 
+Homocysteine also shows a moderate positive trend with NAFLD severity, though this shift is mostly seen through the density and the modal values of each HSI category. This figure contradicts the regression negative coefficient produced in the Python code, but aligns with mechanistic expectations. 
 
-I see: 
+The figure appears to show a slight negative association between serum folate and NAFLD severity, which is consistent with biological mechanism and the ML portion findings. Serum folate shows a stable density distribution across HSI classes but the negative trend is apparent through the decreasing floor value as it shifts across severity categories. This feature aligns with biological mechanism expectations, though outlier evaluation is required for any further assertion. It's worth noting that even though the negative trend is small in magnitude, it is still more visually apparent than RBC. This contradicts expectations because RBC is the more stable/long term folate metric, and therefor, any short term measurements would be expected to be reflected in long term complement. 
 
-1) CRP - strong directional shift (+ association w/ nafld)
-  
-   - shape of distribution changes notably across bins - only feature that shows this (bottom to top heavy density movement)
-    - theres one line at the bottom for healthy, and borderline, but theres a second floor above it too? and a 3rd? around 0.2 and 0.5 respectively what are those?
-   - matches expectations established in section 2.2 - means CRP is part of the evidence that the model's coefficients are correct where they're expected and incorrect (likely due to multicollinearity) where they contradict expected trends (aka females)
-   
-2) Ferritin -  moderate directional shift (+ association w/ nafld)
+MMA and RBC both showed no easily visualized trends, with density, range, and direction staying consistent. Both of these biomarkers were expected to show negative associations based on ML model and established biological mechanisms, so the lack of relationship in both features may suggest an issue in modeling conditioning or artifact.
 
-- as proximity to NAFLD-like states increases, so does the variability of ferrin values - distribution range keeps expanding across bins? what would cause that?
+Vitamin B12 shows a slight negative association with NAFLD severity, which aligns with biological expectation since B12 deficiency is established in literature as a factor associated with metabolic dysfunction. 
 
- - possible explanation - ferritin is used as an iron storage marker and an acute inflammation marker - elevated iron isnt a uniform signal of FLD so maybe this shows the variation (which also points to the fact that NAFLD is an aggregation of symptoms, not a uniform diagnosis based on a singular shared mechanism)
-  
-- model gave ~0 coefficient - wasn't indicated as a meaningful predictor but visual contradicts that somewhat - tracks with severity but weaker signal - could be caused by mechanistic distance, shared signal with other features or something else 
-
-3) GGT - moderate-small directional trend (+ association w/ nafld)
-
-- borderline and healthy classes look more similar in terms of mode value
-- showing similar distribution creep/range expansion with increasing severity as ferritin 
-  - potential source? same as ferritin - will probably discuss together 
-- most significant outliers look to be healthy? 
-
-4) Hcy - moderate directional trend (+ association w/ nafld)
-
-   - shift mostly seen through density/mode value 
-   - contradicts model coefficient findings but aligns with mechanistic expectations - contradiction supports the multicollinearity/suppression hypothesis from 2.2.4.4 — biomarker has correct directional signal at distribution level, but model coefficient is distorted by shared variance with other features
-
-5) MMA - unclear/no trend 
-
-  - no density, range, or directional trend readily apparent
-  - contradicts negative ML findings 
-  - interpretation - unclear-  could be artifact/reflect model conditioning
-
-6) RBC - small/no trend
-
-  - ML reported negative relationship (biologically expected)
-  - no clear visual trend - discuss with MMA 
-
-7) serum - small trend - negative
-
-  - negative aligns with biological mechanism + ML portion 
-  - distribution shape consistent, but negative trend apparent in decreasing floor value per cohort aligns with expectation - though without outlier evaluation, may not be assertable 
-  - trend small but more visually apparent than RBC - weird bc RBC is more stable/long term, so wed expect to see any impact present there 
-  - possible attributions: noise from data, or biologically significant (AKA NALFD acute folate shows more variety - aligns with increased range present in other, stronger deterministic factors/biomarkers)
-
-8) B12 - small trend - negative
-
-  - visually stronger than ML portion indicated (like ferritin)
-  - negative trend aligns with biological expectation (B12 deficiency impairs methylation/is associated with metabolic dysfunction)
+Additionally, it's worth noting that the majority of directional trends observed through this figure align with biological mechanisms even when they contradict the ML analysis's assigned coefficients. Homocysteine  showed a strong trend that aligned with expected behavior but was inconsistent with the minor negative coefficient assigned. Similarly, ferritin and B12 were both assigned near 0 values in the logistic regression, but this figure shows clear directional relationships despite the indication of low mechanistic relevance during modeling. 
+These combined results, which show consistently accurate directional signals at the distribution level but incorrect directional/magnitudinal coefficient assignments in the ML level, supports the idea that multicollinearity and signal overlap is present is some of these examined features.
 
 ### <u> 2.3.4: Sex-Stratified View of Biomarker Subset </u>
 
@@ -874,194 +834,14 @@ ggsave(
 ```
 
 
-
-
-notes: - immediately can see sex based population skew - males seem to exhibit higher homocysteine - not explicitely stated this project, bc uses mouse model but ANSC project paper notes that men seen to use BHMT pathway to compensate - so why increased hcy? bc women are skewed healthier? - wish i had MTHFR data - also makes me question applicability of stats to gen pop, esp with women seemingly more healthy - doesnt align with known data, need to verify. -worthy of discussion - meaningful differences - should proceed with secondary analysis of most variable features (ggt, crp)
+notes: - immediately can see sex based population skew - males seem to exhibit higher homocysteine - not explicitly stated this project, bc uses mouse model but ANSC project paper notes that men seen to use BHMT pathway to compensate - so why increased hcy? bc women are skewed healthier? - wish i had MTHFR data - also makes me question applicability of stats to gen pop, esp with women seemingly more healthy - doesnt align with known data, need to verify. -worthy of discussion - meaningful differences - should proceed with secondary analysis of most variable features (ggt, crp). 
 
 ##### <u> 2.3.4.3: CRP & GGT by Sex & HSI Category </u>
 
-```{r}
-#| label: crp-ggt-by-sex-hsi
-#| code-fold: true
-#| output: true
-
-# CRP & GGT DISTRIBUTIONS BY SEX AND HSI CATEGORY -  -------------
-
-#pivot CRP & GGT into long format w/ sex labels  
-crp_ggt_sex_data <- biomarker_subset %>% 
-  dplyr::filter(!is.na(HSI_category),
-                !is.na(sex),
-                !is.na(crp),
-                !is.na(ggt)) %>% 
-  dplyr::mutate(
-    sex_label = dplyr::case_when(
-      sex == 1 ~ "Male",
-      sex == 2 ~ "Female")) %>% 
-  dplyr::select(HSI_category, 
-                sex_label, 
-                crp, 
-                ggt) %>% 
-  #pivot longer so biomarkers become a variable 
-  tidyr::pivot_longer(
-    cols = c(crp, ggt), 
-    names_to = "biomarker",
-    values_to = "value") %>% 
-  dplyr::mutate(
-    #rename for cleaner display 
-    biomarker = dplyr::recode(
-      biomarker,
-      "crp" = "CRP",
-      "ggt" = "GGT"))
-
-
-#plot - violin + sina, faceted by biomarker (rows) x sex (cols) 
-crp_ggt_sex_plot <- 
-  ggplot(crp_ggt_sex_data, aes(x = HSI_category,
-                               y = value,
-                               color = HSI_category,
-                               fill = HSI_category)) +
-  geom_violin(alpha = 0) +
-  ggforce::geom_sina(alpha = 0.5) +
-  #log transform y-axis for skewed biomarker distributions
-  scale_y_continuous(trans = "log10") +
-  scale_color_viridis_d(
-    option = "plasma", 
-    begin = 0, 
-    end = 0.7) +
-  scale_fill_viridis_d(
-    option = "plasma", 
-    begin = 0, 
-    end = 0.7) + 
-  #facet grid - biomarker rows x sex columns; free_y lets each biomarker have its own scale 
-  facet_grid(biomarker ~ sex_label, 
-             scales = "free_y") +
-  labs(
-    x = NULL,
-    y = "Biomarker Value (log10 scale)",
-    title = "CRP & GGT Distributions by Sex \n Across HSI Severity Categories",
-    fill = "HSI Category",
-    color = "HSI Category") +
-  theme_minimal() +
-  #title/legend position wrangling 
-  theme(legend.position = "bottom",
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        plot.title.position = "plot",
-        plot.title = element_text(hjust = 0.5),
-        panel.grid.minor = element_blank(),
-        strip.text = element_text(face = "bold"))
-
-
-#save plot 
-#ggsave(
-  #filename = here::here("plots", "part2", "crp_ggt_by_sex_hsi.png"),
-  #plot = crp_ggt_sex_plot,
-  #dpi = 400,
-  #width = 12,
-  #height = 9,
-  #units = "in",
-  #bg = "white")
-
-#view it 
-crp_ggt_sex_plot
-
-#ask jeff opinion on flipping order axes vs label for y 
-#- i know its not conventions but i felt like i naturally looked for the labels first, then the measurements 
-
-```
+The next set of figures were stratified by both HSI category and sex to address the skews identified in previous sections. While any conclusions drawn will not be generalizable, they will no longer be compromised by these confounding factors. 
 
 ```{r}
-#| label: crp-ggt-by-sex-hsi-drafting
-#| code-fold: true
-#| output: true
-
-# CRP & GGT DISTRIBUTIONS BY SEX AND HSI CATEGORY -  -------------
-
-#pivot CRP & GGT into long format w/ sex labels  
-crp_ggt_sex_data <- biomarker_subset %>% 
-  dplyr::filter(!is.na(HSI_category),
-                !is.na(sex),
-                !is.na(crp),
-                !is.na(ggt)) %>% 
-  dplyr::mutate(
-    sex_label = dplyr::case_when(
-      sex == 1 ~ "Male",
-      sex == 2 ~ "Female")) %>% 
-  dplyr::select(HSI_category, 
-                sex_label, 
-                crp, 
-                ggt) %>% 
-  #pivot longer so biomarkers become a variable 
-  tidyr::pivot_longer(
-    cols = c(crp, ggt), 
-    names_to = "biomarker",
-    values_to = "value") %>% 
-  dplyr::mutate(
-    #rename for cleaner display 
-    biomarker = dplyr::recode(
-      biomarker,
-      "crp" = "CRP",
-      "ggt" = "GGT"))
-
-
-#plot - violin + sina, faceted by biomarker (rows) x sex (cols) 
-crp_ggt_sex_plot <- 
-  ggplot(crp_ggt_sex_data, aes(x = HSI_category,
-                               y = value,
-                               color = HSI_category,
-                               fill = HSI_category)) +
-  geom_violin(alpha = 0) +
-  ggforce::geom_sina(alpha = 0.5) +
-  #log transform y-axis for skewed biomarker distributions
-  scale_y_continuous(trans = "log10") +
-  scale_color_viridis_d(
-    option = "plasma", 
-    begin = 0, 
-    end = 0.7) +
-  scale_fill_viridis_d(
-    option = "plasma", 
-    begin = 0, 
-    end = 0.7) + 
-  #facet grid - biomarker rows x sex columns; free_y lets each biomarker have its own scale 
-  #ask jeff opinion on flipping order axes vs label for y 
-#- i know its not conventions but i felt like i naturally looked for the labels first, then the measurements 
-#he agreed that we could flip sex and biomarker to improve visual intiutiveness - coord_flip? - nope - just need to flip orientation of ~ line 
-  facet_grid(sex_label ~ biomarker, 
-             scales = "free_y") +
-  labs(
-    x = NULL,
-    y = "Biomarker Value (log10 scale)",
-    title = "CRP & GGT Distributions by Sex \n Across HSI Severity Categories",
-    fill = "HSI Category",
-    color = "HSI Category") +
-  theme_minimal() +
-  #title/legend position wrangling 
-  theme(legend.position = "bottom",
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        plot.title.position = "plot",
-        plot.title = element_text(hjust = 0.5),
-        panel.grid.minor = element_blank(),
-        strip.text = element_text(face = "bold"))
-
-
-#save plot 
-#ggsave(
-  #filename = here::here("plots", "part2", "crp_ggt_by_sex_hsi.png"),
-  #plot = crp_ggt_sex_plot,
-  #dpi = 400,
-  #width = 12,
-  #height = 9,
-  #units = "in",
-  #bg = "white")
-
-#view it 
-crp_ggt_sex_plot
-
-```
-
-```{r}
-#| label: crp-ggt-by-sex-hsi-drafting-2
+#| label: crp-ferritin-by-sex-hsi
 #| code-fold: true
 #| output: true
 
@@ -1069,11 +849,11 @@ crp_ggt_sex_plot
 ##idea for label/readability issue - can't risk compressed data but can switch category legend and sex label positions - more inteutive and better contexual info for valuable real estate under caption - benefit of reducing visual importance of sex label and balancing labels a little better than og
 
 #pivot CRP & GGT into long format w/ sex labels  
-crp_ggt_sex_data <- biomarker_subset %>% 
+crp_ferritin_sex_data <- biomarker_subset %>% 
   dplyr::filter(!is.na(HSI_category),
                 !is.na(sex),
                 !is.na(crp),
-                !is.na(ggt)) %>% 
+                !is.na(ferritin)) %>% 
   dplyr::mutate(
     sex_label = dplyr::case_when(
       sex == 1 ~ "Male",
@@ -1081,10 +861,10 @@ crp_ggt_sex_data <- biomarker_subset %>%
   dplyr::select(HSI_category, 
                 sex_label, 
                 crp, 
-                ggt) %>% 
+                ferritin) %>% 
   #pivot longer so biomarkers become a variable 
   tidyr::pivot_longer(
-    cols = c(crp, ggt), 
+    cols = c(crp, ferritin), 
     names_to = "biomarker",
     values_to = "value") %>% 
   dplyr::mutate(
@@ -1092,11 +872,11 @@ crp_ggt_sex_data <- biomarker_subset %>%
     biomarker = dplyr::recode(
       biomarker,
       "crp" = "CRP",
-      "ggt" = "GGT"))
+      "ferritin" = "Ferritin"))
 
 
 #plot - violin + sina, faceted by biomarker (rows) x sex (cols) 
-crp_ggt_sex_plot <- 
+crp_ferritin_sex_plot <- 
   ggplot(crp_ggt_sex_data, aes(x = HSI_category,
                                y = value,
                                color = HSI_category,
@@ -1126,7 +906,7 @@ crp_ggt_sex_plot <-
     x = NULL,
     y = "Biomarker Value (log10 scale)",
     #needed to move split but better now 
-    title = "CRP & GGT Distributions by \n Sex Across HSI Severity Categories",
+    title = "CRP & Ferritin Distributions by \n Sex Across HSI Severity Categories",
     fill = "HSI Category",
     color = "HSI Category") +
   theme_minimal() +
@@ -1152,7 +932,7 @@ crp_ggt_sex_plot <-
   #bg = "white")
 
 #view it 
-crp_ggt_sex_plot
+crp_ferritin_sex_plot
 
 ```
 Future analysis should address these potential outliers, but due to project timeline constraints, this could not be further explored at this time.
@@ -1168,4 +948,4 @@ notes:
 
 These diagnostic observations refine, but do not replace, the interpretive framing carried forward from Part 1. The extent to which MTHFR-pathway biomarker patterns observed in Part 1 map onto population-level FLD signal is taken up in the integration discussion that follows.
 
-- blurb to remember: "The cross-language reproducibility approach (re-deriving HSI labels in R from raw NHANES variables rather than importing the Python output) initially surfaced a NaN-handling discrepancy in the Python label derivation that affected reported category counts but not model training results. The discrepancy was corrected before downstream analysis. Independent re-derivation in a second language is not a standard step in undergraduate capstone work, but in this project it provided meaningful verification that label-construction logic matched across implementations."
+The cross-language reproducibility approach (re-deriving HSI labels in R from raw NHANES variables rather than importing the Python output) initially surfaced a NaN-handling discrepancy in the Python label derivation that affected reported category counts but not model training results. The discrepancy was corrected before downstream analysis. Independent re-derivation in a second language is not a standard step in undergraduate capstone work, but in this project it provided meaningful verification that label-construction logic matched across implementation
