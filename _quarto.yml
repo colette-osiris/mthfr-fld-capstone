@@ -55,6 +55,7 @@ website:
 format:
   html:
     theme: cosmo
+    css: part2/styles.css
     toc: true
     toc-depth: 3
     number-sections: false
