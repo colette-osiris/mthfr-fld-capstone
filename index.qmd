@@ -1,19 +1,13 @@
 ---
 title: "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis" 
 author: "Colette Rouiller" 
-format: html
+format: 
+  html:
+    css: styles.css
 engine: knitr
 ---
 
-```{css, echo = FALSE}
-.justify {
-  text-align: justify !important
-}
-```
-
 ## Overview 
-
-::: {.justify}
 
 This project investigates whether biomarkers associated with MTHFR C677T genetic
 variant retain relavance and show correlated patterns in population-level Fatty 
@@ -47,11 +41,7 @@ whose biomarkers and genotype is recorded in the same study. However, the analys
 adds evidence of plausible mechanistic overlap and provides a logical basis for
 future research.
 
-:::
-
 ## Project Aims/Research Questions 
-
-::: {.justify}
 
 This project aims to answer the following questions: 
 
@@ -65,11 +55,7 @@ signalling for FLD classification in the NHANES population cohort?
 what do they suggest about the plausibility of a mechanistic link between C677T 
 and FLD risk? 
 
-:::
-
 ## Project Structure 
-
-::: {.justify}
 
 This project is organized as a Quarto website with the following components:
 
@@ -95,7 +81,7 @@ learning concepts and data analysis techniques applied to NHANES 2001–2004 coh
 data. The machine learning portion contains two parallel models to be compared: 
 a core feature model that reconstructs the validated Hepatic Steatosis Index (HSI) 
 proxy, and a biomarker model that incorporates additional metrics that are 
-associated with FLD status but are not included in HSI calcuations. Data extraction 
+associated with FLD status but are not included in HSI calculations. Data extraction 
 and preprocessing were performed in SQL, modeling in Python, and interpretive 
 visualization in R, all contained within a single Quarto document. 
 
@@ -106,11 +92,7 @@ between the mechanistic profile constructed for MTHFR C677T and population-level
 signalling from the models, as well as provides interpretation of compiled evidence.
 This section also addresses project limitations and directions for future research. 
 
-:::
-
 ## Technical Overview 
-
-::: {.justify}
 
 This project was completed by Colette Rouiller as an IVSP capstone for her B.S. 
 of Bioinformatics and Computational Biology at the University of Maryland, College 
@@ -122,7 +104,6 @@ bioinformatic-based inquiry, process, and final deliverable.
 All source code, data files, data processing scripts, and rendering configuration 
 are version-controlled and publicly available in this repository.
 
-:::
   
 
 
