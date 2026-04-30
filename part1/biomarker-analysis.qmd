@@ -1,15 +1,10 @@
 ---
 title: "1.3 Individual Biomarker Analysis"
+format: 
+  html: 
+    toc-depth: 5
 engine: knitr
 ---
-
-```{css, echo = FALSE}
-.justify {
-  text-align: justify !important
-}
-```
-
-::: {.justify}
 
 For this profile, the following biomarkers were investigated: homocysteine, serum folate, folate (RBC), vitamin B6, betaine, vitamin B12, methylmalonic acid (MMA), gamma-glutamyl transferase (GGT), ferritin, C-reactive protein (CRP), and methionine.
 
@@ -19,7 +14,7 @@ The second set focuses on cofactors and compensatory pathway biomarkers, which a
 The third set focuses on downstream and diagnostic markers. These are biomarkers like CRP, which indicates systemic inflammation, or Vitamin B12, which is mechanistically relevant, but effects are seen downstream with weak, null, or conflicting results (Bhatt et al., 2025; Shiran et al., 2015). 
 
 
-### **<u>1.3.1 Set 1 — Primary Folate Pathway Biomarkers </u>**
+## **<u>1.3.1 Set 1 — Primary Folate Pathway Biomarkers </u>**
 
 This section examines homocysteine, serum folate, and RBC folate for trends in conjunction with MTHFR C677T polymorphisms. 
 
@@ -69,7 +64,7 @@ Directional Trend and Confidence Assessment:
 
 Decreased RBC folate in the stepwise pattern of TT < CT < CC is highly directionally consistent and supported across meta-analytic, RCT, and GWAS studies (Tsang et al., 2015; Crider et al., 2011; Shane et al., 2018). For RBC folate specifically, the CC versus CT distinction is less statistically robust than TT versus either group in the other biomarker syntheses, so caution is warranted surrounding heterozygote-specific assertions. Additionally, since the RBC folate deficit in TT carriers appeared to exceed the folate serum deficit even with supplementation, the assertion that RBC folate is a stable, genotype-sensitive biomarker is strengthened (Tsang et al., 2015; Crider et al., 2011). The only primary limitation across the evidence is the sex-based restriction to female populations in both the Tsang meta-analysis and Crider RCT, though generalizability to mixed-sex adult populations was directionally supported by the Irish GWAS (Tsang et al., 2015; Crider et al., 2011; Shane et al., 2018). 
 
-### **<u>1.3.2 Set 2 — Cofactor and Compensatory Pathway Biomarkers </u>**
+## **<u>1.3.2 Set 2 — Cofactor and Compensatory Pathway Biomarkers </u>**
 
 This section examines vitamin B6/PLP, betaine, vitamin B12, and methionine for trends in conjunction with MTHFR C677T polymorphisms. 
 
@@ -130,7 +125,7 @@ Directional Trend and Confidence Assessment:
 
 Overall, the literature indicates that circulating methionine levels are not significantly impacted by the C677T genotype, but T allele dosage is still associated with a consistent pattern of downstream methylation dysfunction regardless; confidence in this null finding is high given the statistical power of the NORCCAP cohort studies and the cross-methodological consistency in trends across all three independent studies (Midttun et al., 2007; Rooney et al., 2020; Yan et al., 2011). The SAM and SAM:SAH evidence further indicates that preserved methionine should not be interpreted as preserved methylation capacity, which is a distinction with meaningful implications that will be discussed in the integrated profile (Rooney et al., 2020). 
 
-### **<u>1.3.3 Set 3 — Downstream and Diagnostic Biomarkers </u>**
+## **<u>1.3.3 Set 3 — Downstream and Diagnostic Biomarkers </u>**
 
 This section examines methylmalonic acid (MMA), C-reactive protein (CRP), ferritin, and gamma-glutamyl transferase (GGT) for trends in conjunction with MTHFR C677T polymorphisms. 
 
@@ -169,5 +164,3 @@ Gamma-Glutamyl Transferase (GGT) is a hepatic enzyme involved in glutathione met
 Ferritin, the storage protein for iron, was also an initial candidate for the profile since elevated levels are also associated with oxidative stress and inflammation (Salem et al., 2024). Like GGT, ferritin exhibits indirect interactions with the folate cycle, with elevated levels functioning as a responsive marker of oxidative stress and inflammatory signaling. Ferritin also appears sparsely in the C677T genotype-stratified literature in a form that meets the inclusion criteria of this analysis. 
 
 GGT and ferritin are both plausible contextual markers, but they lack direct genotype-stratified evidence in the currently available literature. They could not reasonably be incorporated into this profile, but will be revisited in the Part 2 analysis on Fatty Liver Disease (FLD) classification and associated biomarkers. 
-
-:::
