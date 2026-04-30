@@ -1,6 +1,107 @@
 ---
 title: "References"
-nocite: '@*'
+engine: knitr
 ---
 
 *All references cited across this project are listed below.*
+
+Abratte, C. M., Wang, W., Li, R., Moriarty, D. J., & Caudill, M. A. (2008). Folate intake and the MTHFR C677T genotype influence choline status in young Mexican American women. The Journal of Nutritional Biochemistry, 19(3), 158–165. https://doi.org/10.1016/j.jnutbio.2007.02.004
+
+Barbosa, P. R., Stabler, S. P., Trentin, R., Carvalho, F. R., Luchessi, A. D., Hirata, R. D., Hirata, M. H., Allen, R. H., & Guerra-Shinohara, E. M. (2008). Evaluation of nutritional and genetic determinants of total homocysteine, methylmalonic acid and S-adenosylmethionine/S-adenosylhomocysteine values in Brazilian childbearing-age women. Clinica Chimica Acta, 388(1–2), 139–147. https://doi.org/10.1016/j.cca.2007.10.023
+
+Bhatt, R. D., Karmacharya, B. M., Shrestha, A., Timalsena, D., Madhup, S., Shahi, R., Katuwal, N., Shrestha, R., Fitzpatrick, A. L., & Risal, P. (2025). Prevalence of MTHFR C677T polymorphism and its association with serum homocysteine and blood pressure among different ethnic groups: Insights from a cohort study of Nepal. BMC Cardiovascular Disorders, 25, 235. https://doi.org/10.1186/s12872-025-04690-z
+
+Christensen, K. E., Faquette, M.-L., Leclerc, D., Gravel, R. A., & Rozen, R. (2025). Folic acid and methyltetrahydrofolate supplementation in the MTHFR C677T mouse model with hepatic steatosis. Nutrients, 17(1), 82. https://doi.org/10.3390/nu17010082
+
+Colson, N. J., Naug, H. L., Nikbakht, E., Zhang, P., & McCormack, J. (2017). The impact of MTHFR 677 C/T genotypes on folate status markers: A meta-analysis of folic acid intervention studies. European Journal of Nutrition, 56(1), 247–260. https://doi.org/10.1007/s00394-015-1076-x
+
+Courseault, J., Kingry, C., Morrison, V., Edstrom, C., Morrell, K., Elia, V., & Bix, G. (2023). Folate-dependent hypermobility syndrome: A proposed mechanism and diagnosis. Heliyon, 9(4), e15387. https://doi.org/10.1016/j.heliyon.2023.e15387
+
+Crider, K. S., Zhu, J. H., Hao, L., Yang, Q. H., Yang, T. P., Gindler, J., Maneval, D. R., Quinlivan, E. P., Li, Z., Bailey, L. B., & Berry, R. J. (2011). MTHFR 677C→T genotype is associated with folate and homocysteine concentrations in a large, population-based, double-blind trial of folic acid supplementation. The American Journal of Clinical Nutrition, 93(6), 1365–1372.
+https://doi.org/10.3945/ajcn.110.004671
+
+Dagher, D., & Khan, M. (2025). Writing a systematic review and meta-analysis: A step-by-step guide. Sports Health, 17(5), 885–890. https://doi.org/10.1177/19417381251364686
+
+De Carvalho, S. C. R., Muniz, M. T. C., Siqueira, M. D. V., Siqueira, E. R. F., Gomes, A. V., Silva, K. A., Bezerra, L. C. L., D'Almeida, V., de Oliveira, C. P. M. S., & Pereira, L. M. M. B. (2013). Plasmatic higher levels of homocysteine in non-alcoholic fatty liver disease (NAFLD). Nutrition Journal, 12, 37. https://doi.org/10.1186/1475-2891-12-37
+
+Dedoussis, G. V. Z., Panagiotakos, D. B., Pitsavos, C., Chrysohoou, C., Skoumas, J., Choumerianou, D., & Stefanadis, C. (2005). An association between the methylenetetrahydrofolate reductase (MTHFR) C677T mutation and inflammation markers related to cardiovascular disease. International Journal of Cardiology, 100(3), 409–414. https://doi.org/10.1016/j.ijcard.2004.08.038
+
+Dillon, J. F., & Miller, M. H. (2016). Gamma glutamyl transferase 'To be or not to be' a liver function test? Annals of Clinical Biochemistry, 53(6), 629–631. https://doi.org/10.1177/0004563216659887
+
+Fredriksen, A., Meyer, K., Ueland, P. M., Vollset, S. E., Grotmol, T., & Schneede, J. (2007). Large-scale population-based metabolic phenotyping of thirteen genetic polymorphisms related to one-carbon metabolism. Human Mutation, 28(9), 856–865. https://doi.org/10.1002/humu.20522
+
+Girelli, D., Martinelli, N., Pizzolo, F., Friso, S., Olivieri, O., Stranieri, C., Trabetti, E., Faccini, G., Tinazzi, E., Pignatti, P. F., & Corrocher, R. (2003). The interaction between MTHFR 677 C→T genotype and folate status is a determinant of coronary atherosclerosis risk. The Journal of Nutrition, 133(5), 1281–1285. https://doi.org/10.1093/jn/133.5.1281
+
+Holm, P. I., Hustad, S., Ueland, P. M., Vollset, S. E., Grotmol, T., & Schneede, J. (2007). Modulation of the homocysteine-betaine relationship by methylenetetrahydrofolate reductase 677 C→T genotypes and B-vitamin status in a large-scale epidemiological study. The Journal of Clinical Endocrinology and Metabolism, 92(4), 1535–1541. https://doi.org/10.1210/jc.2006-1471
+
+Hustad, S., Midttun, Ø., Schneede, J., Vollset, S. E., Grotmol, T., & Ueland, P. M. (2007). The methylenetetrahydrofolate reductase 677C→T polymorphism as a modulator of a B vitamin network with major effects on homocysteine metabolism. American Journal of Human Genetics, 80(5), 846–855. https://doi.org/10.1086/513520
+
+Jarrett, H., McNulty, H., Hughes, C. F., Pentieva, K., Strain, J. J., McCann, A., McAnena, L., Cunningham, C., Molloy, A. M., Flynn, A., Hopkins, S. M., Horigan, G., O'Connor, C., Walton, J., McNulty, B. A., Gibney, M. J., Lamers, Y., & Ward, M. (2022). Vitamin B-6 and riboflavin, their metabolic interaction, and relationship with MTHFR genotype in adults aged 18-102 years. The American Journal of Clinical Nutrition, 116(6), 1767–1778. https://doi.org/10.1093/ajcn/nqac240
+
+Jones, G. S., Alvarez, C. S., Graubard, B. I., & McGlynn, K. A. (2022). Agreement between the prevalence of nonalcoholic fatty liver disease determined by transient elastography and fatty liver indices. Clinical Gastroenterology and Hepatology, 20(1), 227–229.e2. https://doi.org/10.1016/j.cgh.2020.11.028
+
+Kitagawa, E., Yamamoto, T., Fujishita, M., Ota, Y., Yamamoto, K., Nakagawa, T., & Hayakawa, T. (2017). Choline and betaine ameliorate liver lipid accumulation induced by vitamin B6 deficiency in rats. Bioscience, Biotechnology, and Biochemistry, 81(2), 316–322.
+https://doi.org/10.1080/09168451.2016.1240604
+
+Leclerc, D., Sibani, S., & Rozen, R. (2013). Molecular biology of methylenetetrahydrofolate reductase (MTHFR) and overview of mutations/polymorphisms. In Madame Curie Bioscience Database. Landes Bioscience. https://www.ncbi.nlm.nih.gov/books/NBK6561/
+
+Lee, J. H., Kim, D., Kim, H. J., Lee, C. H., Yang, J. I., Kim, W., Kim, Y. J., Yoon, J. H., Cho, S. H., Sung, M. W., & Lee, H. S. (2010). Hepatic steatosis index: A simple screening tool reflecting nonalcoholic fatty liver disease. Digestive and Liver Disease, 42(7), 503–508. https://doi.org/10.1016/j.dld.2009.08.002
+
+Liew, S.-C., & Gupta, E. D. (2015). Methylenetetrahydrofolate reductase (MTHFR) C677T polymorphism: Epidemiology, metabolism and the associated diseases. European Journal of Medical Genetics, 58(1), 1–10. https://doi.org/10.1016/j.ejmg.2014.10.004
+
+Lippi, G., Salvagno, G. L., Targher, G., Montagnana, M., & Guidi, G. C. (2008). Plasma gamma-glutamyl transferase activity predicts homocysteine concentration in a large cohort of unselected outpatients. Internal Medicine, 47(8), 705–707. https://doi.org/10.2169/internalmedicine.47.0810
+
+Liu, Z., Zeng, Y., Shen, S., Wen, Y., & Xu, C. (2023). Association between folate and non-alcoholic fatty liver disease among US adults: A nationwide cross-sectional analysis. Chinese Medical Journal, 136(2), 233–235. https://doi.org/10.1097/CM9.0000000000002516
+
+Long, S., & Goldblatt, J. (2016). MTHFR genetic testing: Controversy and clinical implications. Australian Family Physician, 45(4), 237–240.
+
+Martínez, Y., Li, X., Liu, G., Bin, P., Yan, W., Más, D., Valdivié, M., Hu, C.-A. A., Ren, W., & Yin, Y. (2017). The role of methionine on metabolism, oxidative stress, and diseases. Amino Acids, 49(12), 2091–2098. https://doi.org/10.1007/s00726-017-2494-2
+
+Matté, C., Stefanello, F. M., Mackedanz, V., Pederzolli, C. D., Lamers, M. L., Dutra-Filho, C. S., dos Santos, M. F., & Wyse, A. T. S. (2009). Homocysteine induces oxidative stress, inflammatory infiltration, fibrosis and reduces glycogen/glycoprotein content in liver of rats. International Journal of Developmental Neuroscience, 27(4), 337–344. https://doi.org/10.1016/j.ijdevneu.2009.03.005
+
+McNulty, H., Strain, J. J., Pentieva, K., & Ward, M. (2012). C1 metabolism and CVD outcomes in older adults. Proceedings of the Nutrition Society, 71(2), 213–221. https://doi.org/10.1017/S0029665111003387
+
+Midttun, Ø., Hustad, S., Schneede, J., Vollset, S. E., & Ueland, P. M. (2007). Plasma vitamin B-6 forms and their relation to transsulfuration metabolites in a large, population-based study. The American Journal of Clinical Nutrition, 86(1), 131–138. https://doi.org/10.1093/ajcn/86.1.131
+
+Molloy, A. M., Pangilinan, F., Mills, J. L., Shane, B., O'Neill, M. B., McGaughey, D. M., Velkova, A., Abaan, H. O., Ueland, P. M., McNulty, H., Ward, M., Strain, J. J., Cunningham, C., Casey, M., Cropp, C. D., Kim, Y., Bailey-Wilson, J. E., Wilson, A. F., & Brody, L. C. (2016). A common polymorphism in HIBCH influences methylmalonic acid concentrations in blood independently of cobalamin. American Journal of Human Genetics, 98(5), 869–882. https://doi.org/10.1016/j.ajhg.2016.03.005
+
+Page, M. J., McKenzie, J. E., Bossuyt, P. M., Boutron, I., Hoffmann, T. C., Mulrow, C. D., Shamseer, L., Tetzlaff, J. M., Akl, E. A., Brennan, S. E., Chou, R., Glanville, J., Grimshaw, J. M., Hróbjartsson, A., Lalu, M. M., Li, T., Loder, E. W., Mayo-Wilson, E., McDonald, S., … Moher, D. (2021). The PRISMA 2020 statement: An updated guideline for reporting systematic reviews. PLOS Medicine, 18(3), e1003583. https://doi.org/10.1371/journal.pmed.1003583
+
+Pokushalov, E., Ponomarenko, A., Bayramova, S., Garcia, C., Pak, I., Shrainer, E., Ermolaeva, M., Kudlay, D., Johnson, M., & Miller, R. (2024). Effect of methylfolate, pyridoxal-5'-phosphate, and methylcobalamin (Soloways™) supplementation on homocysteine and low-density lipoprotein cholesterol levels in patients with methylenetetrahydrofolate reductase, methionine synthase, and methionine synthase reductase polymorphisms: A randomized controlled trial. Nutrients, 16(11), 1550. https://doi.org/10.3390/nu16111550
+
+Qureshi, S. S., Gupta, J. K., Goyal, A., & Yadav, H. N. (2019). A novel approach in the management of hyperhomocysteinemia. Medical Hypotheses, 129, 109245. https://doi.org/10.1016/j.mehy.2019.10924
+
+Raghubeer, S., & Matsha, T. E. (2021). Methylenetetrahydrofolate (MTHFR), the one-carbon cycle, and cardiovascular risks. Nutrients, 13(12), 4562. https://doi.org/10.3390/nu13124562
+
+Rinella, M. E., & Sookoian, S. (2024). From NAFLD to MASLD: Updated naming and diagnosis criteria for fatty liver disease. Journal of Lipid Research, 65(1), 100485. https://doi.org/10.1016/j.jlr.2023.100485
+
+Rooney, M., Bottiglieri, T., Wasek-Patterson, B., McMahon, A., Hughes, C. F., McCann, A., Horigan, G., Strain, J. J., McNulty, H., & Ward, M. (2020). Impact of the MTHFR C677T polymorphism on one-carbon metabolites: Evidence from a randomised trial of riboflavin supplementation. Biochimie, 173, 91–99. https://doi.org/10.1016/j.biochi.2020.04.004
+
+Salem, A. A., Abdelmageed, K. H., Badawy, M. N., & Mohammed Dabiesh, M. A. A. (2024). Serum ferritin and C-reactive protein (CRP) in non-alcoholic fatty liver disease (NAFLD) and non-alcoholic steatohepatitis (NASH) patients [Conference abstract]. QJM: An International Journal of Medicine, 117(Suppl. 1), hcae070.331. https://doi.org/10.1093/qjmed/hcae070.331
+
+Shane, B., Pangilinan, F., Mills, J. L., Fan, R., Gong, T., Cropp, C. D., Kim, Y., Ueland, P. M., Bailey-Wilson, J. E., Wilson, A. F., Brody, L. C., & Molloy, A. M. (2018). The 677C→T variant of MTHFR is the major genetic modifier of biomarkers of folate status in a young, healthy Irish population. The American Journal of Clinical Nutrition, 108(6), 1334–1341. https://doi.org/10.1093/ajcn/nqy209
+
+Shiran, A., Remer, E., Asmer, I., Karkabi, B., Zittan, E., Cassel, A., Barak, M., Rozenberg, O., Karkabi, K., & Flugelman, M. Y. (2015). Association of vitamin B12 deficiency with homozygosity of the TT MTHFR C677T genotype, hyperhomocysteinemia, and endothelial cell dysfunction. The Israel Medical Association Journal, 17(5), 288–292.
+
+Tsang, B. L., Devine, O. J., Cordero, A. M., Marchetta, C. M., Mulinare, J., Mersereau, P., Guo, J., Qi, Y. P., Berry, R. J., Rosenthal, J., Crider, K. S., & Hamner, H. C. (2015). Assessing the association between the methylenetetrahydrofolate reductase (MTHFR) 677C>T polymorphism and blood folate concentrations: A systematic review and meta-analysis of trials and observational studies. The American Journal of Clinical Nutrition, 101(6), 1286–1294. https://doi.org/10.3945/ajcn.114.099994
+Wan, L., Li, Y., Zhang, Z., Sun, Z., He, Y., & Li, R. (2018). Methylenetetrahydrofolate reductase and psychiatric diseases. Translational Psychiatry, 8, 242. https://doi.org/10.1038/s41398-018-0276-6
+
+Yan, J., Wang, W., Gregory, J. F., 3rd, Malysheva, O., Brenna, J. T., Stabler, S. P., Allen, R. H., & Caudill, M. A. (2011). MTHFR C677T genotype influences the isotopic enrichment of one-carbon metabolites in folate-compromised men consuming d9-choline. The American Journal of Clinical Nutrition, 93(2), 348–355. https://doi.org/10.3945/ajcn.110.005975
+
+Yeniova, A., Küçükazman, M., Ata, N., Dal, K., Kefeli, A., Basyigit, S., Aktaş, B., Agladioglu, K., Akın, O., Ertugrul, D., Nazligül, Y., & Beyan, E. (2014). High-sensitivity C-reactive protein is a strong predictor of non-alcoholic fatty liver disease. Hepato-Gastroenterology, 61(130), 422–425.
+
+Younossi, Z. M., Golabi, P., Paik, J. M., Henry, A., Van Dongen, C., & Henry, L. (2023). The global epidemiology of nonalcoholic fatty liver disease (NAFLD) and nonalcoholic steatohepatitis (NASH): A systematic review. Hepatology, 77(4), 1335–1347. https://doi.org/10.1097/HEP.0000000000000004
+
+Zawieja, E., Drabińska, N., Jeleń, H., Szwengiel, A., Durkalec-Michalski, K., & Chmurzynska, A. (2024). Betaine supplementation modulates betaine concentration by methylenetetrahydrofolate reductase genotype, but has no effect on amino acid profile in healthy active males: A randomized placebo-controlled cross-over study. Nutrition Research, 127, 63–74. https://doi.org/10.1016/j.nutres.2024.05.003
+
+Zhang, X., Hou, C., Liu, P., Chen, L., Liu, Y., Tang, P., & Li, R. (2019). Methylenetetrahydrofolate reductase (MTHFR) C677T polymorphism and subacute combined degeneration: Revealing a genetic predisposition. Frontiers in Neurology, 9, 1162. https://doi.org/10.3389/fneur.2018.01162
+
+Zhu, W. (2024). Effective roles of exercise and diet adherence in non-alcoholic fatty liver disease. World Journal of Gastroenterology, 30(29), 3456–3460. https://doi.org/10.3748/wjg.v30.i29.3456
+
+Zittan, E., Preis, M., Asmir, I., Cassel, A., Lindenfeld, N., Alroy, S., Lewis, B. S., Shiran, A., Schliamser, J. E., & Flugelman, M. Y. (2007). High frequency of vitamin B12 deficiency in asymptomatic individuals homozygous to MTHFR C677T mutation is associated with endothelial dysfunction and homocysteinemia. American Journal of Physiology - Heart and Circulatory Physiology, 293(1), H860–H865. https://doi.org/10.1152/ajpheart.01189.2006
+
+#### Methodological Transparency
+
+Multiple LLMs were used during this project for debugging assistance, draft review, structural planning discussions, and reference list formatting verification. AI output was treated as feedback to evaluate, and was often faulty and/or not incorporated in revisions due to content complexity and current AI limitations. Any suggestions that are included in the final work were independently verified and integrated through my own original writing. All analysis decisions, prose writing, code implementation, and final content are my original work. 
+
+
