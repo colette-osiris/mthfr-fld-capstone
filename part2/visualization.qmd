@@ -155,7 +155,7 @@ hsi_category_flextable
 #| output: false
 
 #save flextable 
-flextable::save_as_image(x = hsi_category_flextable, path = "../plots/part2/hsi_category_flextable.png")
+flextable::save_as_image(x = hsi_category_flextable, path = "../tables/part2/hsi_category_flextable.png")
 ```
 
 The category counts (healthy = 3,416, borderline = 4,022, nafld_like = 5,551) match those found in the ML analysis, which confirms the R derivation reproduces the Python labels correctly. This integrity check was initially included in the portion of the project to act as a routine reproducibility verification measure. However, during preliminary runs, it revealed a discrepancy in the ML code that silently misclassified 1,446 rows with missing HSI inputs. This error was traced to the Python code's default NaN behavior in section 2.2.3.4 and was resolved, along with all downstream implications of the initial bug. With labels reconstructed and validated, the analysis proceeds to the diagnostic examinations outlined below.
@@ -273,7 +273,7 @@ full_missingness_plot
 
 #save plot - ggplot not flextable syntax 
 ggsave(
-  filename = here::here("plots", "part2", "biomarker_missingness_tile.png"),
+  filename = here::here("tables", "part2", "biomarker_missingness_table.png"),
   plot = full_missingness_plot,
   dpi = 400,
   width = 10,
@@ -651,18 +651,18 @@ This figure shows how each biomarker trends across HSI categories, with each bio
 
  CRP showed the largest visual change, which was a positive directional shift that increased with NAFLD severity. CRP was also the only biomarker whose classes also ranged in density, with healthy and nafld_like classes showing completely different shapes. The healthy class is more heavily distributed at the bottom with notable lines at approximately 0.2 and 0.5, though the source of that pattern is unknown. CRP being positively associated with NAFLD severity mechanistically aligns with existing literature. 
  
-Ferritin and GGT both also displayed moderately strong positive associations with increasing HSI severity, though GGT's directional magnitude is less prominent than ferritin's. In addition to the directional aspect, GGT and ferritin show increasingly expanding ranges of values as severity increases. This indicates that NAFLD status shows a range of high and low iron and GGT levels that are not seen in the healthy class. This may point to the fact that HSI is a proxy measure, not a defined, bordered phenotype, which may explain this phenotypic plasticity observed in the data. It is worth noting that the Python model assigned ferritin a near 0 coefficient, indicating it wasn't a meaningful predictor, but this visual representation contradicts that assertion. In particular, the directional relationship does track with severity, but the expanding range shows a weaker signal. This could be caused by mechanistic distance, multicollinearity that went undetected by the Python model, or another unknown source. 
+Ferritin and GGT both also displayed moderately strong positive associations with increasing HSI severity, though GGT's directional magnitude is less prominent than ferritin's. In addition to the directional aspect, GGT and ferritin show increasingly expanding ranges of values as severity increases. This indicates that NAFLD status shows a range of high and low iron and GGT levels that are not seen in the healthy class. This may point to the fact that HSI is a proxy measure, not a defined, bordered phenotype, which may explain this phenotypic plasticity observed in the data. It is worth noting that the Python model assigned ferritin a near 0 coefficient, indicating it wasn't a meaningful predictor, but this visual representation suggests ferritin may carry a directional signal that was obscured by the coefficient. The directional relationship does track with severity, but the expanding range shows a weaker signal. This could be caused by mechanistic distance, bias from the  sex skew, or another unknown source. 
 
 Homocysteine also shows a moderate positive trend with NAFLD severity, though this shift is mostly seen through the density and the modal values of each HSI category. This figure contradicts the regression negative coefficient produced in the Python code, but aligns with mechanistic expectations. 
 
-The figure appears to show a slight negative association between serum folate and NAFLD severity, which is consistent with biological mechanism and the ML portion findings. Serum folate shows a stable density distribution across HSI classes but the negative trend is apparent through the decreasing floor value as it shifts across severity categories. This feature aligns with biological mechanism expectations, though outlier evaluation is required for any further assertion. It's worth noting that even though the negative trend is small in magnitude, it is still more visually apparent than RBC. This contradicts expectations because RBC is the more stable/long term folate metric, and therefor, any short term measurements would be expected to be reflected in long term complement. 
+MMA and RBC both showed no easily visualized trends, with density, range, and direction staying consistent. Both of these biomarkers were expected to show negative associations based on ML model and established biological mechanisms, so the lack of relationship in both features suggest that either these biomarkers do not have any significant signal in this subset or there was an issue with modeling conditioning or artifact.
 
-MMA and RBC both showed no easily visualized trends, with density, range, and direction staying consistent. Both of these biomarkers were expected to show negative associations based on ML model and established biological mechanisms, so the lack of relationship in both features may suggest an issue in modeling conditioning or artifact.
+The figure appears to show a slight negative association between serum folate and NAFLD severity, which is consistent with biological mechanism and the ML portion findings. Serum folate shows a stable density distribution across HSI classes but the negative trend is apparent through the decreasing floor value as it shifts across severity categories. This feature aligns with biological mechanism expectations, though outlier evaluation is required for any further assertion. It's worth noting that even though the negative trend is small in magnitude, it is still more visually apparent than RBC. This contradicts expectations because RBC is the more stable/long term folate metric, so chronic impact of FLD on folate levels would be expected to show up more clearly in the long-term metric than in the short-term one. 
 
-Vitamin B12 shows a slight negative association with NAFLD severity, which aligns with biological expectation since B12 deficiency is established in literature as a factor associated with metabolic dysfunction. 
+Vitamin B12 also shows a slight negative association with NAFLD severity, which aligns with biological expectation since B12 deficiency is established in literature as a factor associated with metabolic dysfunction. 
 
 Additionally, it's worth noting that the majority of directional trends observed through this figure align with biological mechanisms even when they contradict the ML analysis's assigned coefficients. Homocysteine  showed a strong trend that aligned with expected behavior but was inconsistent with the minor negative coefficient assigned. Similarly, ferritin and B12 were both assigned near 0 values in the logistic regression, but this figure shows clear directional relationships despite the indication of low mechanistic relevance during modeling. 
-These combined results, which show consistently accurate directional signals at the distribution level but incorrect directional/magnitudinal coefficient assignments in the ML level, supports the idea that multicollinearity and signal overlap is present is some of these examined features.
+These combined results, which show consistently accurate directional signals at the distribution level but incorrect directional/magnitudinal coefficient assignments in the ML level, supports the idea selection bias bias impacts the visibility of conditional effects. 
 
 ### <u> 2.3.4: Sex-Stratified View of Biomarker Subset </u>
 
@@ -756,6 +756,8 @@ This figure visually confirms the inverted NAFLD prevalence noted in section 2.2
 
 ##### <u> 2.3.4.2: Homocysteine by Sex & HSI Category </u>
 
+The next set of figures were stratified by both HSI category and sex to address the skews identified in previous sections. While any conclusions drawn will not be generalizable, they will no longer be compromised by these confounding factors. 
+
 ```{r}
 #| label: homocysteine-by-sex-hsi
 #| code-fold: true
@@ -833,12 +835,11 @@ ggsave(
   bg = "white")
 ```
 
-
-notes: - immediately can see sex based population skew - males seem to exhibit higher homocysteine - not explicitly stated this project, bc uses mouse model but ANSC project paper notes that men seen to use BHMT pathway to compensate - so why increased hcy? bc women are skewed healthier? - wish i had MTHFR data - also makes me question applicability of stats to gen pop, esp with women seemingly more healthy - doesnt align with known data, need to verify. -worthy of discussion - meaningful differences - should proceed with secondary analysis of most variable features (ggt, crp). 
+Both sexes show relatively stable homocysteine levels, though the distributions shapes appear to move in opposite directions, with male modal density compressing and female density distribution range expanding both in positive association with NAFLD severity. This indicates that NAFLD-presenting males have a narrow phenotype compared to females, who tend to present more variably. It is important to note that the male sample size is substantially reduced, and further investigation is required in order to establish these associations. This figure reinforces the impact of the sex skew given that the female distribution matches the original biomarker multiplot in section 2.3.3.1 and the sex stratification produces notable different violin plots for males across HSI categories. 
 
 ##### <u> 2.3.4.3: CRP & GGT by Sex & HSI Category </u>
 
-The next set of figures were stratified by both HSI category and sex to address the skews identified in previous sections. While any conclusions drawn will not be generalizable, they will no longer be compromised by these confounding factors. 
+Stratifying by both sex and HSI category revealed nuanced/subtle trends in the homocysteine biomarker, so this analysis technique was applied to ferritin and CRP given their directional trend strengths visible in the original multiplot. 
 
 ```{r}
 #| label: crp-ferritin-by-sex-hsi
@@ -877,7 +878,7 @@ crp_ferritin_sex_data <- biomarker_subset %>%
 
 #plot - violin + sina, faceted by biomarker (rows) x sex (cols) 
 crp_ferritin_sex_plot <- 
-  ggplot(crp_ggt_sex_data, aes(x = HSI_category,
+  ggplot(crp_ferritin_sex_data, aes(x = HSI_category,
                                y = value,
                                color = HSI_category,
                                fill = HSI_category)) +
@@ -920,24 +921,43 @@ crp_ferritin_sex_plot <-
         panel.grid.minor = element_blank(),
         strip.text = element_text(face = "bold"))
 
-
-#save plot 
-#ggsave(
-  #filename = here::here("plots", "part2", "crp_ggt_by_sex_hsi.png"),
-  #plot = crp_ggt_sex_plot,
-  #dpi = 400,
-  #width = 12,
-  #height = 9,
-  #units = "in",
-  #bg = "white")
-
 #view it 
 crp_ferritin_sex_plot
 
 ```
+
+```{r}
+#| label: crp-ferritin-by-sex-hsi-save
+#| echo: false
+#| output: false
+
+#save plot 
+ggsave(
+  filename = here::here("plots", "part2", "crp_ferritin_by_sex_hsi.png"),
+  plot = crp_ferritin_sex_plot,
+  dpi = 400,
+  width = 12,
+  height = 7,
+  units = "in",
+  bg = "white")
+```
+
 Future analysis should address these potential outliers, but due to project timeline constraints, this could not be further explored at this time.
 
 notes:
+
+- CRP:
+  - trend is consistent across sex, though sick males mode was lower than sick females distribution though other classes are more similar. 
+
+- GGT 
+  - directional trend clear across sexes, more severe than CRP 
+  - females show expanding distribution, just like hcy 
+  - male distribution shape stays the same, just increases in height 
+
+- mechanistic role? 
+
+
+
 
 -   also displays sex difference, especially the healthy class
 -   need to look for sex changes
@@ -947,5 +967,8 @@ notes:
 ### <u> 2.3.5: Summary & Integration with Part 2.2 Findings </u>
 
 These diagnostic observations refine, but do not replace, the interpretive framing carried forward from Part 1. The extent to which MTHFR-pathway biomarker patterns observed in Part 1 map onto population-level FLD signal is taken up in the integration discussion that follows.
+
+
+- discuss what multiple graphs show about the role/need for a borderline class. 
 
 The cross-language reproducibility approach (re-deriving HSI labels in R from raw NHANES variables rather than importing the Python output) initially surfaced a NaN-handling discrepancy in the Python label derivation that affected reported category counts but not model training results. The discrepancy was corrected before downstream analysis. Independent re-derivation in a second language is not a standard step in undergraduate capstone work, but in this project it provided meaningful verification that label-construction logic matched across implementation
