@@ -10,19 +10,18 @@ engine: knitr
 ## Overview 
 
 This project investigates whether biomarkers associated with MTHFR C677T genetic
-variant retain relavance and show correlated patterns in population-level Fatty 
+variants retain relevance and show correlated patterns in population-level Fatty 
 Liver Disease (FLD) analysis. FLD is a liver condition characterized by the 
-accumulation of lipidndroplets in the liver, affecting up to 42.2% of adults in 
+accumulation of lipid droplets in the liver, affecting up to 42.2% of adults in 
 the US (Jones et al., 2022). The MTHFR C677T mutation is one of the most common
 functional genetic variants in the human genome, carried by approximately 25% of 
 the US population (Graydon et al., 2019). Since the liver functions as the central 
 hub for both lipid regulation and folate-dependent one-carbon metabolism, it 
 provides a biologically plausible context by which to examine potential downstream
 effects of MTHFR mutations on metabolic dysfunction cases, like FLD. 
-
 If an association can be found between the two, that can be used to develop 
-protocols and recommendations for preventative and reactive care that could impact 
-a significant portion of the population, making it incredibly important area of 
+protocols and recommendations for preventative and reactive care that could impact
+a significant portion of the population, making it an incredibly important area of
 research. Current research confirms the observed phenomenon of the C677T variant 
 of the MTHFR gene affects liver-related biomarkers, so this project investigates 
 how the two factors are related (Christianson et al., 2025).
@@ -31,7 +30,7 @@ Directly testing this relationship would require a single dataset that contains
 both MTHFR genotype data and FLD biomarker data from the same individuals in order 
 to avoid data and conclusion conflation. However, this combination is not publically
 available and access to the sources that exist require extensive applications and 
-vetting. This project therefor uses a split analytical approach to focus instead on 
+vetting. This project therefore uses a split analytical approach to focus instead on 
 overlapping biomarker trends as potential indications of mechanistic links. 
 
 It is important to note that even if the biomarker profile is consistent across 
@@ -101,8 +100,7 @@ biochemical mechanism understanding and analysis, programming and statistical an
 skills across multiple languages, and integration of the two elements into a realistic
 bioinformatic-based inquiry, process, and final deliverable. 
 
-All source code, data files, data processing scripts, and rendering configuration 
-are version-controlled and publicly available in this repository.
+.
 
   
 
