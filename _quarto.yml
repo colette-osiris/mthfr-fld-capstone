@@ -64,11 +64,6 @@ format:
     code-tools: true
     #code-fold: true and code-tools: true b/c code chunks are collapsed defaulty
 
- #professional practice - single bib file created and stored in references 
-   #csl file controls citation formatting - need to download APA .csl from zotero 
-   #repo and place at 'references/apa.csl
-bibliography: references/references.bib
-csl: references/apa.csl
 
 #freeze set to auto so Quarto only re-executes chunks with source changes 
   ## improves rendering stability for mixed language environments 
