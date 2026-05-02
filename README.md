@@ -61,4 +61,4 @@ All source code, cleaned data files, data processing scripts, and rendering conf
 
 ## Acknowledgements 
 
-Project mentors/readers included Aric Bills (ARLIS at UMD), Jeff Henrikson (AOSC at UMD), and Dr. Louisa Wu.   
+Project mentors/readers included Aric Bills (ARLIS at UMD), Jeff Henrikson (AOSC at UMD), and Dr. Louisa Wu (CBMG at UMD).   
