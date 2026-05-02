@@ -6,6 +6,8 @@
 outputs/
 #*.html
 #*.pdf
+_site/
+_freeze/
 
 #Python execution noise
 __pycache__/
