@@ -2,7 +2,7 @@
 
 This project was completed by Colette Rouiller as an IVSP capstone for her B.S. of Bioinformatics and Computational Biology at the University of Maryland, College Park. It investigates whether biomarkers associated with the MTHFR C677T variant retain relevance and show correlated patterns in population-level Fatty Liver Disease Analysis. 
 
-Live site link: 
+**Live site:** https://colette-osiris.github.io/mthfr-fld-capstone/
 
 ## Project Overview 
 
@@ -21,23 +21,38 @@ The final deliverable for this prodiect is a Quarto-rendered website that is org
 
  The layout of the repository is as follows: 
 
-├── part1/              Part 1 source files (.qmd)
-├── part2/              Part 2 source files (.qmd)
-├── scripts/            Data preprocessing pipeline
-├── data/               Cleaned analysis-ready datasets
-├── plots/              Generated figures
-├── tables/             Generated tables
-├── images/             Reference images and search logs
-├── references/         Bibliography files
-├── docs/               Rendered Quarto site (GitHub Pages source)
-├── _quarto.yml         Quarto configuration
-├── index.qmd           Site landing page
-├── discussion.qmd      Part 3 integrated discussion
-├── references.qmd      Bibliography page
-├── requirements.txt    Python dependencies
-└── .Renviron           Reticulate Python interpreter configuration
+├── _quarto.yml                 Quarto configuration
+
+├── index.qmd                   Site landing page
+
+├── discussion.qmd              Part 3 integrated discussion
+
+├── references.qmd              Bibliography page
+
+├── requirements.txt            Python dependencies
+
+├── .Renviron                   Python interpreter config (for reticulate)
+│
+├── part1/                      Part 1 source files (literature synthesis)
+
+├── part2/                      Part 2 source files (NHANES analysis)
+│
+├── scripts/                    Data preprocessing pipeline (Python + SQL)
+
+├── data/                       Raw NHANES files and cleaned datasets
+
+├── plots/                      Generated figures
+
+├── tables/                     Generated tables
+
+├── images/                     Reference images and search logs
+
+├── references/                 Bibliography files (.bib, .csl) and PRISMA tracking
+│
+└── docs/                       Rendered Quarto site (served by GitHub Pages)
 
 ## Reproducibility 
+
 Raw NHANES .xpt files were excluded from version control to reduce repo size and in accordance with professional standard practices. Original data can be retrieved from the NHANES website to fully reproduce the preprocessing pipeline, but the cleaned datasets in data/clean_data/ are sufficient to run downstream analysis.
 All source code, cleaned data files, data processing scripts, and rendering configuration are version-controlled and publicly available in this repository. 
 
