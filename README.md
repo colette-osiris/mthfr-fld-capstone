@@ -32,12 +32,12 @@ The final deliverable for this prodiect is a Quarto-rendered website that is org
 ├── requirements.txt            Python dependencies
 
 ├── .Renviron                   Python interpreter config (for reticulate)
-│
+
 
 ├── part1/                      Part 1 source files (literature synthesis)
 
 ├── part2/                      Part 2 source files (NHANES analysis)
-│
+
 
 ├── scripts/                    Data preprocessing pipeline (Python + SQL)
 
@@ -50,7 +50,7 @@ The final deliverable for this prodiect is a Quarto-rendered website that is org
 ├── images/                     Reference images and search logs
 
 ├── references/                 Bibliography files (.bib, .csl) and PRISMA tracking
-│
+
 
 └── docs/                       Rendered Quarto site (served by GitHub Pages)
 
