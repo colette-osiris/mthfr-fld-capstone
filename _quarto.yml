@@ -23,6 +23,8 @@ project:
 
 website:
   title: "MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis"
+  description: "Capstone project analyzing concordance between MTHFR C677T biomarker patterns and Fatty Liver Disease classification."
+  site-url: https://colette-osiris.github.io/mthfr-fld-capstone/
   navbar:
     left:
       - href: index.qmd
