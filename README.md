@@ -1,9 +1,10 @@
 # MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis
 
+[![Live Site](https://img.shields.io/badge/site-live-brightgreen)](https://colette-osiris.github.io/mthfr-fld-capstone/)
+
 IVSP capstone project, B.S. Bioinformatics and Computational Biology, University of Maryland College Park.
 
 **Author:** Colette Rouiller
-**Live site:** <https://colette-osiris.github.io/mthfr-fld-capstone/>
 
 ## Background
 
