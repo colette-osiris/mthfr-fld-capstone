@@ -1,23 +1,43 @@
 # MTHFR C677T & Fatty Liver Disease: A Biomarker Analysis
 
-This project was completed by Colette Rouiller as an IVSP capstone for her B.S. of Bioinformatics and Computational Biology at the University of Maryland, College Park. It investigates whether biomarkers associated with the MTHFR C677T variant retain relevance and show correlated patterns in population-level Fatty Liver Disease Analysis. 
+IVSP capstone project, B.S. Bioinformatics and Computational Biology, University of Maryland College Park.
 
-**Live site:** https://colette-osiris.github.io/mthfr-fld-capstone/
+**Author:** Colette Rouiller
+**Live site:** <https://colette-osiris.github.io/mthfr-fld-capstone/>
 
-## Project Overview 
+## Background
 
-Fatty Liver Disease affects up to 42.2% of US adults and MTHFR C677T is
-carried by approximately 25% of the US populationl; these conditions overlapping across symptoms, and they both impact biological mechanisms that take place in the liver. Directly testing the relationship between the two would require a single dataset containing both genotype and biomarker data from the same individuals, which is not publicly available. Instead, this project uses a split-analysis approach that focuses on overlapping biomarker trends as potential indications of mechanistic links.
+Fatty Liver Disease (FLD) affects up to 42.2% of US adults, and the MTHFR C677T variant is carried by approximately 25% of the US population. Both involve hepatic mechanisms, and prior literature suggests the variant may influence liver-related biomarkers — but a direct test of mechanistic linkage between C677T genotype and FLD risk would require a single dataset containing both genotype and biomarker data per individual. No such dataset is publicly available.
 
-## Project Structure 
+## Study Design
 
-The final deliverable for this prodiect is a Quarto-rendered website that is organized into 3 parts:  
+This project uses a split-analysis design that pairs two independently-sourced analyses sharing a biomarker overlap, rather than collapsing to a single underpowered cohort:
 
-  1) A PRISMA-informed mini meta-analysis on mechanisms and biomarker trends related to the C677T MTHFR mutation
-  2) A population level analysis of NHANES 2001-2004 cohort data. Data extracting and preprocessing we conducted in PostgresSQL, machine learning (logistical regression and KNN) in Python, and interpretive visualization in R. All components are contained within Quarto documents.
-  4) Integrated interpretation and discussion that evaluates concordance and mechanistic plausibility between Parts 1 and 2, as well as limitations and directions for future research. 
+- **Part 1 — Genotype-stratified biomarker profile.** A PRISMA-informed mini meta-analysis of peer-reviewed literature establishing directional biomarker patterns associated with C677T genotype (CC/CT/TT).
+- **Part 2 — Population-level FLD classification.** A machine-learning analysis on NHANES 2001–2004 cohort data, evaluating whether biomarkers identified in Part 1 carry independent predictive signal for FLD status.
+- **Part 3 — Discussion.** Concordance evaluation between Parts 1 and 2, mechanistic plausibility, limitations.
 
-## Repository Layout 
+The split design is not a substitute for direct testing; concordance between parts is interpreted as plausibility evidence, not causal evidence.
+
+## Methods
+
+**Part 1.** PRISMA-informed search strategy with pre-defined inclusion/exclusion criteria and a study-characteristics table. Bibliography and search logs in `references/` and `images/`.
+
+**Part 2.** NHANES 2001–2002 and 2003–2004 cohorts, with 1999–2000 as supporting cohort. Data extraction and preprocessing in PostgreSQL via a three-schema architecture (`raw` / `staging` / `final`). Modeling in Python (logistic regression, KNN; scikit-learn). Interpretive visualization in R (tidyverse). All analysis components rendered through Quarto.
+
+**Part 3.** Integrated interpretation, written prose.
+
+### Implementation notes
+
+- Cohort construction was re-anchored on the largest validated source table after early designs anchored on full biomarker overlap collapsed the analytical sample to 551 observations. The re-anchored design recovered ~15,000 observations for the primary analysis while preserving the 551-row biomarker subset for sub-analysis.
+- Cross-language reproducibility checks between Python and R surfaced a 1,446-row misclassification (~10% of usable sample) during preliminary runs, traced to NaN-handling differences. The check was incorporated as a routine QA/QC step in the final pipeline.
+- Type-drift and row-duplication issues at the staging layer were resolved through SEQN auditing and nested SQL casts to preserve one-row-per-participant integrity.
+
+## Tech Stack
+
+Python (pandas, scikit-learn), R (tidyverse), PostgreSQL, SQL, Bash, Quarto, reticulate, GitHub Pages.
+
+## Repository Layout
 
  The layout of the repository is as follows: 
 
@@ -53,6 +73,10 @@ The final deliverable for this prodiect is a Quarto-rendered website that is org
 
 
 └── docs/                       Rendered Quarto site (served by GitHub Pages)
+
+## Data Availability
+
+Part 1 sources are peer-reviewed publications cited in `references/`. Part 2 uses the National Health and Nutrition Examination Survey (NHANES), publicly available at <https://www.cdc.gov/nchs/nhanes/>.
 
 ## Reproducibility 
 
