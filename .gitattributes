@@ -1,0 +1,36 @@
+# .gitattributes: This file controls how GitHub Linguist classifies files in this repo
+# Goal: fix the Languages bar to reflect that this is a Python + R + SQL project,
+# not Python-only as it currently appears.
+
+# --- Quarto files ---
+# Default behavior for .qmd is "Markdown" (prose), which Linguist excludes.
+# Override per-file based on the dominant language of each file's code chunks.
+# Files with no code chunks (Parts 1.1, 1.3,1.4, and Part 3) are left alone so they stay classified as prose.
+
+part1/methods.qmd                 linguist-detectable=true
+part1/methods.qmd                 linguist-language=R
+
+part2/data-preprocessing.qmd      linguist-detectable=true
+part2/data-preprocessing.qmd      linguist-language=SQL
+
+part2/machine-learning.qmd        linguist-detectable=true
+part2/machine-learning.qmd        linguist-language=Python
+
+part2/visualization.qmd           linguist-detectable=true
+part2/visualization.qmd           linguist-language=R
+
+# --- Standalone source files worth included ---
+# These are usually auto-detected, but explicit rules keep behavior stable.
+*.py    linguist-detectable=true
+*.R     linguist-detectable=true
+*.r     linguist-detectable=true
+*.sql   linguist-detectable=true
+
+# --- Custom CSS authored by Colette (counted) ---
+part2/styles.css linguist-detectable=true
+
+# --- Generated / rendered output (excluded from stats) ---
+docs/**      linguist-generated=true
+_site/**     linguist-generated=true
+_freeze/**   linguist-generated=true
+.quarto/**   linguist-generated=true
